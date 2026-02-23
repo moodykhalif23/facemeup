@@ -15,6 +15,19 @@ export default function HomeScreen({ navigation, user, onLogout }) {
         </View>
 
         <View style={styles.card}>
+          <Text style={styles.cardTitle}>📋 Questionnaire</Text>
+          <Text style={styles.cardDescription}>
+            Answer a few questions for more accurate skin analysis
+          </Text>
+          <TouchableOpacity 
+            style={styles.cardButton} 
+            onPress={() => navigation.navigate('Questionnaire')}
+          >
+            <Text style={styles.cardButtonText}>Start Questionnaire</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.card}>
           <Text style={styles.cardTitle}>📸 Camera Analysis</Text>
           <Text style={styles.cardDescription}>
             Take a photo for instant AI-powered skin analysis
