@@ -1,16 +1,4 @@
 services:
-  api:
-    build:
-      context: ./backend
-    container_name: skincare-api
-    env_file:
-      - ./backend/.env
-    ports:
-      - "8000:8000"
-    depends_on:
-      - db
-      - redis
-
   db:
     image: postgres:16
     container_name: skincare-db
