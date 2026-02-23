@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { StatusBar } from "expo-status-bar";
-import { analyze, getProfile, login, recommend, signup } from "./src/api";
+import { analyze, getProfile, login, me, recommend, refresh, signup } from "./src/api";
 
 const buttonStyle = {
   backgroundColor: "#194f3f",
@@ -16,7 +16,9 @@ export default function App() {
   const [password, setPassword] = useState("Password123!");
   const [fullName, setFullName] = useState("Test User");
   const [token, setToken] = useState("");
+  const [refreshToken, setRefreshToken] = useState("");
   const [userId, setUserId] = useState("");
+  const [role, setRole] = useState("");
   const [analysis, setAnalysis] = useState(null);
   const [recommendations, setRecommendations] = useState([]);
   const [profile, setProfile] = useState(null);
@@ -38,9 +40,33 @@ export default function App() {
       setError("");
       const data = await login(email, password);
       setToken(data.access_token);
+      setRefreshToken(data.refresh_token);
       setUserId(data.user_id);
+      setRole(data.role);
     } catch (err) {
       setError(err?.response?.data?.error?.message || "Login failed");
+    }
+  };
+
+  const handleRefresh = async () => {
+    try {
+      setError("");
+      const data = await refresh(refreshToken);
+      setToken(data.access_token);
+      setRefreshToken(data.refresh_token);
+      setRole(data.role);
+    } catch (err) {
+      setError(err?.response?.data?.error?.message || "Refresh failed");
+    }
+  };
+
+  const handleMe = async () => {
+    try {
+      setError("");
+      const data = await me(token);
+      setRole(data.role);
+    } catch (err) {
+      setError(err?.response?.data?.error?.message || "Me failed");
     }
   };
 
@@ -81,7 +107,7 @@ export default function App() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#f4f7f1" }}>
       <ScrollView contentContainerStyle={{ padding: 16, gap: 8 }}>
-        <Text style={{ fontSize: 24, fontWeight: "700", color: "#12352b" }}>SkinCare AI</Text>
+        <Text style={{ fontSize: 24, fontWeight: "700", color: "#12352b" }}>SkinCare AI Client</Text>
 
         <TextInput
           value={fullName}
@@ -112,7 +138,15 @@ export default function App() {
           <Text style={{ color: "white", fontWeight: "600" }}>Login</Text>
         </TouchableOpacity>
 
-        <Text style={{ marginTop: 8, color: "#12352b" }}>Authenticated: {isAuthed ? "Yes" : "No"}</Text>
+        <TouchableOpacity style={buttonStyle} onPress={handleRefresh} disabled={!refreshToken}>
+          <Text style={{ color: "white", fontWeight: "600" }}>Refresh Token</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={buttonStyle} onPress={handleMe} disabled={!isAuthed}>
+          <Text style={{ color: "white", fontWeight: "600" }}>Who Am I</Text>
+        </TouchableOpacity>
+
+        <Text style={{ marginTop: 8, color: "#12352b" }}>Authenticated: {isAuthed ? "Yes" : "No"} | Role: {role || "-"}</Text>
 
         <TouchableOpacity style={buttonStyle} onPress={handleAnalyze} disabled={!isAuthed}>
           <Text style={{ color: "white", fontWeight: "600" }}>Analyze</Text>

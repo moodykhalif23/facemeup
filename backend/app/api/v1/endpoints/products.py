@@ -3,8 +3,10 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.core.deps import require_roles
 from app.core.redis_client import cache_get_json, cache_set_json
 from app.models.product import ProductCatalog
+from app.models.user import User
 from app.schemas.products import Product
 
 
@@ -30,3 +32,12 @@ def list_products(db: Session = Depends(get_db)) -> list[Product]:
     ]
     cache_set_json(cache_key, [p.model_dump() for p in products])
     return products
+
+
+@router.post("/admin/seed", response_model=dict[str, int])
+def reseed_catalog(
+    db: Session = Depends(get_db),
+    _: User = Depends(require_roles("admin")),
+) -> dict[str, int]:
+    count = db.execute(select(ProductCatalog)).scalars().all()
+    return {"products": len(count)}

@@ -21,6 +21,18 @@ export async function login(email, password) {
   return response.data;
 }
 
+export async function refresh(refreshToken) {
+  const response = await api.post("/auth/refresh", { refresh_token: refreshToken });
+  return response.data;
+}
+
+export async function me(token) {
+  const response = await api.get("/auth/me", {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data;
+}
+
 export async function analyze(token) {
   const response = await api.post(
     "/analyze",
