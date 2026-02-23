@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator } from "react-native";
 import { analyze, recommend } from "../api";
 
-export default function RecommendationsScreen({ token }) {
+export default function RecommendationsScreen({ token, navigation }) {
   const [recommendations, setRecommendations] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -53,7 +53,19 @@ export default function RecommendationsScreen({ token }) {
         {recommendations.length > 0 && (
           <View style={styles.productsContainer}>
             {recommendations.map((product) => (
-              <View key={product.sku} style={styles.productCard}>
+              <TouchableOpacity 
+                key={product.sku} 
+                style={styles.productCard}
+                onPress={() => navigation.navigate('ProductDetail', { 
+                  product: {
+                    ...product,
+                    price: 2500, // Mock price - in production, this would come from API
+                    stock: 50,
+                    description: 'Premium skincare product formulated for your skin type',
+                    ingredients: ['Hyaluronic Acid', 'Vitamin C', 'Niacinamide'],
+                  }
+                })}
+              >
                 <View style={styles.productHeader}>
                   <Text style={styles.productName}>{product.name}</Text>
                   <View style={styles.scoreContainer}>
@@ -61,7 +73,8 @@ export default function RecommendationsScreen({ token }) {
                   </View>
                 </View>
                 <Text style={styles.productSku}>SKU: {product.sku}</Text>
-              </View>
+                <Text style={styles.viewDetails}>Tap to view details →</Text>
+              </TouchableOpacity>
             ))}
           </View>
         )}
@@ -180,6 +193,12 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#9CA3AF',
     fontWeight: '500',
+  },
+  viewDetails: {
+    fontSize: 12,
+    color: '#3B82F6',
+    fontWeight: '600',
+    marginTop: 8,
   },
   errorCard: {
     backgroundColor: '#FEF2F2',

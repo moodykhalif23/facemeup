@@ -11,6 +11,11 @@ import CameraScreen from "./src/screens/CameraScreen";
 import AnalysisResultsScreen from "./src/screens/AnalysisResultsScreen";
 import RecommendationsScreen from "./src/screens/RecommendationsScreen";
 import ProfileScreen from "./src/screens/ProfileScreen";
+import ProductDetailScreen from "./src/screens/ProductDetailScreen";
+import CartScreen from "./src/screens/CartScreen";
+import CheckoutScreen from "./src/screens/CheckoutScreen";
+import PaymentScreen from "./src/screens/PaymentScreen";
+import OrderTrackingScreen from "./src/screens/OrderTrackingScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -107,6 +112,44 @@ export default function App() {
             options={{ title: 'Profile History' }}
           >
             {(props) => <ProfileScreen {...props} token={user.token} userId={user.userId} />}
+          </Stack.Screen>
+          
+          <Stack.Screen 
+            name="ProductDetail" 
+            options={{ title: 'Product Details' }}
+          >
+            {(props) => <ProductDetailScreen {...props} />}
+          </Stack.Screen>
+          
+          <Stack.Screen 
+            name="Cart" 
+            options={{ title: 'Shopping Cart' }}
+          >
+            {(props) => <CartScreen {...props} />}
+          </Stack.Screen>
+          
+          <Stack.Screen 
+            name="Checkout" 
+            options={{ title: 'Checkout' }}
+          >
+            {(props) => <CheckoutScreen {...props} />}
+          </Stack.Screen>
+          
+          <Stack.Screen 
+            name="Payment" 
+            options={{ title: 'Payment' }}
+          >
+            {(props) => <PaymentScreen {...props} />}
+          </Stack.Screen>
+          
+          <Stack.Screen 
+            name="OrderTracking" 
+            options={{ 
+              title: 'Order Status',
+              headerLeft: () => null,
+            }}
+          >
+            {(props) => <OrderTrackingScreen {...props} />}
           </Stack.Screen>
         </Stack.Navigator>
       </NavigationContainer>
