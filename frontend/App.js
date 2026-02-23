@@ -107,7 +107,7 @@ export default function App() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#f4f7f1" }}>
       <ScrollView contentContainerStyle={{ padding: 16, gap: 8 }}>
-        <Text style={{ fontSize: 24, fontWeight: "700", color: "#12352b" }}>SkinCare AI Client</Text>
+        <Text style={{ fontSize: 24, fontWeight: "700", color: "#12352b" }}>SkinCare AI</Text>
 
         <TextInput
           value={fullName}
