@@ -6,6 +6,8 @@ import { StatusBar } from "expo-status-bar";
 import AuthScreen from "./src/screens/AuthScreen";
 import HomeScreen from "./src/screens/HomeScreen";
 import AnalysisScreen from "./src/screens/AnalysisScreen";
+import CameraScreen from "./src/screens/CameraScreen";
+import AnalysisResultsScreen from "./src/screens/AnalysisResultsScreen";
 import RecommendationsScreen from "./src/screens/RecommendationsScreen";
 import ProfileScreen from "./src/screens/ProfileScreen";
 
@@ -63,6 +65,26 @@ export default function App() {
             options={{ title: 'Skin Analysis' }}
           >
             {(props) => <AnalysisScreen {...props} token={user.token} />}
+          </Stack.Screen>
+          
+          <Stack.Screen 
+            name="Camera" 
+            options={{ 
+              title: 'Take Photo',
+              headerShown: false,
+            }}
+          >
+            {(props) => <CameraScreen {...props} token={user.token} />}
+          </Stack.Screen>
+          
+          <Stack.Screen 
+            name="AnalysisResults" 
+            options={{ 
+              title: 'Results',
+              headerLeft: () => null,
+            }}
+          >
+            {(props) => <AnalysisResultsScreen {...props} />}
           </Stack.Screen>
           
           <Stack.Screen 

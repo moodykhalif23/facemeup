@@ -15,6 +15,19 @@ export default function HomeScreen({ navigation, user, onLogout }) {
         </View>
 
         <View style={styles.card}>
+          <Text style={styles.cardTitle}>📸 Camera Analysis</Text>
+          <Text style={styles.cardDescription}>
+            Take a photo for instant AI-powered skin analysis
+          </Text>
+          <TouchableOpacity 
+            style={styles.cardButton} 
+            onPress={() => navigation.navigate('Camera')}
+          >
+            <Text style={styles.cardButtonText}>Open Camera</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.card}>
           <Text style={styles.cardTitle}>🔍 Skin Analysis</Text>
           <Text style={styles.cardDescription}>
             Get AI-powered analysis of your skin type and conditions

@@ -33,12 +33,12 @@ export async function me(token) {
   return response.data;
 }
 
-export async function analyze(token) {
+export async function analyze(token, imageBase64 = null, questionnaire = null) {
   const response = await api.post(
     "/analyze",
     {
-      image_base64: "demo-image",
-      questionnaire: {
+      image_base64: imageBase64 || "demo-image",
+      questionnaire: questionnaire || {
         skin_feel: "oily",
         routine: "basic",
         concerns: ["acne"],
