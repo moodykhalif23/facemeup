@@ -12,7 +12,7 @@
  */
 export async function preprocessImage(base64Image, targetSize = 224) {
   // This is a placeholder for actual image preprocessing
-  // In production, you would:
+  // In production,
   // 1. Decode base64 to image
   // 2. Resize to targetSize x targetSize
   // 3. Normalize pixel values to [0, 1]
