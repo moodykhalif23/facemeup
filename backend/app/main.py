@@ -1,10 +1,32 @@
+import logging
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 
 from app.api.v1.router import api_router
 from app.core.config import settings
+from app.core.database import SessionLocal
+from app.core.errors import register_exception_handlers
+from app.services.bootstrap import seed_products
 
 
-app = FastAPI(title=settings.app_name)
+logger = logging.getLogger(__name__)
+
+
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    db = SessionLocal()
+    try:
+        seed_products(db)
+    except Exception:
+        logger.exception("Startup seed skipped because database is unavailable")
+    finally:
+        db.close()
+    yield
+
+
+app = FastAPI(title=settings.app_name, lifespan=lifespan)
+register_exception_handlers(app)
 
 
 @app.get("/health")

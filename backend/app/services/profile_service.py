@@ -1,22 +1,34 @@
-from datetime import datetime, timezone
+from sqlalchemy import select
+from sqlalchemy.orm import Session
 
+from app.models.profile import SkinProfileHistory
 from app.schemas.profile import ProfileRecord
 
 
-IN_MEMORY_PROFILES: dict[str, list[ProfileRecord]] = {}
+def get_profile_history(db: Session, user_id: str) -> list[ProfileRecord]:
+    rows = db.execute(
+        select(SkinProfileHistory)
+        .where(SkinProfileHistory.user_id == user_id)
+        .order_by(SkinProfileHistory.created_at.desc())
+    ).scalars()
 
-
-def get_profile_history(user_id: str) -> list[ProfileRecord]:
-    return IN_MEMORY_PROFILES.get(user_id, [])
-
-
-def append_profile(user_id: str, skin_type: str, conditions: list[str], confidence: float) -> None:
-    history = IN_MEMORY_PROFILES.setdefault(user_id, [])
-    history.append(
+    return [
         ProfileRecord(
-            timestamp=datetime.now(timezone.utc),
-            skin_type=skin_type,
-            conditions=conditions,
-            confidence=confidence,
+            timestamp=row.created_at,
+            skin_type=row.skin_type,
+            conditions=[v for v in row.conditions_csv.split(",") if v],
+            confidence=row.confidence,
         )
+        for row in rows
+    ]
+
+
+def append_profile(db: Session, user_id: str, skin_type: str, conditions: list[str], confidence: float) -> None:
+    row = SkinProfileHistory(
+        user_id=user_id,
+        skin_type=skin_type,
+        conditions_csv=",".join(conditions),
+        confidence=confidence,
     )
+    db.add(row)
+    db.commit()

@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pydantic import BaseModel
 
 
@@ -7,11 +9,12 @@ class OrderItem(BaseModel):
 
 
 class CreateOrderRequest(BaseModel):
-    user_id: str
     channel: str
     items: list[OrderItem]
 
 
 class OrderResponse(BaseModel):
-    order_id: str
+    order_id: int
     status: str
+    channel: str
+    created_at: datetime
