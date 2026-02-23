@@ -2,8 +2,8 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-COPY pyproject.toml /app/pyproject.toml
-RUN pip install --no-cache-dir --upgrade pip && pip install --no-cache-dir .
+COPY requirements.txt /app/requirements.txt
+RUN pip install --no-cache-dir --upgrade pip && pip install --no-cache-dir -r requirements.txt
 
 COPY alembic.ini /app/alembic.ini
 COPY alembic /app/alembic
