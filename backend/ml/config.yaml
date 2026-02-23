@@ -1,0 +1,117 @@
+# Keras Model Training Configuration
+# EfficientNetB0 Fine-Tuning for Skin Analysis
+
+model:
+  name: "EfficientNetB0_SkinAnalysis"
+  base_model: "EfficientNetB0"
+  input_size: 224
+  include_top: false
+  weights: "imagenet"
+  
+  # Output classes
+  skin_types:
+    - "Oily"
+    - "Dry"
+    - "Combination"
+    - "Normal"
+    - "Sensitive"
+  
+  conditions:
+    - "Acne"
+    - "Hyperpigmentation"
+    - "Uneven tone"
+    - "Dehydration"
+    - "None detected"
+
+dataset:
+  # Data sources
+  isic_path: "ml/data/isic"
+  bitmoji_path: "ml/data/bitmoji"
+  
+  # Split ratios
+  train_split: 0.70
+  val_split: 0.15
+  test_split: 0.15
+  
+  # Preprocessing
+  image_size: [224, 224]
+  batch_size: 32
+  shuffle_buffer: 1000
+  
+  # Data augmentation
+  augmentation:
+    random_flip: true
+    random_rotation: 0.2  # 20% rotation
+    random_brightness: 0.2  # 20% brightness
+    random_contrast: 0.2  # 20% contrast
+    random_zoom: 0.1  # 10% zoom
+
+training:
+  # Phase 1: Feature Extraction
+  phase1:
+    epochs: 20
+    learning_rate: 0.001
+    optimizer: "adam"
+    freeze_base: true
+    early_stopping_patience: 5
+    reduce_lr_patience: 3
+    reduce_lr_factor: 0.5
+  
+  # Phase 2: Fine-Tuning
+  phase2:
+    epochs: 15
+    learning_rate: 0.00001
+    optimizer: "adam"
+    unfreeze_layers: 30  # Unfreeze top 30 layers
+    early_stopping_patience: 5
+    reduce_lr_patience: 3
+    reduce_lr_factor: 0.5
+
+architecture:
+  # Custom classification head
+  global_pooling: "average"
+  dense_units: 256
+  dense_activation: "relu"
+  batch_normalization: true
+  dropout_rate: 0.4
+  output_activation: "softmax"
+
+loss:
+  function: "categorical_crossentropy"
+  
+metrics:
+  - "accuracy"
+  - "precision"
+  - "recall"
+
+export:
+  # SavedModel for backend
+  saved_model_path: "app/models_artifacts/saved_model"
+  
+  # TFLite for mobile
+  tflite_path: "app/models_artifacts/model.tflite"
+  quantization: "int8"  # Options: none, float16, int8
+  
+  # ONNX (optional)
+  onnx_path: "app/models_artifacts/model.onnx"
+  export_onnx: false
+
+validation:
+  # Bias audit
+  fitzpatrick_stratification: true
+  
+  # Benchmark
+  benchmark_against_bitmoji: true
+  cohens_kappa_threshold: 0.7
+  
+  # Performance targets
+  min_accuracy: 0.75
+  min_precision: 0.70
+  min_recall: 0.70
+  min_f1_score: 0.70
+
+logging:
+  tensorboard_dir: "ml/logs"
+  checkpoint_dir: "ml/checkpoints"
+  save_best_only: true
+  verbose: 1
