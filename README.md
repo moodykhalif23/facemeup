@@ -1,6 +1,4 @@
-# SkinCare AI Platform
-
-Backend-first scaffold derived from `technical.docx` with Phase 2 hardening.
+# SkinCare AI
 
 ## Monorepo Layout
 - `backend/`: FastAPI + PostgreSQL + Redis + Alembic
