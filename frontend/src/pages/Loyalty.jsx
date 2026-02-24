@@ -32,8 +32,7 @@ export default function Loyalty() {
       const response = await getLoyalty(user?.id);
       setLoyaltyData(response.data);
     } catch (error) {
-      message.error('Failed to load loyalty data');
-      // Mock data for demo
+      // Mock data for demo (API not implemented yet)
       setLoyaltyData({
         points: 850,
         tier: 'Gold',
@@ -164,7 +163,7 @@ export default function Loyalty() {
                       percent={progressPercent} 
                       strokeColor={getTierColor(loyaltyData.next_tier)}
                       showInfo={false}
-                      strokeWidth={12}
+                      size={12}
                     />
                   </div>
                 </>
