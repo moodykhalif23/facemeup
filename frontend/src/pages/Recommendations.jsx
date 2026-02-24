@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { Layout, Card, Button, Typography, Row, Col, message, Spin } from 'antd';
+import { Layout, Card, Button, Typography, Row, Col, App, Spin } from 'antd';
 import { ArrowLeftOutlined, ShoppingCartOutlined } from '@ant-design/icons';
 import { getRecommendations } from '../services/api';
 
@@ -13,6 +13,7 @@ export default function Recommendations() {
   const [loading, setLoading] = useState(false);
   const [products, setProducts] = useState([]);
   const { currentAnalysis } = useSelector((state) => state.analysis);
+  const { message } = App.useApp();
 
   useEffect(() => {
     if (currentAnalysis?.profile) {

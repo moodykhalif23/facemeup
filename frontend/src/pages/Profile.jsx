@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { Layout, Card, Button, Typography, Timeline, Tag, message, Spin } from 'antd';
+import { Layout, Card, Button, Typography, Timeline, Tag, App, Spin } from 'antd';
 import { ArrowLeftOutlined, ClockCircleOutlined } from '@ant-design/icons';
 import { getProfile } from '../services/api';
 
@@ -14,6 +14,7 @@ export default function Profile() {
   const [profileData, setProfileData] = useState(null);
   const { user } = useSelector((state) => state.auth);
   const { history } = useSelector((state) => state.analysis);
+  const { message } = App.useApp();
 
   useEffect(() => {
     if (user?.id) {
