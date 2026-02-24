@@ -48,7 +48,7 @@ export default function Results() {
           <Space direction="vertical" size="middle" style={{ width: '100%' }}>
             {/* Skin Profile - No Card Background */}
             <div>
-              <Title level={4} style={{ marginBottom: 16, paddingLeft: 4 }}>Skin Profile</Title>
+              <Title level={4} style={{ marginBottom: 16, textAlign: 'center' }}>Skin Profile</Title>
               <div style={{ 
                 background: '#fff',
                 borderRadius: 12,
