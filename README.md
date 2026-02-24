@@ -155,54 +155,6 @@ cd frontend
 npm test
 ```
 
-## 🐳 Docker Services
-
-The backend uses Docker Compose with the following services:
-
-- **backend:** FastAPI application (port 8000)
-- **db:** PostgreSQL database (port 5432)
-- **redis:** Redis cache (port 6379)
-
-## 🔐 Environment Variables
-
-### Backend (.env)
-```env
-DATABASE_URL=postgresql://user:password@db:5432/skincare
-REDIS_URL=redis://redis:6379
-SECRET_KEY=your-secret-key-here
-ALGORITHM=HS256
-ACCESS_TOKEN_EXPIRE_MINUTES=30
-```
-
-### Frontend
-API base URL is configured in `frontend/src/api.js` and `frontend/src/store/api.js`
-
-## 🚦 Stopping Services
-
-**Windows:**
-```bash
-scripts\stop-dev.bat
-```
-
-**Mac/Linux:**
-```bash
-./scripts/stop-dev.sh
-```
-
-Or manually:
-```bash
-cd backend
-docker-compose down
-```
-
-## 📊 Project Status
-
-**Frontend:** 100% Complete ✅
-- All 7 feature modules implemented
-- 20+ screens and components
-- Full Redux integration
-- Offline support enabled
-
 **Backend:** 45% Complete
 - Core API endpoints functional
 - Database schema complete
@@ -217,9 +169,6 @@ docker-compose down
 4. Run tests
 5. Submit a pull request
 
-## 📄 License
-
-This project is private and proprietary.
 
 ## 🆘 Troubleshooting
 
@@ -238,4 +187,3 @@ This project is private and proprietary.
 - Verify database connection
 - Ensure migrations are up to date
 
-For more help, see [scripts/README.md](scripts/README.md)
