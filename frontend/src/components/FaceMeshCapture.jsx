@@ -10,10 +10,17 @@ const FaceMeshCapture = ({ onCapture, onFaceDetected }) => {
   const [error, setError] = useState(null);
   const faceMeshRef = useRef(null);
   const cameraRef = useRef(null);
+  const isProcessingRef = useRef(false);
 
   useEffect(() => {
+    let mounted = true;
+
     const initializeFaceMesh = async () => {
       try {
+        if (!videoRef.current || !canvasRef.current) {
+          return;
+        }
+
         // Initialize Face Mesh
         const faceMesh = new FaceMesh({
           locateFile: (file) => {
@@ -30,9 +37,9 @@ const FaceMeshCapture = ({ onCapture, onFaceDetected }) => {
 
         // Process results
         faceMesh.onResults((results) => {
-          const canvas = canvasRef.current;
-          if (!canvas) return;
+          if (!mounted || !canvasRef.current) return;
           
+          const canvas = canvasRef.current;
           const ctx = canvas.getContext('2d');
           
           // Clear canvas
@@ -40,7 +47,12 @@ const FaceMeshCapture = ({ onCapture, onFaceDetected }) => {
           
           // Draw video frame
           if (results.image) {
-            ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
+            try {
+              ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
+            } catch (e) {
+              console.warn('Failed to draw image:', e);
+              return;
+            }
           }
 
           if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
@@ -57,29 +69,58 @@ const FaceMeshCapture = ({ onCapture, onFaceDetected }) => {
           } else {
             setFaceDetected(false);
           }
+          
+          isProcessingRef.current = false;
         });
 
         faceMeshRef.current = faceMesh;
 
-        // Initialize camera
-        if (videoRef.current) {
-          const camera = new Camera(videoRef.current, {
-            onFrame: async () => {
-              if (videoRef.current && videoRef.current.readyState >= 2) {
-                await faceMesh.send({ image: videoRef.current });
-              }
-            },
-            width: 640,
-            height: 480
-          });
+        // Initialize camera with proper video ready check
+        const video = videoRef.current;
+        
+        const camera = new Camera(video, {
+          onFrame: async () => {
+            if (!mounted || !video || isProcessingRef.current) return;
+            
+            // Check if video is ready
+            if (video.readyState < 2 || video.videoWidth === 0 || video.videoHeight === 0) {
+              return;
+            }
+            
+            try {
+              isProcessingRef.current = true;
+              await faceMesh.send({ image: video });
+            } catch (e) {
+              console.warn('Failed to process frame:', e);
+              isProcessingRef.current = false;
+            }
+          },
+          width: 640,
+          height: 480
+        });
 
-          await camera.start();
-          cameraRef.current = camera;
-          setIsInitialized(true);
-        }
+        // Wait for video to be ready before starting
+        await new Promise((resolve) => {
+          const checkVideo = () => {
+            if (video.readyState >= 2 && video.videoWidth > 0) {
+              resolve();
+            } else {
+              setTimeout(checkVideo, 100);
+            }
+          };
+          checkVideo();
+        });
+
+        if (!mounted) return;
+
+        await camera.start();
+        cameraRef.current = camera;
+        setIsInitialized(true);
       } catch (err) {
         console.error('Failed to initialize Face Mesh:', err);
-        setError(err.message);
+        if (mounted) {
+          setError(err.message || 'Failed to initialize camera');
+        }
       }
     };
 
@@ -87,8 +128,20 @@ const FaceMeshCapture = ({ onCapture, onFaceDetected }) => {
 
     // Cleanup
     return () => {
+      mounted = false;
       if (cameraRef.current) {
-        cameraRef.current.stop();
+        try {
+          cameraRef.current.stop();
+        } catch (e) {
+          console.warn('Error stopping camera:', e);
+        }
+      }
+      if (faceMeshRef.current) {
+        try {
+          faceMeshRef.current.close();
+        } catch (e) {
+          console.warn('Error closing face mesh:', e);
+        }
       }
     };
   }, [onFaceDetected]);
@@ -139,25 +192,18 @@ const FaceMeshCapture = ({ onCapture, onFaceDetected }) => {
     }, 'image/jpeg', 0.95);
   };
 
-  const extractFaceRegion = () => {
-    if (!faceDetected || !faceMeshRef.current) {
-      return null;
-    }
-
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-    
-    // Get current frame
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    
-    return imageData;
-  };
-
   if (error) {
     return (
-      <div className="face-mesh-error">
-        <p>Error initializing camera: {error}</p>
-        <p>Please ensure camera permissions are granted.</p>
+      <div className="face-mesh-error" style={{ 
+        padding: '2rem', 
+        textAlign: 'center',
+        color: '#ff4d4f'
+      }}>
+        <p style={{ fontSize: '1.1rem', marginBottom: '0.5rem' }}>Error initializing camera</p>
+        <p style={{ fontSize: '0.9rem', color: '#666' }}>{error}</p>
+        <p style={{ fontSize: '0.9rem', color: '#666', marginTop: '1rem' }}>
+          Please ensure camera permissions are granted and try refreshing the page.
+        </p>
       </div>
     );
   }
@@ -168,6 +214,7 @@ const FaceMeshCapture = ({ onCapture, onFaceDetected }) => {
         ref={videoRef}
         style={{ display: 'none' }}
         playsInline
+        autoPlay
       />
       <canvas
         ref={canvasRef}
@@ -176,14 +223,24 @@ const FaceMeshCapture = ({ onCapture, onFaceDetected }) => {
         style={{
           width: '100%',
           maxWidth: '640px',
-          border: faceDetected ? '3px solid #00FF00' : '3px solid #FF0000',
-          borderRadius: '8px'
+          border: faceDetected ? '3px solid #52c41a' : '3px solid #ff4d4f',
+          borderRadius: '8px',
+          backgroundColor: '#000'
         }}
       />
-      <div className="face-mesh-status">
-        {!isInitialized && <p>Initializing camera...</p>}
+      <div className="face-mesh-status" style={{ 
+        marginTop: '1rem',
+        textAlign: 'center'
+      }}>
+        {!isInitialized && (
+          <p style={{ color: '#1890ff' }}>Initializing camera...</p>
+        )}
         {isInitialized && (
-          <p style={{ color: faceDetected ? '#00FF00' : '#FF0000' }}>
+          <p style={{ 
+            color: faceDetected ? '#52c41a' : '#ff4d4f',
+            fontSize: '1.1rem',
+            fontWeight: 500
+          }}>
             {faceDetected ? '✓ Face Detected' : '✗ No Face Detected'}
           </p>
         )}
@@ -195,11 +252,14 @@ const FaceMeshCapture = ({ onCapture, onFaceDetected }) => {
           marginTop: '1rem',
           padding: '0.75rem 1.5rem',
           fontSize: '1rem',
-          backgroundColor: faceDetected ? '#4CAF50' : '#ccc',
+          backgroundColor: faceDetected ? '#52c41a' : '#d9d9d9',
           color: 'white',
           border: 'none',
-          borderRadius: '4px',
-          cursor: faceDetected ? 'pointer' : 'not-allowed'
+          borderRadius: '8px',
+          cursor: faceDetected ? 'pointer' : 'not-allowed',
+          width: '100%',
+          fontWeight: 600,
+          transition: 'all 0.3s'
         }}
       >
         Capture Face
