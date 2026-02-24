@@ -11,6 +11,7 @@
     "@capacitor/ios": "^6.0.0",
     "@capacitor/network": "^6.0.0",
     "@capacitor/preferences": "^6.0.0",
+    "@ionic/pwa-elements": "^3.4.0",
     "@reduxjs/toolkit": "^2.2.0",
     "antd": "^5.15.0",
     "axios": "^1.6.0",
