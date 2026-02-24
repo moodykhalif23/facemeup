@@ -16,7 +16,7 @@ tensorflow>=2.16.0
 keras>=3.0.0
 httpx>=0.27.0
 woocommerce>=3.0.0
-opencv-python>=4.8.0
+opencv-python-headless>=4.8.0
 
 # ML Training Dependencies
 tensorflow-datasets>=4.9.0
