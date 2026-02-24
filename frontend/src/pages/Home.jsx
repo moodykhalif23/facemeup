@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { Layout, Card, Button, Typography, Row, Col, Space } from 'antd';
+import { Layout, Card, Button, Typography, Row, Col, Space, Avatar, Dropdown } from 'antd';
 import { 
   CameraOutlined, 
   HistoryOutlined, 
@@ -8,7 +8,8 @@ import {
   UserOutlined,
   LogoutOutlined,
   GiftOutlined,
-  ShopOutlined
+  ShopOutlined,
+  SettingOutlined
 } from '@ant-design/icons';
 import { logout } from '../store/slices/authSlice';
 
@@ -26,7 +27,47 @@ export default function Home() {
     navigate('/login');
   };
 
+  // Get user initials for avatar
+  const getUserInitials = () => {
+    if (user?.email) {
+      return user.email.substring(0, 2).toUpperCase();
+    }
+    return 'U';
+  };
+
+  // Dropdown menu items
   const menuItems = [
+    {
+      key: 'profile',
+      icon: <UserOutlined />,
+      label: 'My Profile',
+      onClick: () => navigate('/profile'),
+    },
+    {
+      key: 'orders',
+      icon: <ShoppingCartOutlined />,
+      label: 'My Orders',
+      onClick: () => navigate('/orders'),
+    },
+    {
+      key: 'loyalty',
+      icon: <GiftOutlined />,
+      label: 'Loyalty Rewards',
+      onClick: () => navigate('/loyalty'),
+    },
+    {
+      type: 'divider',
+    },
+    {
+      key: 'logout',
+      icon: <LogoutOutlined />,
+      label: 'Logout',
+      onClick: handleLogout,
+      danger: true,
+    },
+  ];
+
+  const cardMenuItems = [
     {
       title: 'Skin Analysis',
       description: 'Analyze your skin with AI',
@@ -82,15 +123,24 @@ export default function Home() {
         boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
       }}>
         <Title level={3} style={{ margin: 0 }}>SkinCare AI</Title>
-        <Space>
-          <Text>Welcome, {user?.email}</Text>
-          <Button 
-            icon={<LogoutOutlined />} 
-            onClick={handleLogout}
-          >
-            Logout
-          </Button>
-        </Space>
+        
+        <Dropdown 
+          menu={{ items: menuItems }}
+          placement="bottomRight"
+          trigger={['click']}
+        >
+          <Space style={{ cursor: 'pointer' }}>
+            <Avatar 
+              style={{ 
+                backgroundColor: '#3B82F6',
+                cursor: 'pointer'
+              }}
+              size="large"
+            >
+              {getUserInitials()}
+            </Avatar>
+          </Space>
+        </Dropdown>
       </Header>
 
       <Content style={{ padding: '24px' }}>
@@ -103,7 +153,7 @@ export default function Home() {
           </div>
 
           <Row gutter={[16, 16]}>
-            {menuItems.map((item, index) => (
+            {cardMenuItems.map((item, index) => (
               <Col xs={24} sm={12} md={8} key={index}>
                 <Card
                   hoverable
