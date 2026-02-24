@@ -76,7 +76,7 @@ export default function Home() {
     },
     {
       title: 'Recommendations',
-      description: 'Get personalized product recommendations',
+      description: 'Get personalized product',
       icon: <ShopOutlined style={{ fontSize: 32 }} />,
       color: '#10B981',
       path: '/recommendations',
