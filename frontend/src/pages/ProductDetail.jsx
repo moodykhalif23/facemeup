@@ -79,19 +79,30 @@ export default function ProductDetail() {
       <AppHeader title="Product Details" showBack />
 
       <Content style={{ padding: '16px', paddingBottom: 80 }}>
-        <div style={{ maxWidth: 800, margin: '0 auto' }}>
-          <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+          {/* Desktop Layout: Image left, Details right */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+            gap: 16,
+            '@media (min-width: 768px)': {
+              gridTemplateColumns: '1fr 1fr'
+            }
+          }}>
             {/* Product Image */}
             <Card 
               style={{ 
                 borderRadius: 16,
                 overflow: 'hidden',
-                boxShadow: '0 2px 12px rgba(0,0,0,0.08)'
+                boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
+                height: 'fit-content',
+                position: 'sticky',
+                top: 80
               }}
               styles={{ body: { padding: 0 } }}
             >
               <div style={{
-                height: 300,
+                height: 400,
                 background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
                 display: 'flex',
                 alignItems: 'center',
@@ -158,7 +169,7 @@ export default function ProductDetail() {
                 )}
               </Space>
             </Card>
-          </Space>
+          </div>
         </div>
       </Content>
 
@@ -169,19 +180,32 @@ export default function ProductDetail() {
         left: 0,
         right: 0,
         background: '#fff',
-        padding: '12px 16px',
+        padding: '16px',
         boxShadow: '0 -2px 12px rgba(0,0,0,0.1)',
         zIndex: 10
       }}>
         <div style={{ maxWidth: 800, margin: '0 auto', display: 'flex', gap: 12, alignItems: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <Text>Qty:</Text>
+          <div style={{ 
+            display: 'flex', 
+            flexDirection: 'column',
+            alignItems: 'center',
+            minWidth: 80
+          }}>
+            <Text style={{ fontSize: 12, marginBottom: 4, color: '#666' }}>Quantity</Text>
             <InputNumber
               min={1}
               max={10}
               value={quantity}
               onChange={setQuantity}
-              style={{ width: 60 }}
+              size="large"
+              style={{ 
+                width: 80,
+                fontSize: 16
+              }}
+              controls={{
+                upIcon: <span style={{ fontSize: 16 }}>+</span>,
+                downIcon: <span style={{ fontSize: 16 }}>−</span>
+              }}
             />
           </div>
           <Button
@@ -191,10 +215,11 @@ export default function ProductDetail() {
             size="large"
             block
             style={{
-              height: 48,
+              height: 52,
               fontSize: 16,
               fontWeight: 600,
-              borderRadius: 8
+              borderRadius: 8,
+              flex: 1
             }}
           >
             Add to Cart
