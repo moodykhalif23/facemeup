@@ -1,10 +1,11 @@
 import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { Layout, Card, Button, Typography, List, InputNumber, Space, Empty } from 'antd';
-import { ArrowLeftOutlined, DeleteOutlined, ShoppingOutlined } from '@ant-design/icons';
+import { DeleteOutlined, ShoppingOutlined } from '@ant-design/icons';
 import { removeFromCart, updateQuantity } from '../store/slices/cartSlice';
+import AppHeader from '../components/AppHeader';
 
-const { Header, Content } = Layout;
+const { Content } = Layout;
 const { Title, Text } = Typography;
 
 export default function Cart() {
@@ -25,66 +26,65 @@ export default function Cart() {
   };
 
   return (
-    <Layout style={{ minHeight: '100vh' }}>
-      <Header style={{ 
-        background: '#fff', 
-        padding: '0 24px',
-        display: 'flex',
-        alignItems: 'center',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-      }}>
-        <Button 
-          icon={<ArrowLeftOutlined />} 
-          onClick={() => navigate('/')}
-          type="text"
-        />
-        <Title level={3} style={{ margin: '0 0 0 16px' }}>Shopping Cart</Title>
-      </Header>
+    <Layout style={{ minHeight: '100vh', background: '#f5f5f5' }}>
+      <AppHeader title="Shopping Cart" showBack />
 
-      <Content style={{ padding: '24px' }}>
+      <Content style={{ padding: '16px' }}>
         <div style={{ maxWidth: 800, margin: '0 auto' }}>
           {items.length > 0 ? (
             <>
-              <Card>
+              <Card style={{ borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.06)', marginBottom: 16 }}>
                 <List
                   dataSource={items}
                   renderItem={(item) => (
                     <List.Item
+                      style={{ padding: '16px 0' }}
                       actions={[
                         <InputNumber
+                          key="quantity"
                           min={1}
                           value={item.quantity}
                           onChange={(value) => handleQuantityChange(item.id, value)}
+                          size="large"
+                          style={{ width: 80 }}
                         />,
                         <Button
+                          key="delete"
                           danger
                           icon={<DeleteOutlined />}
                           onClick={() => handleRemove(item.id)}
+                          size="large"
                         >
                           Remove
                         </Button>
                       ]}
                     >
                       <List.Item.Meta
-                        title={item.name}
-                        description={`$${item.price} each`}
+                        title={<Text strong style={{ fontSize: 15 }}>{item.name}</Text>}
+                        description={<Text style={{ fontSize: 14 }}>${item.price} each</Text>}
                       />
                     </List.Item>
                   )}
                 />
               </Card>
 
-              <Card style={{ marginTop: 16 }}>
-                <Space direction="vertical" style={{ width: '100%' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <Text strong>Total:</Text>
-                    <Title level={4}>${total.toFixed(2)}</Title>
+              <Card style={{ borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
+                <Space direction="vertical" style={{ width: '100%' }} size={16}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Text strong style={{ fontSize: 16 }}>Total:</Text>
+                    <Title level={3} style={{ margin: 0, color: '#3B82F6' }}>${total.toFixed(2)}</Title>
                   </div>
                   <Button 
                     type="primary" 
                     size="large" 
                     block
                     onClick={() => navigate('/checkout')}
+                    style={{ 
+                      height: 52,
+                      fontSize: 16,
+                      fontWeight: 600,
+                      borderRadius: 8
+                    }}
                   >
                     Proceed to Checkout
                   </Button>
@@ -92,15 +92,27 @@ export default function Cart() {
               </Card>
             </>
           ) : (
-            <Card>
+            <Card style={{ borderRadius: 16, boxShadow: '0 2px 12px rgba(0,0,0,0.08)' }}>
               <Empty
-                image={Empty.PRESENTED_IMAGE_SIMPLE}
-                description="Your cart is empty"
+                image={<ShoppingOutlined style={{ fontSize: 64, color: '#d9d9d9' }} />}
+                description={
+                  <div>
+                    <Title level={4} style={{ marginTop: 16 }}>Your cart is empty</Title>
+                    <Text type="secondary">Add some products to get started</Text>
+                  </div>
+                }
               >
                 <Button 
                   type="primary" 
                   icon={<ShoppingOutlined />}
                   onClick={() => navigate('/recommendations')}
+                  size="large"
+                  style={{ 
+                    height: 48,
+                    fontSize: 16,
+                    borderRadius: 12,
+                    marginTop: 16
+                  }}
                 >
                   Browse Products
                 </Button>

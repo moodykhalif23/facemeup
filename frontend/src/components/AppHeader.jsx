@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { Layout, Typography, Space, Avatar, Dropdown, Button } from 'antd';
+import { Layout, Typography, Space, Avatar, Dropdown, Button, Badge } from 'antd';
 import { 
   UserOutlined,
   LogoutOutlined,
@@ -17,6 +17,10 @@ export default function AppHeader({ title, showBack = false }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
+  const { items } = useSelector((state) => state.cart);
+
+  // Calculate total cart items
+  const cartCount = items.reduce((total, item) => total + item.quantity, 0);
 
   const handleLogout = () => {
     dispatch(logout());
@@ -38,6 +42,16 @@ export default function AppHeader({ title, showBack = false }) {
       icon: <UserOutlined />,
       label: 'My Profile',
       onClick: () => navigate('/profile'),
+    },
+    {
+      key: 'cart',
+      icon: (
+        <Badge count={cartCount} size="small" offset={[5, 0]}>
+          <ShoppingCartOutlined />
+        </Badge>
+      ),
+      label: `Shopping Cart ${cartCount > 0 ? `(${cartCount})` : ''}`,
+      onClick: () => navigate('/cart'),
     },
     {
       key: 'orders',
@@ -94,15 +108,17 @@ export default function AppHeader({ title, showBack = false }) {
         trigger={['click']}
       >
         <Space style={{ cursor: 'pointer' }}>
-          <Avatar 
-            style={{ 
-              backgroundColor: '#3B82F6',
-              cursor: 'pointer'
-            }}
-            size="large"
-          >
-            {getUserInitials()}
-          </Avatar>
+          <Badge count={cartCount} offset={[-5, 5]}>
+            <Avatar 
+              style={{ 
+                backgroundColor: '#3B82F6',
+                cursor: 'pointer'
+              }}
+              size="large"
+            >
+              {getUserInitials()}
+            </Avatar>
+          </Badge>
         </Space>
       </Dropdown>
     </Header>

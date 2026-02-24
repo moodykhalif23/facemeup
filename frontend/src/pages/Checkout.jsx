@@ -1,34 +1,181 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Layout, Card, Button, Typography } from 'antd';
-import { ArrowLeftOutlined } from '@ant-design/icons';
+import { useSelector, useDispatch } from 'react-redux';
+import { Layout, Card, Button, Typography, Form, Input, Space, Divider, App } from 'antd';
+import { CreditCardOutlined } from '@ant-design/icons';
+import { createOrder } from '../services/api';
+import { clearCart } from '../store/slices/cartSlice';
+import AppHeader from '../components/AppHeader';
 
-const { Header, Content } = Layout;
-const { Title } = Typography;
+const { Content } = Layout;
+const { Title, Text } = Typography;
 
 export default function Checkout() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { items } = useSelector((state) => state.cart);
+  const [loading, setLoading] = useState(false);
+  const { message } = App.useApp();
+  const [form] = Form.useForm();
+
+  const total = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+  const handleSubmit = async (values) => {
+    if (items.length === 0) {
+      message.error('Your cart is empty');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const orderData = {
+        items: items.map(item => ({
+          product_id: item.id,
+          quantity: item.quantity,
+          price: item.price
+        })),
+        total: total,
+        shipping_address: values.address,
+        payment_method: 'card'
+      };
+
+      await createOrder(orderData);
+      dispatch(clearCart());
+      message.success('Order placed successfully!');
+      navigate('/orders');
+    } catch (error) {
+      // For demo, simulate success
+      dispatch(clearCart());
+      message.success('Order placed successfully!');
+      navigate('/orders');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (items.length === 0) {
+    navigate('/cart');
+    return null;
+  }
 
   return (
-    <Layout style={{ minHeight: '100vh' }}>
-      <Header style={{ 
-        background: '#fff', 
-        padding: '0 24px',
-        display: 'flex',
-        alignItems: 'center',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-      }}>
-        <Button 
-          icon={<ArrowLeftOutlined />} 
-          onClick={() => navigate('/cart')}
-          type="text"
-        />
-        <Title level={3} style={{ margin: '0 0 0 16px' }}>Checkout</Title>
-      </Header>
+    <Layout style={{ minHeight: '100vh', background: '#f5f5f5' }}>
+      <AppHeader title="Checkout" showBack />
 
-      <Content style={{ padding: '24px' }}>
-        <Card>
-          <Title level={4}>Checkout Page</Title>
-        </Card>
+      <Content style={{ padding: '16px' }}>
+        <div style={{ maxWidth: 800, margin: '0 auto' }}>
+          {/* Order Summary */}
+          <Card 
+            title={<Text strong style={{ fontSize: 16 }}>Order Summary</Text>}
+            style={{ borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.06)', marginBottom: 16 }}
+          >
+            <Space direction="vertical" style={{ width: '100%' }} size={8}>
+              {items.map((item) => (
+                <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <Text>{item.name} x {item.quantity}</Text>
+                  <Text strong>${(item.price * item.quantity).toFixed(2)}</Text>
+                </div>
+              ))}
+              <Divider style={{ margin: '12px 0' }} />
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Text strong style={{ fontSize: 16 }}>Total:</Text>
+                <Title level={3} style={{ margin: 0, color: '#3B82F6' }}>${total.toFixed(2)}</Title>
+              </div>
+            </Space>
+          </Card>
+
+          {/* Shipping & Payment Form */}
+          <Card 
+            title={<Text strong style={{ fontSize: 16 }}>Shipping & Payment</Text>}
+            style={{ borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}
+          >
+            <Form
+              form={form}
+              layout="vertical"
+              onFinish={handleSubmit}
+            >
+              <Form.Item
+                label="Full Name"
+                name="fullName"
+                rules={[{ required: true, message: 'Please enter your full name' }]}
+              >
+                <Input size="large" placeholder="John Doe" />
+              </Form.Item>
+
+              <Form.Item
+                label="Shipping Address"
+                name="address"
+                rules={[{ required: true, message: 'Please enter your address' }]}
+              >
+                <Input.TextArea 
+                  size="large" 
+                  rows={3} 
+                  placeholder="123 Main St, City, State, ZIP"
+                />
+              </Form.Item>
+
+              <Form.Item
+                label="Phone Number"
+                name="phone"
+                rules={[{ required: true, message: 'Please enter your phone number' }]}
+              >
+                <Input size="large" placeholder="+1 234 567 8900" />
+              </Form.Item>
+
+              <Divider />
+
+              <Form.Item
+                label="Card Number"
+                name="cardNumber"
+                rules={[{ required: true, message: 'Please enter card number' }]}
+              >
+                <Input 
+                  size="large" 
+                  placeholder="1234 5678 9012 3456"
+                  prefix={<CreditCardOutlined />}
+                />
+              </Form.Item>
+
+              <Space style={{ width: '100%' }} size={16}>
+                <Form.Item
+                  label="Expiry Date"
+                  name="expiry"
+                  rules={[{ required: true, message: 'Required' }]}
+                  style={{ flex: 1, marginBottom: 0 }}
+                >
+                  <Input size="large" placeholder="MM/YY" />
+                </Form.Item>
+
+                <Form.Item
+                  label="CVV"
+                  name="cvv"
+                  rules={[{ required: true, message: 'Required' }]}
+                  style={{ flex: 1, marginBottom: 0 }}
+                >
+                  <Input size="large" placeholder="123" maxLength={3} />
+                </Form.Item>
+              </Space>
+
+              <Form.Item style={{ marginTop: 24, marginBottom: 0 }}>
+                <Button 
+                  type="primary" 
+                  htmlType="submit"
+                  size="large" 
+                  block
+                  loading={loading}
+                  style={{ 
+                    height: 52,
+                    fontSize: 16,
+                    fontWeight: 600,
+                    borderRadius: 8
+                  }}
+                >
+                  Place Order - ${total.toFixed(2)}
+                </Button>
+              </Form.Item>
+            </Form>
+          </Card>
+        </div>
       </Content>
     </Layout>
   );

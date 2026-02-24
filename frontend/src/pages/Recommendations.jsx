@@ -53,10 +53,12 @@ export default function Recommendations() {
                 <Col xs={12} sm={12} md={8} lg={6} key={product.id}>
                   <Card
                     hoverable
+                    onClick={() => navigate(`/product/${product.id}`)}
                     style={{ 
                       borderRadius: 12,
                       boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
-                      height: '100%'
+                      height: '100%',
+                      cursor: 'pointer'
                     }}
                     styles={{
                       body: { padding: '16px' }
@@ -91,8 +93,11 @@ export default function Recommendations() {
                     </div>
                     <Button 
                       type="primary" 
-                      icon={<ShoppingCartOutlined key={`icon-${product.id}`} />}
-                      onClick={() => navigate(`/product/${product.id}`)}
+                      icon={<ShoppingCartOutlined />}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/product/${product.id}`);
+                      }}
                       size="middle"
                       block
                       style={{ borderRadius: 8, fontSize: 14, height: 40 }}
