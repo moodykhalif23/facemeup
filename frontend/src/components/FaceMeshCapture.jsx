@@ -31,13 +31,17 @@ const FaceMeshCapture = ({ onCapture, onFaceDetected }) => {
         // Process results
         faceMesh.onResults((results) => {
           const canvas = canvasRef.current;
+          if (!canvas) return;
+          
           const ctx = canvas.getContext('2d');
           
           // Clear canvas
           ctx.clearRect(0, 0, canvas.width, canvas.height);
           
           // Draw video frame
-          ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
+          if (results.image) {
+            ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
+          }
 
           if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
             setFaceDetected(true);
@@ -61,7 +65,9 @@ const FaceMeshCapture = ({ onCapture, onFaceDetected }) => {
         if (videoRef.current) {
           const camera = new Camera(videoRef.current, {
             onFrame: async () => {
-              await faceMesh.send({ image: videoRef.current });
+              if (videoRef.current && videoRef.current.readyState >= 2) {
+                await faceMesh.send({ image: videoRef.current });
+              }
             },
             width: 640,
             height: 480
