@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { Layout, Card, Button, Typography, Row, Col, Space, Avatar, Dropdown } from 'antd';
+import { Layout, Card, Typography, Row, Col, Space, Avatar, Dropdown } from 'antd';
 import { 
   CameraOutlined, 
   HistoryOutlined, 
@@ -8,8 +8,7 @@ import {
   UserOutlined,
   LogoutOutlined,
   GiftOutlined,
-  ShopOutlined,
-  SettingOutlined
+  ShopOutlined
 } from '@ant-design/icons';
 import { logout } from '../store/slices/authSlice';
 

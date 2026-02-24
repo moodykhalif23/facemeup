@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { store } from '../store';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
 
@@ -14,18 +15,15 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     try {
-      const authData = localStorage.getItem('persist:auth');
-      if (authData && authData !== 'undefined') {
-        const parsed = JSON.parse(authData);
-        if (parsed.token && parsed.token !== 'null') {
-          const accessToken = JSON.parse(parsed.token);
-          if (accessToken) {
-            config.headers.Authorization = `Bearer ${accessToken}`;
-          }
-        }
+      // Get token from Redux store
+      const state = store.getState();
+      const token = state.auth?.token;
+      
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
       }
     } catch (e) {
-      // Silently fail - no token available
+      console.error('Error getting token:', e);
     }
     return config;
   },
