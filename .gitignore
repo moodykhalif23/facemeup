@@ -12,3 +12,4 @@ backend/.mypy_cache/
 backend/.ruff_cache/
 frontend/.expo/
 .venv
+.vscode
