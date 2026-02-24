@@ -2,7 +2,7 @@ import { useState } from 'react';
 import FaceMeshCapture from './FaceMeshCapture';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { setAnalysisResult } from '../store/slices/analysisSlice';
+import { setCurrentAnalysis, addToHistory } from '../store/slices/analysisSlice';
 import api from '../services/api';
 
 const FaceMeshAnalysis = () => {
@@ -38,7 +38,8 @@ const FaceMeshAnalysis = () => {
         });
 
         // Store result and navigate
-        dispatch(setAnalysisResult(response.data));
+        dispatch(setCurrentAnalysis(response.data));
+        dispatch(addToHistory(response.data));
         navigate('/results');
       };
     } catch (error) {
