@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 
 from fastapi import APIRouter, Depends
 from sqlalchemy import select
@@ -8,7 +9,7 @@ from app.core.database import get_db
 from app.core.deps import get_current_user
 from app.models.order import Order
 from app.models.user import User
-from app.schemas.orders import CreateOrderRequest, OrderResponse
+from app.schemas.orders import CreateOrderRequest, OrderResponse, OrderDetailResponse, OrderItemDetail
 
 
 router = APIRouter()
@@ -37,18 +38,89 @@ def create_order(
     )
 
 
-@router.get("", response_model=list[OrderResponse])
+@router.get("", response_model=dict)
 def list_orders(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
-) -> list[OrderResponse]:
+) -> dict:
+    """List all orders for the current user with full details"""
     rows = db.execute(
         select(Order)
         .where(Order.user_id == current_user.id)
         .order_by(Order.created_at.desc())
     ).scalars()
 
-    return [
-        OrderResponse(order_id=row.id, status=row.status, channel=row.channel, created_at=row.created_at)
-        for row in rows
-    ]
+    orders = []
+    for row in rows:
+        # Parse items from JSON
+        items_data = json.loads(row.items_json) if row.items_json else []
+        items = []
+        total = 0.0
+        
+        for item_data in items_data:
+            # Handle both old format (sku) and new format (product_id)
+            product_name = item_data.get('product_name', 'Product')
+            price = item_data.get('price', 29.99)
+            quantity = item_data.get('quantity', 1)
+            
+            items.append({
+                'product_name': product_name,
+                'quantity': quantity,
+                'price': price
+            })
+            total += price * quantity
+        
+        orders.append({
+            'id': row.id,
+            'order_number': f'ORD-{datetime.now().year}-{str(row.id).zfill(3)}',
+            'created_at': row.created_at.isoformat(),
+            'status': row.status,
+            'total': total,
+            'items': items
+        })
+
+    return {'orders': orders}
+
+
+@router.get("/{order_id}", response_model=OrderDetailResponse)
+def get_order(
+    order_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> OrderDetailResponse:
+    """Get detailed information about a specific order"""
+    row = db.execute(
+        select(Order)
+        .where(Order.id == order_id)
+        .where(Order.user_id == current_user.id)
+    ).scalar_one_or_none()
+    
+    if not row:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail="Order not found")
+    
+    # Parse items from JSON
+    items_data = json.loads(row.items_json) if row.items_json else []
+    items = []
+    total = 0.0
+    
+    for item_data in items_data:
+        product_name = item_data.get('product_name', 'Product')
+        price = item_data.get('price', 29.99)
+        quantity = item_data.get('quantity', 1)
+        
+        items.append(OrderItemDetail(
+            product_name=product_name,
+            quantity=quantity,
+            price=price
+        ))
+        total += price * quantity
+    
+    return OrderDetailResponse(
+        id=row.id,
+        order_number=f'ORD-{datetime.now().year}-{str(row.id).zfill(3)}',
+        created_at=row.created_at,
+        status=row.status,
+        total=total,
+        items=items
+    )
