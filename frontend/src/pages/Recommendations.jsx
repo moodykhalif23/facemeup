@@ -66,7 +66,7 @@ export default function Recommendations() {
           ) : products.length > 0 ? (
             <Row gutter={[12, 12]}>
               {products.map((product) => (
-                <Col xs={24} sm={12} md={8} key={product.id}>
+                <Col xs={12} sm={12} md={8} key={product.id}>
                   <Card
                     hoverable
                     style={{ 
@@ -76,13 +76,13 @@ export default function Recommendations() {
                     cover={
                       <div style={{ 
                         height: 200, 
-                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                        background: '#f5f5f5',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         borderRadius: '16px 16px 0 0'
                       }}>
-                        <Text style={{ color: '#fff', fontSize: 16 }}>Product Image</Text>
+                        <Text type="secondary" style={{ fontSize: 14 }}>Product Image</Text>
                       </div>
                     }
                     actions={[
@@ -99,14 +99,14 @@ export default function Recommendations() {
                     ]}
                   >
                     <Card.Meta
-                      title={<Text strong style={{ fontSize: 16 }}>{product.name}</Text>}
+                      title={<Text strong style={{ fontSize: 15 }}>{product.name}</Text>}
                       description={
                         <>
-                          <Text strong style={{ fontSize: 18, color: '#3B82F6' }}>
+                          <Text strong style={{ fontSize: 16, color: '#3B82F6' }}>
                             ${product.price}
                           </Text>
                           <br />
-                          <Text type="secondary">{product.category}</Text>
+                          <Text type="secondary" style={{ fontSize: 13 }}>{product.category}</Text>
                         </>
                       }
                     />
