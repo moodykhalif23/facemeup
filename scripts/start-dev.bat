@@ -13,28 +13,31 @@ if %errorlevel% neq 0 (
     exit /b 1
 )
 
-echo [1/4] Starting Backend Services (Docker)...
+echo [1/5] Starting Database Services (Docker)...
 echo.
-cd backend
 docker-compose up -d
 if %errorlevel% neq 0 (
-    echo [ERROR] Failed to start backend services!
+    echo [ERROR] Failed to start database services!
     pause
     exit /b 1
 )
-cd ..
 
 echo.
-echo [2/4] Waiting for backend to be ready...
+echo [2/5] Waiting for database to be ready...
 timeout /t 5 /nobreak >nul
 
 echo.
-echo [3/4] Installing Frontend Dependencies...
+echo [3/5] Starting Backend API (Local)...
+start "SkinCare Backend" cmd /k "cd backend && .venv\Scripts\activate && uvicorn app.main:app --reload --host 0.0.0.0 --port 8000"
+timeout /t 3 /nobreak >nul
+
+echo.
+echo [4/5] Installing Frontend Dependencies...
 echo.
 cd frontend
 if not exist node_modules (
     echo Installing npm packages...
-    call npm install
+    call npm install --legacy-peer-deps
     if %errorlevel% neq 0 (
         echo [ERROR] Failed to install frontend dependencies!
         cd ..
@@ -46,7 +49,7 @@ if not exist node_modules (
 )
 
 echo.
-echo [4/4] Starting Frontend Development Server...
+echo [5/5] Starting Frontend Development Server...
 echo.
 echo ========================================
 echo  Services Starting:
@@ -64,10 +67,8 @@ call npm start
 
 REM If npm start exits, stop backend
 echo.
-echo Stopping backend services...
+echo Stopping services...
 cd ..
-cd backend
 docker-compose down
-cd ..
 
 pause
