@@ -80,7 +80,7 @@ export default function Results() {
                 </Descriptions.Item>
                 <Descriptions.Item label={<Text strong>Confidence</Text>}>
                   <Progress 
-                    percent={Math.round((profile.confidence_score || 0.85) * 100)} 
+                    percent={Math.round((profile.confidence || 0.85) * 100)} 
                     status="active"
                     strokeColor="#3B82F6"
                   />
