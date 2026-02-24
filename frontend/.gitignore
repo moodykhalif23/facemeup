@@ -1,9 +1,27 @@
-node-modules/
+# Dependencies
+node_modules/
+
+# Production
 dist/
 build/
-coverage/
+
+# Environment
 .env
-.DS_Store
-*.log
-.idea/
+.env.local
+
+# Capacitor
+android/
+ios/
+.capacitor/
+
+# IDE
 .vscode/
+.idea/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
