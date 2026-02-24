@@ -88,13 +88,14 @@ export default function ProductDetail() {
     <Layout style={{ minHeight: '100vh', background: '#f5f5f5' }}>
       <AppHeader title="Product Details" showBack />
 
-      <Content style={{ padding: '16px', paddingBottom: 80 }}>
+      <Content style={{ padding: '16px', paddingBottom: 100 }}>
         <div style={{ maxWidth: 1200, margin: '0 auto' }}>
           {/* Responsive Layout: Stacked on mobile, side-by-side on desktop */}
           <div style={{
             display: 'grid',
             gridTemplateColumns: isDesktop ? '1fr 1fr' : '1fr',
-            gap: 16
+            gap: 16,
+            marginBottom: isDesktop ? 0 : 16
           }}>
             {/* Product Image */}
             <Card 
@@ -178,59 +179,121 @@ export default function ProductDetail() {
         </div>
       </Content>
 
-      {/* Fixed Bottom Bar */}
-      <div style={{
-        position: 'fixed',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        background: '#fff',
-        padding: '16px',
-        boxShadow: '0 -2px 12px rgba(0,0,0,0.1)',
-        zIndex: 10
-      }}>
-        <div style={{ maxWidth: 800, margin: '0 auto', display: 'flex', gap: 12, alignItems: 'center' }}>
-          <div style={{ 
-            display: 'flex', 
-            flexDirection: 'column',
-            alignItems: 'center',
-            minWidth: 80
-          }}>
-            <Text style={{ fontSize: 12, marginBottom: 4, color: '#666' }}>Quantity</Text>
-            <InputNumber
-              min={1}
-              max={10}
-              value={quantity}
-              onChange={setQuantity}
+      {/* Fixed Bottom Bar - Only on Mobile */}
+      {!isDesktop && (
+        <div style={{
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          background: 'rgba(255, 255, 255, 0.95)',
+          backdropFilter: 'blur(10px)',
+          padding: '12px 16px',
+          boxShadow: '0 -2px 12px rgba(0,0,0,0.1)',
+          zIndex: 10
+        }}>
+          <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+            <div style={{ 
+              display: 'flex', 
+              flexDirection: 'column',
+              alignItems: 'center',
+              minWidth: 80
+            }}>
+              <Text style={{ fontSize: 12, marginBottom: 4, color: '#666' }}>Quantity</Text>
+              <InputNumber
+                min={1}
+                max={10}
+                value={quantity}
+                onChange={setQuantity}
+                size="large"
+                style={{ 
+                  width: 80,
+                  fontSize: 16
+                }}
+                controls={{
+                  upIcon: <span style={{ fontSize: 16 }}>+</span>,
+                  downIcon: <span style={{ fontSize: 16 }}>−</span>
+                }}
+              />
+            </div>
+            <Button
+              type="primary"
+              icon={<ShoppingCartOutlined />}
+              onClick={handleAddToCart}
               size="large"
-              style={{ 
-                width: 80,
-                fontSize: 16
+              block
+              style={{
+                height: 52,
+                fontSize: 16,
+                fontWeight: 600,
+                borderRadius: 8,
+                flex: 1
               }}
-              controls={{
-                upIcon: <span style={{ fontSize: 16 }}>+</span>,
-                downIcon: <span style={{ fontSize: 16 }}>−</span>
-              }}
-            />
+            >
+              Add to Cart
+            </Button>
           </div>
-          <Button
-            type="primary"
-            icon={<ShoppingCartOutlined />}
-            onClick={handleAddToCart}
-            size="large"
-            block
-            style={{
-              height: 52,
-              fontSize: 16,
-              fontWeight: 600,
-              borderRadius: 8,
-              flex: 1
-            }}
-          >
-            Add to Cart
-          </Button>
         </div>
-      </div>
+      )}
+
+      {/* Desktop: Add to Cart Section Inside Card */}
+      {isDesktop && (
+        <div style={{ 
+          maxWidth: 1200, 
+          margin: '16px auto 0',
+          padding: '0 16px'
+        }}>
+          <Card style={{ 
+            borderRadius: 16, 
+            boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
+            background: 'transparent',
+            border: 'none'
+          }}>
+            <div style={{ display: 'flex', gap: 16, alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ 
+                display: 'flex', 
+                flexDirection: 'column',
+                alignItems: 'center',
+                minWidth: 100
+              }}>
+                <Text style={{ fontSize: 14, marginBottom: 8, color: '#666', fontWeight: 500 }}>Quantity</Text>
+                <InputNumber
+                  min={1}
+                  max={10}
+                  value={quantity}
+                  onChange={setQuantity}
+                  size="large"
+                  style={{ 
+                    width: 100,
+                    fontSize: 18
+                  }}
+                  controls={{
+                    upIcon: <span style={{ fontSize: 18 }}>+</span>,
+                    downIcon: <span style={{ fontSize: 18 }}>−</span>
+                  }}
+                />
+              </div>
+              <Button
+                type="primary"
+                icon={<ShoppingCartOutlined />}
+                onClick={handleAddToCart}
+                size="large"
+                style={{
+                  height: 56,
+                  fontSize: 18,
+                  fontWeight: 600,
+                  borderRadius: 12,
+                  minWidth: 300,
+                  paddingLeft: 32,
+                  paddingRight: 32
+                }}
+              >
+                Add to Cart
+              </Button>
+            </div>
+          </Card>
+        </div>
+      )}
     </Layout>
   );
 }
