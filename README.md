@@ -170,7 +170,7 @@ npm test
 5. Submit a pull request
 
 
-## 🆘 Troubleshooting
+## Troubleshooting
 
 ### Docker Issues
 - Ensure Docker Desktop is running
