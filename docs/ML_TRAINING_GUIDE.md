@@ -70,102 +70,6 @@ docker exec skincare-api python ml/train.py --phase 1
 docker exec skincare-api python ml/train.py --phase 2
 ```
 
-## MediaPipe Face Mesh Integration (Future Enhancement)
-
-For real-time face capture and analysis, integrate MediaPipe Face Mesh:
-
-### Frontend Integration:
-
-1. **Install MediaPipe:**
-```bash
-cd frontend
-npm install @mediapipe/face_mesh @mediapipe/camera_utils
-```
-
-2. **Create FaceMesh Component:**
-```javascript
-import { FaceMesh } from '@mediapipe/face_mesh';
-import { Camera } from '@mediapipe/camera_utils';
-
-// Initialize Face Mesh
-const faceMesh = new FaceMesh({
-  locateFile: (file) => {
-    return `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`;
-  }
-});
-
-faceMesh.setOptions({
-  maxNumFaces: 1,
-  refineLandmarks: true,
-  minDetectionConfidence: 0.5,
-  minTrackingConfidence: 0.5
-});
-
-// Process results
-faceMesh.onResults((results) => {
-  if (results.multiFaceLandmarks) {
-    // Face detected - capture for analysis
-    const faceImage = extractFaceRegion(results);
-    sendToBackend(faceImage);
-  }
-});
-
-// Start camera
-const camera = new Camera(videoElement, {
-  onFrame: async () => {
-    await faceMesh.send({image: videoElement});
-  },
-  width: 640,
-  height: 480
-});
-camera.start();
-```
-
-3. **Benefits:**
-- Real-time face detection
-- Automatic face cropping
-- Better image quality for analysis
-- Face landmark detection (468 points)
-- Works on web and mobile
-
-### Backend Enhancement:
-
-Add face region extraction and preprocessing:
-
-```python
-# backend/app/services/face_processor.py
-import cv2
-import numpy as np
-
-def extract_face_region(image, landmarks):
-    """Extract and normalize face region from landmarks"""
-    # Get face bounding box from landmarks
-    x_coords = [lm.x for lm in landmarks]
-    y_coords = [lm.y for lm in landmarks]
-    
-    x_min, x_max = min(x_coords), max(x_coords)
-    y_min, y_max = min(y_coords), max(y_coords)
-    
-    # Add padding
-    padding = 0.2
-    width = x_max - x_min
-    height = y_max - y_min
-    
-    x_min = max(0, x_min - width * padding)
-    x_max = min(1, x_max + width * padding)
-    y_min = max(0, y_min - height * padding)
-    y_max = min(1, y_max + height * padding)
-    
-    # Crop face region
-    h, w = image.shape[:2]
-    face = image[
-        int(y_min * h):int(y_max * h),
-        int(x_min * w):int(x_max * w)
-    ]
-    
-    return face
-```
-
 ## Model Performance Targets
 
 | Metric | Current (Dummy) | Target (Real Data) |
@@ -244,20 +148,20 @@ docker logs skincare-api --tail 50
 ## Next Steps
 
 1. ✅ **Current**: Basic model working with dummy data
-2. 🔄 **Recommended**: Train with HAM10000 for better accuracy
-3. 🔄 **Future**: Integrate MediaPipe Face Mesh for real-time capture
+2. ✅ **Complete**: MediaPipe Face Mesh integration for real-time capture (see MEDIAPIPE_INTEGRATION.md)
+3. 🔄 **Recommended**: Train with HAM10000 for better accuracy
 4. 🔄 **Future**: Collect real user data for fine-tuning
 5. 🔄 **Future**: A/B test different model architectures
 
 ## Resources
 
-- **MediaPipe Face Mesh**: https://developers.google.com/mediapipe/solutions/vision/face_landmarker
+- **MediaPipe Integration Guide**: See `docs/MEDIAPIPE_INTEGRATION.md` for complete documentation
 - **HAM10000 Dataset**: https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/DBW86T
 - **TensorFlow Lite**: https://www.tensorflow.org/lite
 - **EfficientNet Paper**: https://arxiv.org/abs/1905.11946
 
 ---
 
-**Current Status**: ✅ Model is trained and working. Recommendations are being generated from real Dr. Rashel products!
+**Current Status**: ✅ Model is trained and working. MediaPipe Face Mesh integration complete. Recommendations are being generated from real Dr. Rashel products!
 
 For production deployment, train with HAM10000 dataset for better accuracy.
