@@ -93,7 +93,7 @@ export default function Recommendations() {
                     </div>
                     <Button 
                       type="primary" 
-                      icon={<ShoppingCartOutlined />}
+                      icon={<ShoppingCartOutlined key={`icon-${product.id}`} />}
                       onClick={() => navigate(`/product/${product.id}`)}
                       size="small"
                       block
