@@ -39,9 +39,16 @@ export default function HomeScreen({ navigation, user, onLogout }) {
       color: '#FEF3C7',
     },
     {
+      icon: '📷',
+      title: 'Progress Photos',
+      description: 'Track your skincare journey',
+      route: 'ProgressPhotos',
+      color: '#F3E8FF',
+    },
+    {
       icon: '📊',
       title: 'Profile History',
-      description: 'Track your skin journey',
+      description: 'View your analysis history',
       route: 'Profile',
       color: '#E0E7FF',
     },

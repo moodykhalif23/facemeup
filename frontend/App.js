@@ -17,6 +17,7 @@ import CheckoutScreen from "./src/screens/CheckoutScreen";
 import PaymentScreen from "./src/screens/PaymentScreen";
 import OrderTrackingScreen from "./src/screens/OrderTrackingScreen";
 import LoyaltyScreen from "./src/screens/LoyaltyScreen";
+import ProgressPhotosScreen from "./src/screens/ProgressPhotosScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -158,6 +159,13 @@ export default function App() {
             options={{ title: 'Loyalty & Rewards' }}
           >
             {(props) => <LoyaltyScreen {...props} token={user.token} userId={user.userId} />}
+          </Stack.Screen>
+          
+          <Stack.Screen 
+            name="ProgressPhotos" 
+            options={{ title: 'Progress Photos' }}
+          >
+            {(props) => <ProgressPhotosScreen {...props} token={user.token} userId={user.userId} />}
           </Stack.Screen>
         </Stack.Navigator>
       </NavigationContainer>
