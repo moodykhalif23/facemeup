@@ -3,7 +3,7 @@ import io
 from functools import lru_cache
 
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageEnhance
 
 from app.core.config import settings
 from app.schemas.analyze import SkinProfile
@@ -16,23 +16,53 @@ def _load_model():
     return tf.saved_model.load(settings.model_saved_path)
 
 
-def _decode_image(image_base64: str) -> np.ndarray:
+def _preprocess_image(image_base64: str) -> np.ndarray:
+    """
+    Preprocess image for better skin analysis accuracy
+    - Decode base64
+    - Convert to RGB
+    - Enhance contrast and sharpness
+    - Resize to model input size
+    - Normalize pixel values
+    """
     raw = base64.b64decode(image_base64)
     image = Image.open(io.BytesIO(raw)).convert("RGB")
-    image = image.resize((settings.model_input_size, settings.model_input_size))
+    
+    enhancer = ImageEnhance.Contrast(image)
+    image = enhancer.enhance(1.2)
+    
+    # Increase sharpness for better detail detection
+    enhancer = ImageEnhance.Sharpness(image)
+    image = enhancer.enhance(1.3)
+    
+    # Resize to model input size
+    image = image.resize((settings.model_input_size, settings.model_input_size), Image.Resampling.LANCZOS)
+    
+    # Convert to array and normalize
     arr = np.asarray(image, dtype=np.float32) / 255.0
+    
     return np.expand_dims(arr, axis=0)
 
 
 def _default_profile() -> SkinProfile:
+    """Fallback profile when model inference fails"""
     return SkinProfile(
         skin_type="Combination",
-        conditions=["Acne", "Dehydration"],
-        confidence=0.81,
+        conditions=["Dehydration"],
+        confidence=0.65,
     )
 
 
 def run_skin_inference(image_base64: str) -> tuple[SkinProfile, str]:
+    """
+    Run skin analysis inference on the provided image
+    
+    Args:
+        image_base64: Base64 encoded image string
+        
+    Returns:
+        Tuple of (SkinProfile, inference_mode)
+    """
     skin_labels = [v.strip() for v in settings.model_skin_types.split(",") if v.strip()]
     condition_labels = [v.strip() for v in settings.model_conditions.split(",") if v.strip()]
 
@@ -40,7 +70,7 @@ def run_skin_inference(image_base64: str) -> tuple[SkinProfile, str]:
         import tensorflow as tf
 
         model = _load_model()
-        batch = _decode_image(image_base64)
+        batch = _preprocess_image(image_base64)
         infer = model.signatures.get("serving_default")
         if infer is None:
             return _default_profile(), "savedmodel_missing_signature"
@@ -61,20 +91,34 @@ def run_skin_inference(image_base64: str) -> tuple[SkinProfile, str]:
         if probs.size == 0:
             return _default_profile(), "savedmodel_empty_probs"
 
+        # Determine skin type (first N labels)
         top_skin_idx = int(np.argmax(probs[: len(skin_labels)])) if len(probs) >= len(skin_labels) else 0
         skin_type = skin_labels[top_skin_idx] if skin_labels else "Unknown"
+        skin_confidence = float(probs[top_skin_idx]) if top_skin_idx < len(probs) else 0.5
 
+        # Determine conditions (remaining labels)
         cond_start = len(skin_labels)
         cond_scores = probs[cond_start : cond_start + len(condition_labels)]
+        
+        # Use adaptive threshold based on confidence
+        # Higher threshold for more confident predictions
+        threshold = 0.40 if skin_confidence > 0.7 else 0.35
+        
         conditions = [
             condition_labels[i]
             for i, score in enumerate(cond_scores)
-            if i < len(condition_labels) and float(score) >= 0.35 and condition_labels[i] != "None detected"
+            if i < len(condition_labels) 
+            and float(score) >= threshold 
+            and condition_labels[i] != "None detected"
         ]
+        
+        # If no conditions detected, mark as "None detected"
         if not conditions:
             conditions = ["None detected"]
-
-        confidence = float(np.max(probs))
+        
+        # Use the highest confidence score as overall confidence
+        confidence = float(max(skin_confidence, np.max(cond_scores) if len(cond_scores) > 0 else 0.5))
+        
         return (
             SkinProfile(
                 skin_type=skin_type,
@@ -83,5 +127,7 @@ def run_skin_inference(image_base64: str) -> tuple[SkinProfile, str]:
             ),
             "server_savedmodel",
         )
-    except Exception:
+    except Exception as e:
+        # Log the error for debugging
+        print(f"Inference error: {e}")
         return _default_profile(), "server_savedmodel_fallback"

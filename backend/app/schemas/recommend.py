@@ -7,8 +7,10 @@ class RecommendRequest(BaseModel):
 
 
 class ProductRecommendation(BaseModel):
+    id: str
     sku: str
     name: str
+    price: float
     score: float
     matched_ingredients: list[str]
 

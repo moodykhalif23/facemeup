@@ -15,7 +15,7 @@ router = APIRouter()
 @router.post("", response_model=RecommendResponse)
 def recommend(
     payload: RecommendRequest,
-    _: Session = Depends(get_db),
+    db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ) -> RecommendResponse:
     key = f"recommend:{current_user.id}:{payload.skin_type}:{','.join(sorted(payload.conditions))}"
@@ -23,6 +23,6 @@ def recommend(
     if cached:
         return RecommendResponse(products=cached)
 
-    products = recommend_products(payload.skin_type, payload.conditions)
-    cache_set_json(key, [p.model_dump() for p in products])
+    products = recommend_products(payload.skin_type, payload.conditions, db)
+    cache_set_json(key, [p.model_dump() for p in products], ttl=300)  # Cache for 5 minutes
     return RecommendResponse(products=products)
