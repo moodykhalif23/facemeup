@@ -108,29 +108,51 @@ export default function ProductDetail() {
               styles={{ body: { padding: 0 } }}
             >
               {product.image_url ? (
-                <img 
-                  src={product.image_url} 
-                  alt={product.name}
-                  style={{
-                    width: '100%',
+                <>
+                  <img 
+                    src={product.image_url} 
+                    alt={product.name}
+                    style={{
+                      width: '100%',
+                      height: isDesktop ? 400 : 300,
+                      objectFit: 'cover'
+                    }}
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                      if (e.target.nextSibling) {
+                        e.target.nextSibling.style.display = 'flex';
+                      }
+                    }}
+                  />
+                  <div style={{
                     height: isDesktop ? 400 : 300,
-                    objectFit: 'cover'
-                  }}
-                  onError={(e) => {
-                    e.target.style.display = 'none';
-                    e.target.nextSibling.style.display = 'flex';
-                  }}
-                />
-              ) : null}
-              <div style={{
-                height: isDesktop ? 400 : 300,
-                background: '#f5f5f5',
-                display: product.image_url ? 'none' : 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}>
-                <Text style={{ fontSize: 18, color: '#999' }}>No Image Available</Text>
-              </div>
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    display: 'none',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'white',
+                    fontSize: 48,
+                    fontWeight: 600,
+                    letterSpacing: 2
+                  }}>
+                    {product.name.substring(0, 2).toUpperCase()}
+                  </div>
+                </>
+              ) : (
+                <div style={{
+                  height: isDesktop ? 400 : 300,
+                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'white',
+                  fontSize: 48,
+                  fontWeight: 600,
+                  letterSpacing: 2
+                }}>
+                  {product.name.substring(0, 2).toUpperCase()}
+                </div>
+              )}
             </Card>
 
             {/* Product Info */}

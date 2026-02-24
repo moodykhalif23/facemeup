@@ -65,29 +65,50 @@ export default function Recommendations() {
                     }}
                     cover={
                       product.image_url ? (
-                        <img 
-                          src={product.image_url} 
-                          alt={product.name}
-                          style={{ 
+                        <>
+                          <img 
+                            src={product.image_url} 
+                            alt={product.name}
+                            style={{ 
+                              height: 180, 
+                              objectFit: 'cover',
+                              borderRadius: '12px 12px 0 0',
+                              width: '100%'
+                            }}
+                            onError={(e) => {
+                              e.target.style.display = 'none';
+                              if (e.target.nextSibling) {
+                                e.target.nextSibling.style.display = 'flex';
+                              }
+                            }}
+                          />
+                          <div style={{ 
                             height: 180, 
-                            objectFit: 'cover',
-                            borderRadius: '12px 12px 0 0'
-                          }}
-                          onError={(e) => {
-                            e.target.style.display = 'none';
-                            e.target.nextSibling.style.display = 'flex';
-                          }}
-                        />
+                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                            display: 'none',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            borderRadius: '12px 12px 0 0',
+                            color: 'white',
+                            fontSize: 16,
+                            fontWeight: 500
+                          }}>
+                            {product.name.substring(0, 2).toUpperCase()}
+                          </div>
+                        </>
                       ) : (
                         <div style={{ 
                           height: 180, 
-                          background: '#f5f5f5',
+                          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          borderRadius: '12px 12px 0 0'
+                          borderRadius: '12px 12px 0 0',
+                          color: 'white',
+                          fontSize: 16,
+                          fontWeight: 500
                         }}>
-                          <Text type="secondary" style={{ fontSize: 13 }}>No Image</Text>
+                          {product.name.substring(0, 2).toUpperCase()}
                         </div>
                       )
                     }
