@@ -40,7 +40,7 @@ async def proxy_image(url: str = Query(..., description="Image URL to proxy")):
                 content=response.content,
                 media_type=content_type,
                 headers={
-                    "Cache-Control": "public, max-age=86400",  # Cache for 24 hours
+                    "Cache-Control": "public, max-age=86400",
                     "Access-Control-Allow-Origin": "*",
                 }
             )
