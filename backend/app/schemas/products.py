@@ -2,10 +2,14 @@ from pydantic import BaseModel
 
 
 class Product(BaseModel):
+    id: str
     sku: str
     name: str
+    price: float
     ingredients: list[str]
     stock: int
+    image_url: str | None = None
+    category: str | None = None
 
 
 class ProductDetail(BaseModel):
@@ -19,3 +23,4 @@ class ProductDetail(BaseModel):
     ingredients: str
     usage: str
     stock: int
+    image_url: str | None = None

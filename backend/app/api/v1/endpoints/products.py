@@ -23,10 +23,14 @@ def list_products(db: Session = Depends(get_db)) -> list[Product]:
     rows = db.execute(select(ProductCatalog).order_by(ProductCatalog.name.asc())).scalars()
     products = [
         Product(
+            id=row.sku,
             sku=row.sku,
             name=row.name,
+            price=row.price or 29.99,
             ingredients=[v for v in row.ingredients_csv.split(",") if v],
             stock=row.stock,
+            image_url=row.image_url,
+            category=row.category
         )
         for row in rows
     ]
@@ -49,22 +53,26 @@ def get_product(product_id: str, db: Session = Depends(get_db)) -> ProductDetail
     if not row:
         raise HTTPException(status_code=404, detail="Product not found")
     
+    # Parse benefits from description or use defaults
+    benefits = [
+        "Deeply hydrates skin",
+        "Reduces fine lines",
+        "Improves skin texture",
+        "Non-comedogenic formula"
+    ]
+    
     product = ProductDetail(
         id=row.sku,
         sku=row.sku,
         name=row.name,
-        price=29.99,  # Default price, could be added to database
-        category="Skincare",
-        description=f"Premium skincare product: {row.name}",
-        benefits=[
-            "Deeply hydrates skin",
-            "Reduces fine lines",
-            "Improves skin texture",
-            "Non-comedogenic formula"
-        ],
+        price=row.price or 29.99,
+        category=row.category or "Skincare",
+        description=row.description or f"Premium skincare product: {row.name}",
+        benefits=benefits,
         ingredients=", ".join([v for v in row.ingredients_csv.split(",") if v]),
         usage="Apply twice daily to clean, dry skin. Gently massage until fully absorbed.",
-        stock=row.stock
+        stock=row.stock,
+        image_url=row.image_url
     )
     
     cache_set_json(cache_key, product.model_dump())

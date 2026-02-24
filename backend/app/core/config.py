@@ -21,5 +21,10 @@ class Settings(BaseSettings):
     model_skin_types: str = "Oily,Dry,Combination,Normal,Sensitive"
     model_conditions: str = "Acne,Hyperpigmentation,Uneven tone,Dehydration,None detected"
 
+    # WooCommerce Settings
+    woocommerce_url: str = "https://drrashel.com"
+    woocommerce_consumer_key: str = ""
+    woocommerce_consumer_secret: str = ""
+
 
 settings = Settings()
