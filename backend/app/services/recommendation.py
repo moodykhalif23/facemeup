@@ -25,10 +25,31 @@ INGREDIENT_MAP: dict[str, list[str]] = {
     "Redness": ["Centella", "Niacinamide", "Aloe Vera", "Green Tea"],
 }
 
+# Keywords to match in product names/descriptions for each skin type/condition
+KEYWORD_MAP: dict[str, list[str]] = {
+    # Skin Types
+    "Oily": ["oil control", "mattifying", "pore", "salicylic", "clay", "charcoal", "niacinamide"],
+    "Dry": ["hydrat", "moistur", "nourish", "hyaluronic", "ceramide", "shea butter", "dry skin"],
+    "Combination": ["balance", "hydrat", "niacinamide", "vitamin c"],
+    "Normal": ["vitamin c", "glow", "radiance", "maintain"],
+    "Sensitive": ["gentle", "soothing", "calm", "sensitive", "aloe", "centella"],
+    
+    # Conditions
+    "Acne": ["acne", "blemish", "clear", "salicylic", "tea tree", "pimple"],
+    "Hyperpigmentation": ["bright", "whitening", "pigment", "dark spot", "vitamin c", "arbutin"],
+    "Uneven tone": ["bright", "even", "tone", "radiance", "vitamin c", "niacinamide"],
+    "Dehydration": ["hydrat", "moistur", "hyaluronic", "water", "plump"],
+    "Fine lines": ["anti-aging", "retinol", "wrinkle", "firm", "peptide"],
+    "Wrinkles": ["anti-aging", "retinol", "wrinkle", "firm", "collagen"],
+    "Dark spots": ["bright", "whitening", "dark spot", "pigment", "vitamin c"],
+    "Redness": ["soothing", "calm", "redness", "sensitive", "centella"],
+}
+
 
 def recommend_products(skin_type: str, conditions: list[str], db: Session = None) -> list[ProductRecommendation]:
     """
     Recommend products from database based on skin type and conditions
+    Uses both ingredient matching and keyword matching in product names/descriptions
     
     Args:
         skin_type: User's skin type
@@ -38,15 +59,19 @@ def recommend_products(skin_type: str, conditions: list[str], db: Session = None
     Returns:
         List of recommended products sorted by relevance score
     """
-    # Get desired ingredients based on skin type and conditions
-    desired = set(INGREDIENT_MAP.get(skin_type, []))
+    # Get desired ingredients and keywords
+    desired_ingredients = set(INGREDIENT_MAP.get(skin_type, []))
+    desired_keywords = set(KEYWORD_MAP.get(skin_type, []))
+    
     for condition in conditions:
         if condition != "None detected":
-            desired.update(INGREDIENT_MAP.get(condition, []))
+            desired_ingredients.update(INGREDIENT_MAP.get(condition, []))
+            desired_keywords.update(KEYWORD_MAP.get(condition, []))
     
-    # If no specific ingredients needed, use general skincare ingredients
-    if not desired:
-        desired = {"Hyaluronic Acid", "Vitamin C", "Niacinamide", "Glycerin"}
+    # If no specific criteria, use general skincare
+    if not desired_ingredients and not desired_keywords:
+        desired_ingredients = {"Hyaluronic Acid", "Vitamin C", "Niacinamide", "Glycerin"}
+        desired_keywords = {"hydrat", "moistur", "vitamin", "serum"}
     
     # Get database session if not provided
     if db is None:
@@ -56,7 +81,6 @@ def recommend_products(skin_type: str, conditions: list[str], db: Session = None
     products = db.execute(select(ProductCatalog)).scalars().all()
     
     if not products:
-        # Return empty list if no products in database
         return []
     
     scored: list[ProductRecommendation] = []
@@ -65,31 +89,42 @@ def recommend_products(skin_type: str, conditions: list[str], db: Session = None
         # Parse ingredients from CSV
         product_ingredients = [ing.strip() for ing in product.ingredients_csv.split(",") if ing.strip()]
         
+        # Combine product name, category, and description for keyword matching
+        searchable_text = f"{product.name} {product.category or ''} {product.description or ''}".lower()
+        
         # Find matching ingredients (case-insensitive)
-        matched = []
-        for desired_ing in desired:
+        matched_ingredients = []
+        for desired_ing in desired_ingredients:
             for product_ing in product_ingredients:
                 if desired_ing.lower() in product_ing.lower():
-                    matched.append(desired_ing)
+                    matched_ingredients.append(desired_ing)
                     break
         
-        # Skip products with no matching ingredients
-        if not matched:
-            continue
+        # Find matching keywords in product name/description
+        matched_keywords = []
+        for keyword in desired_keywords:
+            if keyword.lower() in searchable_text:
+                matched_keywords.append(keyword)
         
-        # Calculate relevance score
-        score = len(matched) / max(len(desired), 1)
+        # Calculate score based on both ingredient and keyword matches
+        ingredient_score = len(matched_ingredients) / max(len(desired_ingredients), 1) if desired_ingredients else 0
+        keyword_score = len(matched_keywords) / max(len(desired_keywords), 1) if desired_keywords else 0
         
-        scored.append(
-            ProductRecommendation(
-                id=product.sku,
-                sku=product.sku,
-                name=product.name,
-                price=product.price or 29.99,
-                score=round(score, 4),
-                matched_ingredients=sorted(set(matched)),
+        # Weighted average: keywords are more reliable for our data
+        total_score = (keyword_score * 0.7) + (ingredient_score * 0.3)
+        
+        # Only include products with some relevance
+        if total_score > 0.1:
+            scored.append(
+                ProductRecommendation(
+                    id=product.sku,
+                    sku=product.sku,
+                    name=product.name,
+                    price=product.price or 0,
+                    score=round(total_score, 4),
+                    matched_ingredients=sorted(set(matched_ingredients + matched_keywords))[:5],  # Show top 5 matches
+                )
             )
-        )
     
     # Sort by score (highest first) and return top recommendations
     return sorted(scored, key=lambda x: x.score, reverse=True)[:20]
