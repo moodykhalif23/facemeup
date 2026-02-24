@@ -18,6 +18,11 @@ def analyze(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ) -> AnalyzeResponse:
-    profile, mode = run_skin_inference(payload.image_base64)
+    # Convert landmarks to dict format if provided
+    landmarks = None
+    if payload.landmarks:
+        landmarks = [{"x": lm.x, "y": lm.y, "z": lm.z} for lm in payload.landmarks]
+    
+    profile, mode = run_skin_inference(payload.image_base64, landmarks)
     append_profile(db, current_user.id, profile.skin_type, profile.conditions, profile.confidence)
     return AnalyzeResponse(profile=profile, inference_mode=mode)

@@ -1,14 +1,15 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { Layout, Card, Button, Form, Select, Checkbox, Typography, Space, App, Spin } from 'antd';
-import { CameraOutlined } from '@ant-design/icons';
+import { Layout, Card, Button, Form, Select, Checkbox, Typography, Space, App, Spin, Tabs } from 'antd';
+import { CameraOutlined, ScanOutlined } from '@ant-design/icons';
 import { Capacitor } from '@capacitor/core';
 import { takePicture } from '../services/camera';
 import { analyzeImage } from '../services/api';
 import { setCurrentAnalysis, addToHistory } from '../store/slices/analysisSlice';
 import AppHeader from '../components/AppHeader';
 import WebCamera from '../components/WebCamera';
+import FaceMeshAnalysis from '../components/FaceMeshAnalysis';
 
 const { Content } = Layout;
 const { Title, Text } = Typography;
@@ -18,6 +19,7 @@ export default function Analysis() {
   const [loading, setLoading] = useState(false);
   const [imageData, setImageData] = useState(null);
   const [showCamera, setShowCamera] = useState(false);
+  const [captureMode, setCaptureMode] = useState('standard'); // 'standard' or 'facemesh'
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { message } = App.useApp();
@@ -100,124 +102,149 @@ export default function Analysis() {
               body: { padding: 24 }
             }}
           >
-            <Space direction="vertical" size="large" style={{ width: '100%' }}>
-              <div style={{ textAlign: 'center' }}>
-                <Title level={4} style={{ marginBottom: 8 }}>Capture Your Skin</Title>
-                <Text type="secondary">
-                  Take a clear photo of your face in good lighting
-                </Text>
-              </div>
+            <Tabs
+              activeKey={captureMode}
+              onChange={setCaptureMode}
+              items={[
+                {
+                  key: 'standard',
+                  label: (
+                    <span>
+                      <CameraOutlined /> Standard Camera
+                    </span>
+                  ),
+                  children: (
+                    <Space direction="vertical" size="large" style={{ width: '100%' }}>
+                      <div style={{ textAlign: 'center' }}>
+                        <Title level={4} style={{ marginBottom: 8 }}>Capture Your Skin</Title>
+                        <Text type="secondary">
+                          Take a clear photo of your face in good lighting
+                        </Text>
+                      </div>
 
-              {imageData && (
-                <div style={{ 
-                  textAlign: 'center',
-                  padding: '16px 0'
-                }}>
-                  <img 
-                    src={`data:image/jpeg;base64,${imageData}`}
-                    alt="Captured"
-                    style={{ 
-                      maxWidth: '100%', 
-                      maxHeight: 300,
-                      borderRadius: 12,
-                      border: '2px solid #e5e7eb',
-                      objectFit: 'cover'
-                    }}
-                  />
-                </div>
-              )}
+                      {imageData && (
+                        <div style={{ 
+                          textAlign: 'center',
+                          padding: '16px 0'
+                        }}>
+                          <img 
+                            src={`data:image/jpeg;base64,${imageData}`}
+                            alt="Captured"
+                            style={{ 
+                              maxWidth: '100%', 
+                              maxHeight: 300,
+                              borderRadius: 12,
+                              border: '2px solid #e5e7eb',
+                              objectFit: 'cover'
+                            }}
+                          />
+                        </div>
+                      )}
 
-              <Button
-                icon={<CameraOutlined />}
-                onClick={handleTakePhoto}
-                size="large"
-                block
-                style={{
-                  height: 56,
-                  fontSize: 16,
-                  fontWeight: 500,
-                  borderRadius: 12
-                }}
-              >
-                Take Photo
-              </Button>
+                      <Button
+                        icon={<CameraOutlined />}
+                        onClick={handleTakePhoto}
+                        size="large"
+                        block
+                        style={{
+                          height: 56,
+                          fontSize: 16,
+                          fontWeight: 500,
+                          borderRadius: 12
+                        }}
+                      >
+                        Take Photo
+                      </Button>
 
-              <Form
-                form={form}
-                layout="vertical"
-                onFinish={onFinish}
-                requiredMark="optional"
-              >
-                <Form.Item
-                  label={<Text strong>How does your skin feel?</Text>}
-                  name="skinFeel"
-                  rules={[{ required: true, message: 'Please select an option' }]}
-                >
-                  <Select 
-                    size="large" 
-                    placeholder="Select..."
-                    style={{ borderRadius: 8 }}
-                  >
-                    <Select.Option value="oily">Oily</Select.Option>
-                    <Select.Option value="dry">Dry</Select.Option>
-                    <Select.Option value="combination">Combination</Select.Option>
-                    <Select.Option value="normal">Normal</Select.Option>
-                  </Select>
-                </Form.Item>
+                      <Form
+                        form={form}
+                        layout="vertical"
+                        onFinish={onFinish}
+                        requiredMark="optional"
+                      >
+                        <Form.Item
+                          label={<Text strong>How does your skin feel?</Text>}
+                          name="skinFeel"
+                          rules={[{ required: true, message: 'Please select an option' }]}
+                        >
+                          <Select 
+                            size="large" 
+                            placeholder="Select..."
+                            style={{ borderRadius: 8 }}
+                          >
+                            <Select.Option value="oily">Oily</Select.Option>
+                            <Select.Option value="dry">Dry</Select.Option>
+                            <Select.Option value="combination">Combination</Select.Option>
+                            <Select.Option value="normal">Normal</Select.Option>
+                          </Select>
+                        </Form.Item>
 
-                <Form.Item
-                  label={<Text strong>Current skincare routine</Text>}
-                  name="routine"
-                  rules={[{ required: true, message: 'Please select an option' }]}
-                >
-                  <Select 
-                    size="large" 
-                    placeholder="Select..."
-                    style={{ borderRadius: 8 }}
-                  >
-                    <Select.Option value="none">None</Select.Option>
-                    <Select.Option value="basic">Basic (cleanser + moisturizer)</Select.Option>
-                    <Select.Option value="moderate">Moderate (3-5 products)</Select.Option>
-                    <Select.Option value="extensive">Extensive (6+ products)</Select.Option>
-                  </Select>
-                </Form.Item>
+                        <Form.Item
+                          label={<Text strong>Current skincare routine</Text>}
+                          name="routine"
+                          rules={[{ required: true, message: 'Please select an option' }]}
+                        >
+                          <Select 
+                            size="large" 
+                            placeholder="Select..."
+                            style={{ borderRadius: 8 }}
+                          >
+                            <Select.Option value="none">None</Select.Option>
+                            <Select.Option value="basic">Basic (cleanser + moisturizer)</Select.Option>
+                            <Select.Option value="moderate">Moderate (3-5 products)</Select.Option>
+                            <Select.Option value="extensive">Extensive (6+ products)</Select.Option>
+                          </Select>
+                        </Form.Item>
 
-                <Form.Item
-                  label={<Text strong>Skin concerns</Text>}
-                  name="concerns"
-                >
-                  <Checkbox.Group style={{ width: '100%' }}>
-                    <Space direction="vertical" style={{ width: '100%' }}>
-                      <Checkbox value="acne" style={{ fontSize: 15 }}>Acne</Checkbox>
-                      <Checkbox value="wrinkles" style={{ fontSize: 15 }}>Wrinkles</Checkbox>
-                      <Checkbox value="dark_spots" style={{ fontSize: 15 }}>Dark Spots</Checkbox>
-                      <Checkbox value="redness" style={{ fontSize: 15 }}>Redness</Checkbox>
-                      <Checkbox value="dryness" style={{ fontSize: 15 }}>Dryness</Checkbox>
-                      <Checkbox value="oiliness" style={{ fontSize: 15 }}>Oiliness</Checkbox>
+                        <Form.Item
+                          label={<Text strong>Skin concerns</Text>}
+                          name="concerns"
+                        >
+                          <Checkbox.Group style={{ width: '100%' }}>
+                            <Space direction="vertical" style={{ width: '100%' }}>
+                              <Checkbox value="acne" style={{ fontSize: 15 }}>Acne</Checkbox>
+                              <Checkbox value="wrinkles" style={{ fontSize: 15 }}>Wrinkles</Checkbox>
+                              <Checkbox value="dark_spots" style={{ fontSize: 15 }}>Dark Spots</Checkbox>
+                              <Checkbox value="redness" style={{ fontSize: 15 }}>Redness</Checkbox>
+                              <Checkbox value="dryness" style={{ fontSize: 15 }}>Dryness</Checkbox>
+                              <Checkbox value="oiliness" style={{ fontSize: 15 }}>Oiliness</Checkbox>
+                            </Space>
+                          </Checkbox.Group>
+                        </Form.Item>
+
+                        <Form.Item style={{ marginBottom: 0 }}>
+                          <Button 
+                            type="primary" 
+                            htmlType="submit" 
+                            size="large"
+                            block
+                            loading={loading}
+                            disabled={!imageData}
+                            style={{
+                              height: 56,
+                              fontSize: 16,
+                              fontWeight: 600,
+                              borderRadius: 12
+                            }}
+                          >
+                            {loading ? <Spin /> : 'Analyze My Skin'}
+                          </Button>
+                        </Form.Item>
+                      </Form>
                     </Space>
-                  </Checkbox.Group>
-                </Form.Item>
-
-                <Form.Item style={{ marginBottom: 0 }}>
-                  <Button 
-                    type="primary" 
-                    htmlType="submit" 
-                    size="large"
-                    block
-                    loading={loading}
-                    disabled={!imageData}
-                    style={{
-                      height: 56,
-                      fontSize: 16,
-                      fontWeight: 600,
-                      borderRadius: 12
-                    }}
-                  >
-                    {loading ? <Spin /> : 'Analyze My Skin'}
-                  </Button>
-                </Form.Item>
-              </Form>
-            </Space>
+                  ),
+                },
+                {
+                  key: 'facemesh',
+                  label: (
+                    <span>
+                      <ScanOutlined /> AI Face Detection
+                    </span>
+                  ),
+                  children: <FaceMeshAnalysis />,
+                },
+              ]}
+            />
           </Card>
         </div>
       </Content>

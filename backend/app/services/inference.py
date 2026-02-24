@@ -1,12 +1,15 @@
 import base64
 import io
 from functools import lru_cache
+from typing import Optional, List, Dict
 
 import numpy as np
 from PIL import Image, ImageEnhance
+import cv2
 
 from app.core.config import settings
 from app.schemas.analyze import SkinProfile
+from app.services.face_processor import face_processor
 
 
 @lru_cache(maxsize=1)
@@ -16,15 +19,22 @@ def _load_model():
     return tf.saved_model.load(settings.model_saved_path)
 
 
-def _preprocess_image(image_base64: str) -> np.ndarray:
+def _preprocess_image(image_base64: str, landmarks: Optional[List[Dict]] = None) -> np.ndarray:
     """
     Preprocess image for better skin analysis accuracy
     - Decode base64
+    - Extract face region using landmarks (if provided)
     - Convert to RGB
     - Enhance contrast and sharpness
     - Resize to model input size
     - Normalize pixel values
     """
+    if landmarks:
+        # Use face processor for landmark-based extraction
+        arr = face_processor.process_image_with_landmarks(image_base64, landmarks)
+        return np.expand_dims(arr, axis=0)
+    
+    # Fallback to original preprocessing
     raw = base64.b64decode(image_base64)
     image = Image.open(io.BytesIO(raw)).convert("RGB")
     
@@ -53,12 +63,13 @@ def _default_profile() -> SkinProfile:
     )
 
 
-def run_skin_inference(image_base64: str) -> tuple[SkinProfile, str]:
+def run_skin_inference(image_base64: str, landmarks: Optional[List[Dict]] = None) -> tuple[SkinProfile, str]:
     """
     Run skin analysis inference on the provided image
     
     Args:
         image_base64: Base64 encoded image string
+        landmarks: Optional MediaPipe face landmarks for better face extraction
         
     Returns:
         Tuple of (SkinProfile, inference_mode)
@@ -66,11 +77,16 @@ def run_skin_inference(image_base64: str) -> tuple[SkinProfile, str]:
     skin_labels = [v.strip() for v in settings.model_skin_types.split(",") if v.strip()]
     condition_labels = [v.strip() for v in settings.model_conditions.split(",") if v.strip()]
 
+    # Calculate face quality score if landmarks provided
+    face_quality_score = None
+    if landmarks:
+        face_quality_score = face_processor.get_face_quality_score(landmarks)
+
     try:
         import tensorflow as tf
 
         model = _load_model()
-        batch = _preprocess_image(image_base64)
+        batch = _preprocess_image(image_base64, landmarks)
         infer = model.signatures.get("serving_default")
         if infer is None:
             return _default_profile(), "savedmodel_missing_signature"
@@ -124,6 +140,7 @@ def run_skin_inference(image_base64: str) -> tuple[SkinProfile, str]:
                 skin_type=skin_type,
                 conditions=conditions,
                 confidence=round(confidence, 4),
+                face_quality_score=round(face_quality_score, 4) if face_quality_score else None,
             ),
             "server_savedmodel",
         )
