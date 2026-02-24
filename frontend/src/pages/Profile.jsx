@@ -2,10 +2,11 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { Layout, Card, Button, Typography, Timeline, Tag, App, Spin } from 'antd';
-import { ArrowLeftOutlined, ClockCircleOutlined } from '@ant-design/icons';
+import { ClockCircleOutlined } from '@ant-design/icons';
 import { getProfile } from '../services/api';
+import AppHeader from '../components/AppHeader';
 
-const { Header, Content } = Layout;
+const { Content } = Layout;
 const { Title, Text } = Typography;
 
 export default function Profile() {
@@ -36,20 +37,7 @@ export default function Profile() {
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
-      <Header style={{ 
-        background: '#fff', 
-        padding: '0 24px',
-        display: 'flex',
-        alignItems: 'center',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-      }}>
-        <Button 
-          icon={<ArrowLeftOutlined />} 
-          onClick={() => navigate('/')}
-          type="text"
-        />
-        <Title level={3} style={{ margin: '0 0 0 16px' }}>Profile History</Title>
-      </Header>
+      <AppHeader title="Profile History" showBack />
 
       <Content style={{ padding: '24px' }}>
         <div style={{ maxWidth: 800, margin: '0 auto' }}>

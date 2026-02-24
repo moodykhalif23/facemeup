@@ -1,9 +1,10 @@
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { Layout, Card, Button, Typography, Descriptions, Tag, Space, Progress } from 'antd';
-import { ArrowLeftOutlined, ShopOutlined } from '@ant-design/icons';
+import { ShopOutlined } from '@ant-design/icons';
+import AppHeader from '../components/AppHeader';
 
-const { Header, Content } = Layout;
+const { Content } = Layout;
 const { Title, Text } = Typography;
 
 export default function Results() {
@@ -13,6 +14,7 @@ export default function Results() {
   if (!currentAnalysis) {
     return (
       <Layout style={{ minHeight: '100vh', background: '#f5f5f5' }}>
+        <AppHeader title="Analysis Results" showBack />
         <Content style={{ 
           padding: '24px', 
           display: 'flex', 
@@ -39,24 +41,7 @@ export default function Results() {
 
   return (
     <Layout style={{ minHeight: '100vh', background: '#f5f5f5' }}>
-      <Header style={{ 
-        background: '#fff', 
-        padding: '0 16px',
-        display: 'flex',
-        alignItems: 'center',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-        position: 'sticky',
-        top: 0,
-        zIndex: 1
-      }}>
-        <Button 
-          icon={<ArrowLeftOutlined />} 
-          onClick={() => navigate('/')}
-          type="text"
-          size="large"
-        />
-        <Title level={4} style={{ margin: '0 0 0 12px' }}>Analysis Results</Title>
-      </Header>
+      <AppHeader title="Analysis Results" showBack />
 
       <Content style={{ padding: '16px' }}>
         <div style={{ maxWidth: 800, margin: '0 auto' }}>

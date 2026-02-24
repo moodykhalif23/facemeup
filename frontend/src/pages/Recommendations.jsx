@@ -2,10 +2,11 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { Layout, Card, Button, Typography, Row, Col, App, Spin } from 'antd';
-import { ArrowLeftOutlined, ShoppingCartOutlined } from '@ant-design/icons';
+import { ShoppingCartOutlined } from '@ant-design/icons';
 import { getRecommendations } from '../services/api';
+import AppHeader from '../components/AppHeader';
 
-const { Header, Content } = Layout;
+const { Content } = Layout;
 const { Title, Text } = Typography;
 
 export default function Recommendations() {
@@ -38,24 +39,7 @@ export default function Recommendations() {
 
   return (
     <Layout style={{ minHeight: '100vh', background: '#f5f5f5' }}>
-      <Header style={{ 
-        background: '#fff', 
-        padding: '0 16px',
-        display: 'flex',
-        alignItems: 'center',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-        position: 'sticky',
-        top: 0,
-        zIndex: 1
-      }}>
-        <Button 
-          icon={<ArrowLeftOutlined />} 
-          onClick={() => navigate('/')}
-          type="text"
-          size="large"
-        />
-        <Title level={4} style={{ margin: '0 0 0 12px' }}>Recommendations</Title>
-      </Header>
+      <AppHeader title="Recommendations" showBack />
 
       <Content style={{ padding: '16px' }}>
         <div style={{ maxWidth: 1200, margin: '0 auto' }}>

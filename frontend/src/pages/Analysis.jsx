@@ -2,12 +2,13 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { Layout, Card, Button, Form, Select, Checkbox, Typography, Space, App, Spin } from 'antd';
-import { CameraOutlined, ArrowLeftOutlined } from '@ant-design/icons';
+import { CameraOutlined } from '@ant-design/icons';
 import { takePicture } from '../services/camera';
 import { analyzeImage } from '../services/api';
 import { setCurrentAnalysis, addToHistory } from '../store/slices/analysisSlice';
+import AppHeader from '../components/AppHeader';
 
-const { Header, Content } = Layout;
+const { Content } = Layout;
 const { Title, Text } = Typography;
 
 export default function Analysis() {
@@ -60,24 +61,7 @@ export default function Analysis() {
 
   return (
     <Layout style={{ minHeight: '100vh', background: '#f5f5f5' }}>
-      <Header style={{ 
-        background: '#fff', 
-        padding: '0 16px',
-        display: 'flex',
-        alignItems: 'center',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-        position: 'sticky',
-        top: 0,
-        zIndex: 1
-      }}>
-        <Button 
-          icon={<ArrowLeftOutlined />} 
-          onClick={() => navigate('/')}
-          type="text"
-          size="large"
-        />
-        <Title level={4} style={{ margin: '0 0 0 12px' }}>Skin Analysis</Title>
-      </Header>
+      <AppHeader title="Skin Analysis" showBack />
 
       <Content style={{ padding: '16px' }}>
         <div style={{ maxWidth: 600, margin: '0 auto' }}>
