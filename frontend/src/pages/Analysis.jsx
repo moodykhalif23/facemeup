@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { Layout, Card, Button, Form, Select, Checkbox, Typography, Space, message, Spin } from 'antd';
+import { Layout, Card, Button, Form, Select, Checkbox, Typography, Space, App, Spin } from 'antd';
 import { CameraOutlined, PictureOutlined, ArrowLeftOutlined } from '@ant-design/icons';
 import { takePicture, pickImage } from '../services/camera';
 import { analyzeImage } from '../services/api';
@@ -16,6 +16,7 @@ export default function Analysis() {
   const [imageData, setImageData] = useState(null);
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const { message } = App.useApp();
 
   const handleTakePhoto = async () => {
     try {
