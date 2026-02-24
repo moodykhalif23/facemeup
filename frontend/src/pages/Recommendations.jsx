@@ -22,8 +22,18 @@ export default function Recommendations() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [products, setProducts] = useState([]);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const { currentAnalysis } = useSelector((state) => state.analysis);
   const { message } = App.useApp();
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     if (currentAnalysis?.profile) {
@@ -80,21 +90,40 @@ export default function Recommendations() {
                       }
                     }}
                     cover={
-                      <div style={{ 
-                        height: 180, 
-                        background: product.image_url 
-                          ? `url(${getProxiedImageUrl(product.image_url)}) center/cover no-repeat, linear-gradient(135deg, #667eea 0%, #764ba2 100%)`
-                          : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        borderRadius: '12px 12px 0 0',
-                        color: 'white',
-                        fontSize: 16,
-                        fontWeight: 500
-                      }}>
-                        {!product.image_url && product.name.substring(0, 2).toUpperCase()}
-                      </div>
+                      <>
+                        {product.image_url && (
+                          <img 
+                            src={getProxiedImageUrl(product.image_url)} 
+                            alt={product.name}
+                            style={{ 
+                              height: isMobile ? 140 : 180, 
+                              objectFit: 'cover',
+                              borderRadius: '12px 12px 0 0',
+                              width: '100%',
+                              backgroundColor: '#f0f0f0'
+                            }}
+                            onError={(e) => {
+                              e.target.style.display = 'none';
+                              if (e.target.nextSibling) {
+                                e.target.nextSibling.style.display = 'flex';
+                              }
+                            }}
+                          />
+                        )}
+                        <div style={{ 
+                          height: isMobile ? 140 : 180, 
+                          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                          display: product.image_url ? 'none' : 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          borderRadius: '12px 12px 0 0',
+                          color: 'white',
+                          fontSize: 16,
+                          fontWeight: 500
+                        }}>
+                          {product.name.substring(0, 2).toUpperCase()}
+                        </div>
+                      </>
                     }
                   >
                     <div style={{ 
