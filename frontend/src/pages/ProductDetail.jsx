@@ -18,6 +18,16 @@ export default function ProductDetail() {
   const [loading, setLoading] = useState(false);
   const [product, setProduct] = useState(null);
   const [quantity, setQuantity] = useState(1);
+  const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 768);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsDesktop(window.innerWidth >= 768);
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     fetchProduct();
@@ -80,14 +90,11 @@ export default function ProductDetail() {
 
       <Content style={{ padding: '16px', paddingBottom: 80 }}>
         <div style={{ maxWidth: 1200, margin: '0 auto' }}>
-          {/* Desktop Layout: Image left, Details right */}
+          {/* Responsive Layout: Stacked on mobile, side-by-side on desktop */}
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-            gap: 16,
-            '@media (min-width: 768px)': {
-              gridTemplateColumns: '1fr 1fr'
-            }
+            gridTemplateColumns: isDesktop ? '1fr 1fr' : '1fr',
+            gap: 16
           }}>
             {/* Product Image */}
             <Card 
@@ -95,20 +102,18 @@ export default function ProductDetail() {
                 borderRadius: 16,
                 overflow: 'hidden',
                 boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
-                height: 'fit-content',
-                position: 'sticky',
-                top: 80
+                height: 'fit-content'
               }}
               styles={{ body: { padding: 0 } }}
             >
               <div style={{
-                height: 400,
-                background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
+                height: isDesktop ? 400 : 300,
+                background: '#f5f5f5',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center'
               }}>
-                <Text style={{ fontSize: 18, color: '#666' }}>Product Image</Text>
+                <Text style={{ fontSize: 18, color: '#999' }}>Product Image</Text>
               </div>
             </Card>
 

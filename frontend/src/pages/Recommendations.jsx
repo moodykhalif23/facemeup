@@ -48,9 +48,9 @@ export default function Recommendations() {
               <Spin size="large" />
             </div>
           ) : products.length > 0 ? (
-            <Row gutter={[12, 12]}>
+            <Row gutter={[16, 16]}>
               {products.map((product) => (
-                <Col xs={12} sm={12} md={8} key={product.id}>
+                <Col xs={12} sm={12} md={8} lg={6} key={product.id}>
                   <Card
                     hoverable
                     style={{ 
@@ -59,35 +59,33 @@ export default function Recommendations() {
                       height: '100%'
                     }}
                     styles={{
-                      body: { padding: '12px' }
+                      body: { padding: '16px' }
                     }}
                     cover={
                       <div style={{ 
-                        height: 120, 
+                        height: 180, 
                         background: '#f5f5f5',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         borderRadius: '12px 12px 0 0'
                       }}>
-                        <Text type="secondary" style={{ fontSize: 12 }}>Product Image</Text>
+                        <Text type="secondary" style={{ fontSize: 13 }}>Product Image</Text>
                       </div>
                     }
                   >
-                    <div style={{ marginBottom: 8 }}>
+                    <div style={{ marginBottom: 12 }}>
                       <Text 
                         strong 
                         style={{ 
-                          fontSize: 13, 
+                          fontSize: 14, 
                           display: 'block',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          whiteSpace: 'nowrap'
+                          marginBottom: 4
                         }}
                       >
                         {product.name}
                       </Text>
-                      <Text strong style={{ fontSize: 15, color: '#3B82F6' }}>
+                      <Text strong style={{ fontSize: 16, color: '#3B82F6' }}>
                         ${product.price}
                       </Text>
                     </div>
@@ -95,9 +93,9 @@ export default function Recommendations() {
                       type="primary" 
                       icon={<ShoppingCartOutlined key={`icon-${product.id}`} />}
                       onClick={() => navigate(`/product/${product.id}`)}
-                      size="small"
+                      size="middle"
                       block
-                      style={{ borderRadius: 6, fontSize: 12 }}
+                      style={{ borderRadius: 8, fontSize: 14, height: 40 }}
                     >
                       View Details
                     </Button>
