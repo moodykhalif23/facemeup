@@ -64,16 +64,32 @@ export default function Recommendations() {
                       body: { padding: '16px' }
                     }}
                     cover={
-                      <div style={{ 
-                        height: 180, 
-                        background: '#f5f5f5',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        borderRadius: '12px 12px 0 0'
-                      }}>
-                        <Text type="secondary" style={{ fontSize: 13 }}>Product Image</Text>
-                      </div>
+                      product.image_url ? (
+                        <img 
+                          src={product.image_url} 
+                          alt={product.name}
+                          style={{ 
+                            height: 180, 
+                            objectFit: 'cover',
+                            borderRadius: '12px 12px 0 0'
+                          }}
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                            e.target.nextSibling.style.display = 'flex';
+                          }}
+                        />
+                      ) : (
+                        <div style={{ 
+                          height: 180, 
+                          background: '#f5f5f5',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          borderRadius: '12px 12px 0 0'
+                        }}>
+                          <Text type="secondary" style={{ fontSize: 13 }}>No Image</Text>
+                        </div>
+                      )
                     }
                   >
                     <div style={{ marginBottom: 12 }}>
@@ -88,7 +104,7 @@ export default function Recommendations() {
                         {product.name}
                       </Text>
                       <Text strong style={{ fontSize: 16, color: '#3B82F6' }}>
-                        ${product.price}
+                        KSh {product.price ? product.price.toLocaleString() : '0'}
                       </Text>
                     </div>
                     <Button 

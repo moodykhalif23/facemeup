@@ -107,14 +107,29 @@ export default function ProductDetail() {
               }}
               styles={{ body: { padding: 0 } }}
             >
+              {product.image_url ? (
+                <img 
+                  src={product.image_url} 
+                  alt={product.name}
+                  style={{
+                    width: '100%',
+                    height: isDesktop ? 400 : 300,
+                    objectFit: 'cover'
+                  }}
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                    e.target.nextSibling.style.display = 'flex';
+                  }}
+                />
+              ) : null}
               <div style={{
                 height: isDesktop ? 400 : 300,
                 background: '#f5f5f5',
-                display: 'flex',
+                display: product.image_url ? 'none' : 'flex',
                 alignItems: 'center',
                 justifyContent: 'center'
               }}>
-                <Text style={{ fontSize: 18, color: '#999' }}>Product Image</Text>
+                <Text style={{ fontSize: 18, color: '#999' }}>No Image Available</Text>
               </div>
             </Card>
 
@@ -124,7 +139,7 @@ export default function ProductDetail() {
                 <Tag color="blue">{product.category}</Tag>
                 <Title level={3} style={{ margin: '8px 0' }}>{product.name}</Title>
                 <Title level={2} style={{ color: '#3B82F6', margin: '8px 0' }}>
-                  ${product.price}
+                  KSh {product.price ? product.price.toLocaleString() : '0'}
                 </Title>
                 
                 <Divider style={{ margin: '16px 0' }} />

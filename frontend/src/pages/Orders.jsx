@@ -136,7 +136,7 @@ export default function Orders() {
                               {item.product_name}
                             </Text>
                             <Text strong style={{ fontSize: 14 }}>
-                              ${item.price}
+                              KSh {item.price ? item.price.toLocaleString() : '0'}
                             </Text>
                           </div>
                           <Text type="secondary" style={{ fontSize: 12 }}>
@@ -158,7 +158,7 @@ export default function Orders() {
                   }}>
                     <Text strong style={{ fontSize: 15 }}>Total</Text>
                     <Text strong style={{ fontSize: 18, color: '#3B82F6' }}>
-                      ${order.total.toFixed(2)}
+                      KSh {order.total ? order.total.toLocaleString() : '0'}
                     </Text>
                   </div>
                 </Card>

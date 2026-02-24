@@ -61,7 +61,7 @@ export default function Cart() {
                     >
                       <List.Item.Meta
                         title={<Text strong style={{ fontSize: 15 }}>{item.name}</Text>}
-                        description={<Text style={{ fontSize: 14 }}>${item.price} each</Text>}
+                        description={<Text style={{ fontSize: 14 }}>KSh {item.price ? item.price.toLocaleString() : '0'} each</Text>}
                       />
                     </List.Item>
                   )}
@@ -72,7 +72,7 @@ export default function Cart() {
                 <Space direction="vertical" style={{ width: '100%' }} size={16}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <Text strong style={{ fontSize: 16 }}>Total:</Text>
-                    <Title level={3} style={{ margin: 0, color: '#3B82F6' }}>${total.toFixed(2)}</Title>
+                    <Title level={3} style={{ margin: 0, color: '#3B82F6' }}>KSh {total.toLocaleString()}</Title>
                   </div>
                   <Button 
                     type="primary" 

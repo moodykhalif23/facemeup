@@ -73,13 +73,13 @@ export default function Checkout() {
               {items.map((item) => (
                 <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <Text>{item.name} x {item.quantity}</Text>
-                  <Text strong>${(item.price * item.quantity).toFixed(2)}</Text>
+                  <Text strong>KSh {((item.price * item.quantity) || 0).toLocaleString()}</Text>
                 </div>
               ))}
               <Divider style={{ margin: '12px 0' }} />
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <Text strong style={{ fontSize: 16 }}>Total:</Text>
-                <Title level={3} style={{ margin: 0, color: '#3B82F6' }}>${total.toFixed(2)}</Title>
+                <Title level={3} style={{ margin: 0, color: '#3B82F6' }}>KSh {total.toLocaleString()}</Title>
               </div>
             </Space>
           </Card>
@@ -170,7 +170,7 @@ export default function Checkout() {
                     borderRadius: 8
                   }}
                 >
-                  Place Order - ${total.toFixed(2)}
+                  Place Order - KSh {total.toLocaleString()}
                 </Button>
               </Form.Item>
             </Form>
