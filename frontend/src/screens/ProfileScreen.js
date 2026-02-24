@@ -1,20 +1,22 @@
 import { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator } from "react-native";
+import { View, Text, StyleSheet, ScrollView } from "react-native";
+import { Card, Button, WhiteSpace, WingBlank, ActivityIndicator, Toast, List } from '@ant-design/react-native';
 import { getProfile } from "../api";
+
+const ListItem = List.Item;
 
 export default function ProfileScreen({ token, userId }) {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
 
   const loadProfile = async () => {
     setLoading(true);
-    setError("");
     try {
       const data = await getProfile(token, userId);
       setProfile(data);
+      Toast.success("Profile loaded!", 1);
     } catch (err) {
-      setError(err?.response?.data?.error?.message || "Failed to load profile");
+      Toast.fail(err?.response?.data?.error?.message || "Failed to load profile", 2);
     } finally {
       setLoading(false);
     }
@@ -27,65 +29,95 @@ export default function ProfileScreen({ token, userId }) {
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <View style={styles.header}>
-          <Text style={styles.title}>Profile History</Text>
-          <Text style={styles.subtitle}>Track your skin journey</Text>
-        </View>
-
-        {loading && (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#3B82F6" />
-            <Text style={styles.loadingText}>Loading history...</Text>
+        <WingBlank size="lg">
+          <View style={styles.header}>
+            <Text style={styles.title}>Profile History</Text>
+            <Text style={styles.subtitle}>Track your skin journey</Text>
           </View>
-        )}
 
-        {profile && profile.history && profile.history.length > 0 && (
-          <View style={styles.historyContainer}>
-            <Text style={styles.historyCount}>
-              {profile.history.length} {profile.history.length === 1 ? 'entry' : 'entries'}
-            </Text>
-            {profile.history.map((entry, idx) => (
-              <View key={`${entry.timestamp}-${idx}`} style={styles.historyCard}>
-                <View style={styles.historyHeader}>
-                  <Text style={styles.historyType}>{entry.skin_type}</Text>
-                  <View style={styles.confidenceBadge}>
-                    <Text style={styles.confidenceText}>{Math.round(entry.confidence * 100)}%</Text>
+          <WhiteSpace size="xl" />
+
+          {loading && (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color="#3B82F6" />
+              <WhiteSpace size="lg" />
+              <Text style={styles.loadingText}>Loading history...</Text>
+            </View>
+          )}
+
+          {profile && profile.history && profile.history.length > 0 && (
+            <>
+              <Text style={styles.historyCount}>
+                {profile.history.length} {profile.history.length === 1 ? 'entry' : 'entries'}
+              </Text>
+              <WhiteSpace size="md" />
+              
+              <List>
+                {profile.history.map((entry, idx) => (
+                  <View key={`${entry.timestamp}-${idx}`}>
+                    <Card>
+                      <Card.Body>
+                        <View style={styles.historyCard}>
+                          <View style={styles.historyHeader}>
+                            <Text style={styles.historyType}>{entry.skin_type}</Text>
+                            <View style={styles.confidenceBadge}>
+                              <Text style={styles.confidenceText}>
+                                {Math.round(entry.confidence * 100)}%
+                              </Text>
+                            </View>
+                          </View>
+                          
+                          <WhiteSpace size="sm" />
+                          
+                          <Text style={styles.historyConditions}>
+                            {entry.conditions.join(", ")}
+                          </Text>
+                          
+                          {entry.timestamp && (
+                            <>
+                              <WhiteSpace size="sm" />
+                              <Text style={styles.historyDate}>
+                                {new Date(entry.timestamp).toLocaleDateString('en-US', {
+                                  year: 'numeric',
+                                  month: 'long',
+                                  day: 'numeric',
+                                })}
+                              </Text>
+                            </>
+                          )}
+                        </View>
+                      </Card.Body>
+                    </Card>
+                    <WhiteSpace size="md" />
                   </View>
-                </View>
-                <Text style={styles.historyConditions}>
-                  {entry.conditions.join(", ")}
-                </Text>
-                {entry.timestamp && (
-                  <Text style={styles.historyDate}>
-                    {new Date(entry.timestamp).toLocaleDateString()}
-                  </Text>
-                )}
-              </View>
-            ))}
-          </View>
-        )}
+                ))}
+              </List>
+            </>
+          )}
 
-        {profile && profile.history && profile.history.length === 0 && (
-          <View style={styles.emptyState}>
-            <Text style={styles.emptyIcon}>📊</Text>
-            <Text style={styles.emptyTitle}>No History Yet</Text>
-            <Text style={styles.emptyText}>
-              Start analyzing your skin to build your history
-            </Text>
-          </View>
-        )}
+          {profile && profile.history && profile.history.length === 0 && (
+            <View style={styles.emptyState}>
+              <Text style={styles.emptyIcon}>📊</Text>
+              <Text style={styles.emptyTitle}>No History Yet</Text>
+              <Text style={styles.emptyText}>
+                Start analyzing your skin to build your history
+              </Text>
+            </View>
+          )}
 
-        {error && (
-          <View style={styles.errorCard}>
-            <Text style={styles.errorText}>⚠️ {error}</Text>
-          </View>
-        )}
-
-        {!loading && (
-          <TouchableOpacity style={styles.button} onPress={loadProfile}>
-            <Text style={styles.buttonText}>Refresh</Text>
-          </TouchableOpacity>
-        )}
+          {!loading && (
+            <>
+              <WhiteSpace size="lg" />
+              <Button
+                type="primary"
+                onPress={loadProfile}
+                style={styles.button}
+              >
+                Refresh
+              </Button>
+            </>
+          )}
+        </WingBlank>
       </ScrollView>
     </View>
   );
@@ -97,11 +129,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#FAFAFA',
   },
   content: {
-    padding: 20,
+    paddingVertical: 20,
     paddingBottom: 40,
   },
   header: {
-    marginBottom: 32,
     paddingTop: 20,
   },
   title: {
@@ -121,33 +152,19 @@ const styles = StyleSheet.create({
   loadingText: {
     fontSize: 16,
     color: '#6B7280',
-    marginTop: 16,
-  },
-  historyContainer: {
-    marginBottom: 24,
   },
   historyCount: {
     fontSize: 14,
     fontWeight: '600',
     color: '#6B7280',
-    marginBottom: 16,
   },
   historyCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 20,
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 2,
+    paddingVertical: 8,
   },
   historyHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
   },
   historyType: {
     fontSize: 18,
@@ -169,7 +186,6 @@ const styles = StyleSheet.create({
   historyConditions: {
     fontSize: 14,
     color: '#6B7280',
-    marginBottom: 8,
   },
   historyDate: {
     fontSize: 12,
@@ -196,33 +212,8 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     paddingHorizontal: 40,
   },
-  errorCard: {
-    backgroundColor: '#FEF2F2',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 24,
-    borderLeftWidth: 4,
-    borderLeftColor: '#EF4444',
-  },
-  errorText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#DC2626',
-  },
   button: {
-    backgroundColor: '#3B82F6',
     borderRadius: 12,
-    padding: 16,
-    alignItems: 'center',
-    shadowColor: '#3B82F6',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  buttonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '700',
+    height: 48,
   },
 });

@@ -1,15 +1,14 @@
-import { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator } from "react-native";
+import { useState } from "react";
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
+import { Card, Button, WhiteSpace, WingBlank, ActivityIndicator, Toast, List } from '@ant-design/react-native';
 import { analyze, recommend } from "../api";
 
 export default function RecommendationsScreen({ token, navigation }) {
   const [recommendations, setRecommendations] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
 
   const handleRecommend = async () => {
     setLoading(true);
-    setError("");
     try {
       // First get analysis
       const analysisData = await analyze(token);
@@ -18,8 +17,9 @@ export default function RecommendationsScreen({ token, navigation }) {
       // Then get recommendations
       const data = await recommend(token, skin_type, conditions);
       setRecommendations(data.products || []);
+      Toast.success("Recommendations loaded!", 1);
     } catch (err) {
-      setError(err?.response?.data?.error?.message || "Failed to get recommendations");
+      Toast.fail(err?.response?.data?.error?.message || "Failed to get recommendations", 2);
     } finally {
       setLoading(false);
     }
@@ -28,72 +28,89 @@ export default function RecommendationsScreen({ token, navigation }) {
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <View style={styles.header}>
-          <Text style={styles.title}>Product Recommendations</Text>
-          <Text style={styles.subtitle}>Personalized for your skin</Text>
-        </View>
-
-        {!recommendations.length && !loading && (
-          <View style={styles.emptyState}>
-            <Text style={styles.emptyIcon}>✨</Text>
-            <Text style={styles.emptyTitle}>Get Recommendations</Text>
-            <Text style={styles.emptyText}>
-              Discover products tailored to your skin type and needs
-            </Text>
+        <WingBlank size="lg">
+          <View style={styles.header}>
+            <Text style={styles.title}>Product Recommendations</Text>
+            <Text style={styles.subtitle}>Personalized for your skin</Text>
           </View>
-        )}
 
-        {loading && (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#3B82F6" />
-            <Text style={styles.loadingText}>Finding perfect products...</Text>
-          </View>
-        )}
+          <WhiteSpace size="xl" />
 
-        {recommendations.length > 0 && (
-          <View style={styles.productsContainer}>
-            {recommendations.map((product) => (
-              <TouchableOpacity 
-                key={product.sku} 
-                style={styles.productCard}
-                onPress={() => navigation.navigate('ProductDetail', { 
-                  product: {
-                    ...product,
-                    price: 2500, // Mock price - in production, this would come from API
-                    stock: 50,
-                    description: 'Premium skincare product formulated for your skin type',
-                    ingredients: ['Hyaluronic Acid', 'Vitamin C', 'Niacinamide'],
-                  }
-                })}
-              >
-                <View style={styles.productHeader}>
-                  <Text style={styles.productName}>{product.name}</Text>
-                  <View style={styles.scoreContainer}>
-                    <Text style={styles.scoreText}>{Math.round(product.score * 100)}%</Text>
+          {!recommendations.length && !loading && (
+            <View style={styles.emptyState}>
+              <Text style={styles.emptyIcon}>✨</Text>
+              <Text style={styles.emptyTitle}>Get Recommendations</Text>
+              <Text style={styles.emptyText}>
+                Discover products tailored to your skin type and needs
+              </Text>
+            </View>
+          )}
+
+          {loading && (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color="#3B82F6" />
+              <WhiteSpace size="lg" />
+              <Text style={styles.loadingText}>Finding perfect products...</Text>
+            </View>
+          )}
+
+          {recommendations.length > 0 && (
+            <>
+              <List>
+                {recommendations.map((product) => (
+                  <View key={product.sku}>
+                    <TouchableOpacity
+                      onPress={() => navigation.navigate('ProductDetail', { 
+                        product: {
+                          ...product,
+                          price: 2500,
+                          stock: 50,
+                          description: 'Premium skincare product formulated for your skin type',
+                          ingredients: ['Hyaluronic Acid', 'Vitamin C', 'Niacinamide'],
+                          matchScore: product.score,
+                        }
+                      })}
+                    >
+                      <Card>
+                        <Card.Body>
+                          <View style={styles.productCard}>
+                            <View style={styles.productHeader}>
+                              <Text style={styles.productName}>{product.name}</Text>
+                              <View style={styles.scoreContainer}>
+                                <Text style={styles.scoreText}>
+                                  {Math.round(product.score * 100)}%
+                                </Text>
+                              </View>
+                            </View>
+                            
+                            <WhiteSpace size="sm" />
+                            
+                            <Text style={styles.productSku}>SKU: {product.sku}</Text>
+                            
+                            <WhiteSpace size="sm" />
+                            
+                            <Text style={styles.viewDetails}>Tap to view details →</Text>
+                          </View>
+                        </Card.Body>
+                      </Card>
+                    </TouchableOpacity>
+                    <WhiteSpace size="md" />
                   </View>
-                </View>
-                <Text style={styles.productSku}>SKU: {product.sku}</Text>
-                <Text style={styles.viewDetails}>Tap to view details →</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        )}
+                ))}
+              </List>
+            </>
+          )}
 
-        {error && (
-          <View style={styles.errorCard}>
-            <Text style={styles.errorText}>⚠️ {error}</Text>
-          </View>
-        )}
-
-        <TouchableOpacity 
-          style={[styles.button, loading && styles.buttonDisabled]} 
-          onPress={handleRecommend}
-          disabled={loading}
-        >
-          <Text style={styles.buttonText}>
-            {loading ? "Loading..." : recommendations.length ? "Refresh" : "Get Recommendations"}
-          </Text>
-        </TouchableOpacity>
+          <Button
+            type="primary"
+            onPress={handleRecommend}
+            loading={loading}
+            disabled={loading}
+            style={styles.button}
+          >
+            {recommendations.length ? "Refresh" : "Get Recommendations"}
+          </Button>
+        </WingBlank>
       </ScrollView>
     </View>
   );
@@ -105,11 +122,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#FAFAFA',
   },
   content: {
-    padding: 20,
+    paddingVertical: 20,
     paddingBottom: 40,
   },
   header: {
-    marginBottom: 32,
     paddingTop: 20,
   },
   title: {
@@ -149,27 +165,14 @@ const styles = StyleSheet.create({
   loadingText: {
     fontSize: 16,
     color: '#6B7280',
-    marginTop: 16,
-  },
-  productsContainer: {
-    marginBottom: 24,
   },
   productCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 20,
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 2,
+    paddingVertical: 8,
   },
   productHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: 8,
   },
   productName: {
     fontSize: 16,
@@ -198,39 +201,9 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#3B82F6',
     fontWeight: '600',
-    marginTop: 8,
-  },
-  errorCard: {
-    backgroundColor: '#FEF2F2',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 24,
-    borderLeftWidth: 4,
-    borderLeftColor: '#EF4444',
-  },
-  errorText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#DC2626',
   },
   button: {
-    backgroundColor: '#3B82F6',
     borderRadius: 12,
-    padding: 16,
-    alignItems: 'center',
-    shadowColor: '#3B82F6',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  buttonDisabled: {
-    backgroundColor: '#93C5FD',
-    shadowOpacity: 0,
-  },
-  buttonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '700',
+    height: 48,
   },
 });

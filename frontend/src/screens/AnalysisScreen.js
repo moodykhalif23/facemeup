@@ -1,20 +1,20 @@
 import { useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator } from "react-native";
+import { View, Text, StyleSheet, ScrollView } from "react-native";
+import { Card, Button, WhiteSpace, WingBlank, ActivityIndicator, Toast, Progress } from '@ant-design/react-native';
 import { analyze } from "../api";
 
 export default function AnalysisScreen({ token }) {
   const [analysis, setAnalysis] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
 
   const handleAnalyze = async () => {
     setLoading(true);
-    setError("");
     try {
       const data = await analyze(token);
       setAnalysis(data.profile);
+      Toast.success("Analysis complete!", 1);
     } catch (err) {
-      setError(err?.response?.data?.error?.message || "Analysis failed");
+      Toast.fail(err?.response?.data?.error?.message || "Analysis failed", 2);
     } finally {
       setLoading(false);
     }
@@ -23,69 +23,92 @@ export default function AnalysisScreen({ token }) {
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <View style={styles.header}>
-          <Text style={styles.title}>Skin Analysis</Text>
-          <Text style={styles.subtitle}>AI-powered skin type detection</Text>
-        </View>
-
-        {!analysis && !loading && (
-          <View style={styles.emptyState}>
-            <Text style={styles.emptyIcon}>🔍</Text>
-            <Text style={styles.emptyTitle}>Ready to analyze</Text>
-            <Text style={styles.emptyText}>
-              Tap the button below to start your skin analysis
-            </Text>
+        <WingBlank size="lg">
+          <View style={styles.header}>
+            <Text style={styles.title}>Skin Analysis</Text>
+            <Text style={styles.subtitle}>AI-powered skin type detection</Text>
           </View>
-        )}
 
-        {loading && (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#3B82F6" />
-            <Text style={styles.loadingText}>Analyzing your skin...</Text>
-          </View>
-        )}
+          <WhiteSpace size="xl" />
 
-        {analysis && (
-          <View style={styles.resultCard}>
-            <Text style={styles.resultTitle}>🎯 Analysis Results</Text>
-            
-            <View style={styles.resultRow}>
-              <Text style={styles.resultLabel}>Skin Type</Text>
-              <View style={styles.badge}>
-                <Text style={styles.badgeText}>{analysis.skin_type}</Text>
-              </View>
+          {!analysis && !loading && (
+            <View style={styles.emptyState}>
+              <Text style={styles.emptyIcon}>🔍</Text>
+              <Text style={styles.emptyTitle}>Ready to analyze</Text>
+              <Text style={styles.emptyText}>
+                Tap the button below to start your skin analysis
+              </Text>
             </View>
+          )}
 
-            <View style={styles.resultRow}>
-              <Text style={styles.resultLabel}>Conditions</Text>
-              <Text style={styles.resultValue}>{analysis.conditions.join(", ")}</Text>
+          {loading && (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color="#3B82F6" />
+              <WhiteSpace size="lg" />
+              <Text style={styles.loadingText}>Analyzing your skin...</Text>
             </View>
+          )}
 
-            <View style={styles.resultRow}>
-              <Text style={styles.resultLabel}>Confidence</Text>
-              <View style={styles.progressBar}>
-                <View style={[styles.progressFill, { width: `${analysis.confidence * 100}%` }]} />
-              </View>
-              <Text style={styles.confidenceText}>{Math.round(analysis.confidence * 100)}%</Text>
-            </View>
-          </View>
-        )}
+          {analysis && (
+            <>
+              <Card>
+                <Card.Header
+                  title={
+                    <View style={styles.cardHeader}>
+                      <Text style={styles.cardIcon}>🎯</Text>
+                      <Text style={styles.cardTitle}>Analysis Results</Text>
+                    </View>
+                  }
+                />
+                <Card.Body>
+                  <View style={styles.resultSection}>
+                    <Text style={styles.resultLabel}>Skin Type</Text>
+                    <WhiteSpace size="sm" />
+                    <View style={styles.badge}>
+                      <Text style={styles.badgeText}>{analysis.skin_type}</Text>
+                    </View>
+                  </View>
 
-        {error && (
-          <View style={styles.errorCard}>
-            <Text style={styles.errorText}>⚠️ {error}</Text>
-          </View>
-        )}
+                  <WhiteSpace size="lg" />
 
-        <TouchableOpacity 
-          style={[styles.button, loading && styles.buttonDisabled]} 
-          onPress={handleAnalyze}
-          disabled={loading}
-        >
-          <Text style={styles.buttonText}>
-            {loading ? "Analyzing..." : analysis ? "Analyze Again" : "Start Analysis"}
-          </Text>
-        </TouchableOpacity>
+                  <View style={styles.resultSection}>
+                    <Text style={styles.resultLabel}>Conditions</Text>
+                    <WhiteSpace size="sm" />
+                    <Text style={styles.resultValue}>{analysis.conditions.join(", ")}</Text>
+                  </View>
+
+                  <WhiteSpace size="lg" />
+
+                  <View style={styles.resultSection}>
+                    <Text style={styles.resultLabel}>Confidence</Text>
+                    <WhiteSpace size="sm" />
+                    <Progress
+                      percent={analysis.confidence * 100}
+                      position="normal"
+                      unfilled
+                      style={styles.progress}
+                    />
+                    <WhiteSpace size="sm" />
+                    <Text style={styles.confidenceText}>
+                      {Math.round(analysis.confidence * 100)}% confident
+                    </Text>
+                  </View>
+                </Card.Body>
+              </Card>
+              <WhiteSpace size="lg" />
+            </>
+          )}
+
+          <Button
+            type="primary"
+            onPress={handleAnalyze}
+            loading={loading}
+            disabled={loading}
+            style={styles.button}
+          >
+            {analysis ? "Analyze Again" : "Start Analysis"}
+          </Button>
+        </WingBlank>
       </ScrollView>
     </View>
   );
@@ -97,11 +120,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#FAFAFA',
   },
   content: {
-    padding: 20,
+    paddingVertical: 20,
     paddingBottom: 40,
   },
   header: {
-    marginBottom: 32,
     paddingTop: 20,
   },
   title: {
@@ -141,33 +163,27 @@ const styles = StyleSheet.create({
   loadingText: {
     fontSize: 16,
     color: '#6B7280',
-    marginTop: 16,
   },
-  resultCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 24,
-    marginBottom: 24,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 4,
+  cardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
-  resultTitle: {
-    fontSize: 20,
+  cardIcon: {
+    fontSize: 24,
+    marginRight: 12,
+  },
+  cardTitle: {
+    fontSize: 18,
     fontWeight: '700',
     color: '#1F2937',
-    marginBottom: 20,
   },
-  resultRow: {
-    marginBottom: 20,
+  resultSection: {
+    paddingVertical: 8,
   },
   resultLabel: {
     fontSize: 14,
     fontWeight: '600',
     color: '#6B7280',
-    marginBottom: 8,
   },
   resultValue: {
     fontSize: 16,
@@ -187,16 +203,7 @@ const styles = StyleSheet.create({
     color: '#1E40AF',
     textTransform: 'capitalize',
   },
-  progressBar: {
-    height: 8,
-    backgroundColor: '#E5E7EB',
-    borderRadius: 4,
-    overflow: 'hidden',
-    marginBottom: 8,
-  },
-  progressFill: {
-    height: '100%',
-    backgroundColor: '#10B981',
+  progress: {
     borderRadius: 4,
   },
   confidenceText: {
@@ -204,37 +211,8 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#10B981',
   },
-  errorCard: {
-    backgroundColor: '#FEF2F2',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 24,
-    borderLeftWidth: 4,
-    borderLeftColor: '#EF4444',
-  },
-  errorText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#DC2626',
-  },
   button: {
-    backgroundColor: '#3B82F6',
     borderRadius: 12,
-    padding: 16,
-    alignItems: 'center',
-    shadowColor: '#3B82F6',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  buttonDisabled: {
-    backgroundColor: '#93C5FD',
-    shadowOpacity: 0,
-  },
-  buttonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '700',
+    height: 48,
   },
 });

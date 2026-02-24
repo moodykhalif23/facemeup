@@ -1,83 +1,96 @@
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
+import { View, Text, StyleSheet, ScrollView } from "react-native";
+import { Card, WingBlank, WhiteSpace, Button, Grid } from '@ant-design/react-native';
 
 export default function HomeScreen({ navigation, user, onLogout }) {
+  const menuItems = [
+    {
+      icon: '📋',
+      title: 'Questionnaire',
+      description: 'Answer questions for accurate analysis',
+      route: 'Questionnaire',
+      color: '#EFF6FF',
+    },
+    {
+      icon: '📸',
+      title: 'Camera Analysis',
+      description: 'Take a photo for instant AI analysis',
+      route: 'Camera',
+      color: '#F0FDF4',
+    },
+    {
+      icon: '🔍',
+      title: 'Skin Analysis',
+      description: 'Get AI-powered skin type detection',
+      route: 'Analysis',
+      color: '#FEF3C7',
+    },
+    {
+      icon: '✨',
+      title: 'Recommendations',
+      description: 'Discover personalized products',
+      route: 'Recommendations',
+      color: '#FCE7F3',
+    },
+    {
+      icon: '📊',
+      title: 'Profile History',
+      description: 'Track your skin journey',
+      route: 'Profile',
+      color: '#E0E7FF',
+    },
+  ];
+
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <View style={styles.header}>
-          <View>
-            <Text style={styles.greeting}>Hello! 👋</Text>
-            <Text style={styles.role}>{user.role || "User"}</Text>
+        <WingBlank size="lg">
+          <View style={styles.header}>
+            <View>
+              <Text style={styles.greeting}>Hello! 👋</Text>
+              <Text style={styles.role}>{user.role || "User"}</Text>
+            </View>
+            <Button
+              type="ghost"
+              size="small"
+              onPress={onLogout}
+              style={styles.logoutButton}
+            >
+              <Text style={styles.logoutText}>Logout</Text>
+            </Button>
           </View>
-          <TouchableOpacity style={styles.logoutButton} onPress={onLogout}>
-            <Text style={styles.logoutText}>Logout</Text>
-          </TouchableOpacity>
-        </View>
 
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>📋 Questionnaire</Text>
-          <Text style={styles.cardDescription}>
-            Answer a few questions for more accurate skin analysis
-          </Text>
-          <TouchableOpacity 
-            style={styles.cardButton} 
-            onPress={() => navigation.navigate('Questionnaire')}
-          >
-            <Text style={styles.cardButtonText}>Start Questionnaire</Text>
-          </TouchableOpacity>
-        </View>
+          <WhiteSpace size="xl" />
 
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>📸 Camera Analysis</Text>
-          <Text style={styles.cardDescription}>
-            Take a photo for instant AI-powered skin analysis
-          </Text>
-          <TouchableOpacity 
-            style={styles.cardButton} 
-            onPress={() => navigation.navigate('Camera')}
-          >
-            <Text style={styles.cardButtonText}>Open Camera</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>🔍 Skin Analysis</Text>
-          <Text style={styles.cardDescription}>
-            Get AI-powered analysis of your skin type and conditions
-          </Text>
-          <TouchableOpacity 
-            style={styles.cardButton} 
-            onPress={() => navigation.navigate('Analysis')}
-          >
-            <Text style={styles.cardButtonText}>Start Analysis</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>✨ Recommendations</Text>
-          <Text style={styles.cardDescription}>
-            Discover personalized product recommendations for your skin
-          </Text>
-          <TouchableOpacity 
-            style={styles.cardButton} 
-            onPress={() => navigation.navigate('Recommendations')}
-          >
-            <Text style={styles.cardButtonText}>View Products</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>📊 Profile History</Text>
-          <Text style={styles.cardDescription}>
-            Track your skin analysis history and progress
-          </Text>
-          <TouchableOpacity 
-            style={styles.cardButton} 
-            onPress={() => navigation.navigate('Profile')}
-          >
-            <Text style={styles.cardButtonText}>View History</Text>
-          </TouchableOpacity>
-        </View>
+          {menuItems.map((item, index) => (
+            <View key={index}>
+              <Card>
+                <Card.Header
+                  title={
+                    <View style={styles.cardHeader}>
+                      <Text style={styles.cardIcon}>{item.icon}</Text>
+                      <Text style={styles.cardTitle}>{item.title}</Text>
+                    </View>
+                  }
+                />
+                <Card.Body>
+                  <View style={styles.cardBody}>
+                    <Text style={styles.cardDescription}>{item.description}</Text>
+                    <WhiteSpace size="md" />
+                    <Button
+                      type="primary"
+                      size="small"
+                      onPress={() => navigation.navigate(item.route)}
+                      style={styles.cardButton}
+                    >
+                      Get Started
+                    </Button>
+                  </View>
+                </Card.Body>
+              </Card>
+              <WhiteSpace size="lg" />
+            </View>
+          ))}
+        </WingBlank>
       </ScrollView>
     </View>
   );
@@ -89,14 +102,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#FAFAFA',
   },
   content: {
-    padding: 20,
+    paddingVertical: 20,
     paddingBottom: 40,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 32,
     paddingTop: 20,
   },
   greeting: {
@@ -111,50 +123,37 @@ const styles = StyleSheet.create({
     textTransform: 'capitalize',
   },
   logoutButton: {
-    backgroundColor: '#FFFFFF',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 8,
-    borderWidth: 1.5,
     borderColor: '#E5E7EB',
+    borderWidth: 1.5,
+    borderRadius: 8,
   },
   logoutText: {
     fontSize: 14,
     fontWeight: '600',
     color: '#EF4444',
   },
-  card: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 24,
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 3,
+  cardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  cardIcon: {
+    fontSize: 24,
+    marginRight: 12,
   },
   cardTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: '700',
     color: '#1F2937',
-    marginBottom: 8,
+  },
+  cardBody: {
+    paddingVertical: 8,
   },
   cardDescription: {
     fontSize: 14,
     color: '#6B7280',
     lineHeight: 20,
-    marginBottom: 16,
   },
   cardButton: {
-    backgroundColor: '#3B82F6',
-    borderRadius: 10,
-    padding: 14,
-    alignItems: 'center',
-  },
-  cardButtonText: {
-    color: '#FFFFFF',
-    fontSize: 15,
-    fontWeight: '700',
+    borderRadius: 8,
   },
 });
