@@ -10,6 +10,15 @@ import AppHeader from '../components/AppHeader';
 const { Content } = Layout;
 const { Title, Text, Paragraph } = Typography;
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
+
+// Helper function to get proxied image URL
+const getProxiedImageUrl = (imageUrl) => {
+  if (!imageUrl) return null;
+  const baseUrl = API_BASE_URL.replace('/api/v1', '');
+  return `${baseUrl}/api/v1/proxy/image?url=${encodeURIComponent(imageUrl)}`;
+};
+
 export default function ProductDetail() {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -107,52 +116,21 @@ export default function ProductDetail() {
               }}
               styles={{ body: { padding: 0 } }}
             >
-              {product.image_url ? (
-                <>
-                  <img 
-                    src={product.image_url} 
-                    alt={product.name}
-                    style={{
-                      width: '100%',
-                      height: isDesktop ? 400 : 300,
-                      objectFit: 'cover'
-                    }}
-                    onError={(e) => {
-                      e.target.style.display = 'none';
-                      if (e.target.nextSibling) {
-                        e.target.nextSibling.style.display = 'flex';
-                      }
-                    }}
-                  />
-                  <div style={{
-                    height: isDesktop ? 400 : 300,
-                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                    display: 'none',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: 'white',
-                    fontSize: 48,
-                    fontWeight: 600,
-                    letterSpacing: 2
-                  }}>
-                    {product.name.substring(0, 2).toUpperCase()}
-                  </div>
-                </>
-              ) : (
-                <div style={{
-                  height: isDesktop ? 400 : 300,
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: 'white',
-                  fontSize: 48,
-                  fontWeight: 600,
-                  letterSpacing: 2
-                }}>
-                  {product.name.substring(0, 2).toUpperCase()}
-                </div>
-              )}
+              <div style={{
+                height: isDesktop ? 400 : 300,
+                background: product.image_url 
+                  ? `url(${getProxiedImageUrl(product.image_url)}) center/cover no-repeat, linear-gradient(135deg, #667eea 0%, #764ba2 100%)`
+                  : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'white',
+                fontSize: 48,
+                fontWeight: 600,
+                letterSpacing: 2
+              }}>
+                {!product.image_url && product.name.substring(0, 2).toUpperCase()}
+              </div>
             </Card>
 
             {/* Product Info */}

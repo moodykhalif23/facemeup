@@ -9,6 +9,15 @@ import AppHeader from '../components/AppHeader';
 const { Content } = Layout;
 const { Title, Text } = Typography;
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
+
+// Helper function to get proxied image URL
+const getProxiedImageUrl = (imageUrl) => {
+  if (!imageUrl) return null;
+  const baseUrl = API_BASE_URL.replace('/api/v1', '');
+  return `${baseUrl}/api/v1/proxy/image?url=${encodeURIComponent(imageUrl)}`;
+};
+
 export default function Recommendations() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -58,73 +67,55 @@ export default function Recommendations() {
                       borderRadius: 12,
                       boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
                       height: '100%',
-                      cursor: 'pointer'
+                      cursor: 'pointer',
+                      display: 'flex',
+                      flexDirection: 'column'
                     }}
                     styles={{
-                      body: { padding: '16px' }
+                      body: { 
+                        padding: '16px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        flex: 1
+                      }
                     }}
                     cover={
-                      product.image_url ? (
-                        <>
-                          <img 
-                            src={product.image_url} 
-                            alt={product.name}
-                            style={{ 
-                              height: 180, 
-                              objectFit: 'cover',
-                              borderRadius: '12px 12px 0 0',
-                              width: '100%'
-                            }}
-                            onError={(e) => {
-                              e.target.style.display = 'none';
-                              if (e.target.nextSibling) {
-                                e.target.nextSibling.style.display = 'flex';
-                              }
-                            }}
-                          />
-                          <div style={{ 
-                            height: 180, 
-                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                            display: 'none',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            borderRadius: '12px 12px 0 0',
-                            color: 'white',
-                            fontSize: 16,
-                            fontWeight: 500
-                          }}>
-                            {product.name.substring(0, 2).toUpperCase()}
-                          </div>
-                        </>
-                      ) : (
-                        <div style={{ 
-                          height: 180, 
-                          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          borderRadius: '12px 12px 0 0',
-                          color: 'white',
-                          fontSize: 16,
-                          fontWeight: 500
-                        }}>
-                          {product.name.substring(0, 2).toUpperCase()}
-                        </div>
-                      )
+                      <div style={{ 
+                        height: 180, 
+                        background: product.image_url 
+                          ? `url(${getProxiedImageUrl(product.image_url)}) center/cover no-repeat, linear-gradient(135deg, #667eea 0%, #764ba2 100%)`
+                          : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        borderRadius: '12px 12px 0 0',
+                        color: 'white',
+                        fontSize: 16,
+                        fontWeight: 500
+                      }}>
+                        {!product.image_url && product.name.substring(0, 2).toUpperCase()}
+                      </div>
                     }
                   >
-                    <div style={{ marginBottom: 12 }}>
+                    <div style={{ 
+                      marginBottom: 12,
+                      flex: 1,
+                      display: 'flex',
+                      flexDirection: 'column'
+                    }}>
                       <Text 
                         strong 
                         style={{ 
                           fontSize: 14, 
                           display: 'block',
-                          marginBottom: 4
+                          marginBottom: 8,
+                          minHeight: 42,
+                          lineHeight: '1.5'
                         }}
                       >
                         {product.name}
                       </Text>
-                      <Text strong style={{ fontSize: 16, color: '#3B82F6' }}>
+                      <Text strong style={{ fontSize: 16, color: '#3B82F6', marginTop: 'auto' }}>
                         KSh {product.price ? product.price.toLocaleString() : '0'}
                       </Text>
                     </div>
