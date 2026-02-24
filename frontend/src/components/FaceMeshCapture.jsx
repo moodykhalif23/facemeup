@@ -75,7 +75,7 @@ const FaceMeshCapture = ({ onCapture, onFaceDetected }) => {
 
         faceMeshRef.current = faceMesh;
 
-        // Initialize camera with proper video ready check
+        // Initialize camera
         const video = videoRef.current;
         
         const camera = new Camera(video, {
@@ -83,7 +83,7 @@ const FaceMeshCapture = ({ onCapture, onFaceDetected }) => {
             if (!mounted || !video || isProcessingRef.current) return;
             
             // Check if video is ready
-            if (video.readyState < 2 || video.videoWidth === 0 || video.videoHeight === 0) {
+            if (video.readyState < 2) {
               return;
             }
             
@@ -99,22 +99,13 @@ const FaceMeshCapture = ({ onCapture, onFaceDetected }) => {
           height: 480
         });
 
-        // Wait for video to be ready before starting
-        await new Promise((resolve) => {
-          const checkVideo = () => {
-            if (video.readyState >= 2 && video.videoWidth > 0) {
-              resolve();
-            } else {
-              setTimeout(checkVideo, 100);
-            }
-          };
-          checkVideo();
-        });
-
-        if (!mounted) return;
-
-        await camera.start();
         cameraRef.current = camera;
+        
+        // Start camera
+        await camera.start();
+        
+        if (!mounted) return;
+        
         setIsInitialized(true);
       } catch (err) {
         console.error('Failed to initialize Face Mesh:', err);
