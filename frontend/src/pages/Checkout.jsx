@@ -29,14 +29,13 @@ export default function Checkout() {
     setLoading(true);
     try {
       const orderData = {
+        channel: 'web',
         items: items.map(item => ({
-          product_id: item.id,
+          sku: item.id,
           quantity: item.quantity,
+          product_name: item.name,
           price: item.price
-        })),
-        total: total,
-        shipping_address: values.address,
-        payment_method: 'card'
+        }))
       };
 
       await createOrder(orderData);
@@ -44,7 +43,8 @@ export default function Checkout() {
       message.success('Order placed successfully!');
       navigate('/orders');
     } catch (error) {
-      // For demo, simulate success
+      console.error('Order creation error:', error);
+      // For demo, still clear cart and navigate
       dispatch(clearCart());
       message.success('Order placed successfully!');
       navigate('/orders');
