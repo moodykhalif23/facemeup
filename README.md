@@ -155,12 +155,6 @@ cd frontend
 npm test
 ```
 
-**Backend:** 45% Complete
-- Core API endpoints functional
-- Database schema complete
-- ML pipeline structure ready
-- Authentication working
-
 ## 🤝 Contributing
 
 1. Fork the repository
