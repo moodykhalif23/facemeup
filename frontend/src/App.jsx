@@ -25,7 +25,7 @@ function PrivateRoute({ children }) {
 
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Layout style={{ minHeight: '100vh' }}>
         <Content>
           <Routes>

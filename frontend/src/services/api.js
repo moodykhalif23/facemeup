@@ -13,17 +13,19 @@ const api = axios.create({
 // Request interceptor to add auth token
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('persist:auth');
-    if (token) {
-      try {
-        const authData = JSON.parse(token);
-        const accessToken = JSON.parse(authData.token);
-        if (accessToken) {
-          config.headers.Authorization = `Bearer ${accessToken}`;
+    try {
+      const authData = localStorage.getItem('persist:auth');
+      if (authData && authData !== 'undefined') {
+        const parsed = JSON.parse(authData);
+        if (parsed.token && parsed.token !== 'null') {
+          const accessToken = JSON.parse(parsed.token);
+          if (accessToken) {
+            config.headers.Authorization = `Bearer ${accessToken}`;
+          }
         }
-      } catch (e) {
-        console.error('Error parsing token:', e);
       }
+    } catch (e) {
+      // Silently fail - no token available
     }
     return config;
   },
