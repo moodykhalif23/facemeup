@@ -3,10 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { Layout, Card, Button, Form, Select, Checkbox, Typography, Space, App, Spin } from 'antd';
 import { CameraOutlined } from '@ant-design/icons';
+import { Capacitor } from '@capacitor/core';
 import { takePicture } from '../services/camera';
 import { analyzeImage } from '../services/api';
 import { setCurrentAnalysis, addToHistory } from '../store/slices/analysisSlice';
 import AppHeader from '../components/AppHeader';
+import WebCamera from '../components/WebCamera';
 
 const { Content } = Layout;
 const { Title, Text } = Typography;
@@ -15,11 +17,19 @@ export default function Analysis() {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [imageData, setImageData] = useState(null);
+  const [showCamera, setShowCamera] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { message } = App.useApp();
 
   const handleTakePhoto = async () => {
+    // Use custom web camera for web platform
+    if (Capacitor.getPlatform() === 'web') {
+      setShowCamera(true);
+      return;
+    }
+
+    // Use native camera for mobile
     try {
       const base64 = await takePicture();
       setImageData(base64);
@@ -30,6 +40,16 @@ export default function Analysis() {
         message.error('Failed to capture photo');
       }
     }
+  };
+
+  const handleWebCameraCapture = (base64) => {
+    setImageData(base64);
+    setShowCamera(false);
+    message.success('Photo captured!');
+  };
+
+  const handleWebCameraCancel = () => {
+    setShowCamera(false);
   };
 
   const onFinish = async (values) => {
@@ -62,6 +82,12 @@ export default function Analysis() {
   return (
     <Layout style={{ minHeight: '100vh', background: '#f5f5f5' }}>
       <AppHeader title="Skin Analysis" showBack />
+
+      <WebCamera
+        visible={showCamera}
+        onCapture={handleWebCameraCapture}
+        onCancel={handleWebCameraCancel}
+      />
 
       <Content style={{ padding: '16px' }}>
         <div style={{ maxWidth: 600, margin: '0 auto' }}>
