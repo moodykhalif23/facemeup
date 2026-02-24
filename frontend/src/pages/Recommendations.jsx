@@ -70,46 +70,53 @@ export default function Recommendations() {
                   <Card
                     hoverable
                     style={{ 
-                      borderRadius: 16,
-                      boxShadow: '0 2px 12px rgba(0,0,0,0.08)'
+                      borderRadius: 12,
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+                      height: '100%'
+                    }}
+                    styles={{
+                      body: { padding: '12px' }
                     }}
                     cover={
                       <div style={{ 
-                        height: 200, 
+                        height: 120, 
                         background: '#f5f5f5',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        borderRadius: '16px 16px 0 0'
+                        borderRadius: '12px 12px 0 0'
                       }}>
-                        <Text type="secondary" style={{ fontSize: 14 }}>Product Image</Text>
+                        <Text type="secondary" style={{ fontSize: 12 }}>Product Image</Text>
                       </div>
                     }
-                    actions={[
-                      <Button 
-                        key="view"
-                        type="primary" 
-                        icon={<ShoppingCartOutlined />}
-                        onClick={() => navigate(`/product/${product.id}`)}
-                        size="large"
-                        style={{ borderRadius: 8 }}
-                      >
-                        View Details
-                      </Button>
-                    ]}
                   >
-                    <Card.Meta
-                      title={<Text strong style={{ fontSize: 15 }}>{product.name}</Text>}
-                      description={
-                        <>
-                          <Text strong style={{ fontSize: 16, color: '#3B82F6' }}>
-                            ${product.price}
-                          </Text>
-                          <br />
-                          <Text type="secondary" style={{ fontSize: 13 }}>{product.category}</Text>
-                        </>
-                      }
-                    />
+                    <div style={{ marginBottom: 8 }}>
+                      <Text 
+                        strong 
+                        style={{ 
+                          fontSize: 13, 
+                          display: 'block',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap'
+                        }}
+                      >
+                        {product.name}
+                      </Text>
+                      <Text strong style={{ fontSize: 15, color: '#3B82F6' }}>
+                        ${product.price}
+                      </Text>
+                    </div>
+                    <Button 
+                      type="primary" 
+                      icon={<ShoppingCartOutlined />}
+                      onClick={() => navigate(`/product/${product.id}`)}
+                      size="small"
+                      block
+                      style={{ borderRadius: 6, fontSize: 12 }}
+                    >
+                      View Details
+                    </Button>
                   </Card>
                 </Col>
               ))}
