@@ -12,11 +12,21 @@ export default function Results() {
 
   if (!currentAnalysis) {
     return (
-      <Layout style={{ minHeight: '100vh' }}>
-        <Content style={{ padding: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <Card>
+      <Layout style={{ minHeight: '100vh', background: '#f5f5f5' }}>
+        <Content style={{ 
+          padding: '24px', 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center' 
+        }}>
+          <Card style={{ borderRadius: 16, textAlign: 'center' }}>
             <Title level={4}>No analysis data available</Title>
-            <Button type="primary" onClick={() => navigate('/analysis')}>
+            <Button 
+              type="primary" 
+              onClick={() => navigate('/analysis')}
+              size="large"
+              style={{ marginTop: 16, borderRadius: 8 }}
+            >
               Start New Analysis
             </Button>
           </Card>
@@ -28,69 +38,93 @@ export default function Results() {
   const { profile } = currentAnalysis;
 
   return (
-    <Layout style={{ minHeight: '100vh' }}>
+    <Layout style={{ minHeight: '100vh', background: '#f5f5f5' }}>
       <Header style={{ 
         background: '#fff', 
-        padding: '0 24px',
+        padding: '0 16px',
         display: 'flex',
         alignItems: 'center',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+        position: 'sticky',
+        top: 0,
+        zIndex: 1
       }}>
         <Button 
           icon={<ArrowLeftOutlined />} 
           onClick={() => navigate('/')}
           type="text"
+          size="large"
         />
-        <Title level={3} style={{ margin: '0 0 0 16px' }}>Analysis Results</Title>
+        <Title level={4} style={{ margin: '0 0 0 12px' }}>Analysis Results</Title>
       </Header>
 
-      <Content style={{ padding: '24px' }}>
+      <Content style={{ padding: '16px' }}>
         <div style={{ maxWidth: 800, margin: '0 auto' }}>
-          <Space direction="vertical" size="large" style={{ width: '100%' }}>
-            <Card>
-              <Title level={4}>Skin Profile</Title>
+          <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+            <Card style={{ borderRadius: 16, boxShadow: '0 2px 12px rgba(0,0,0,0.08)' }}>
+              <Title level={4} style={{ marginBottom: 16 }}>Skin Profile</Title>
               <Descriptions column={1} bordered>
-                <Descriptions.Item label="Skin Type">
-                  <Tag color="blue">{profile.skin_type}</Tag>
+                <Descriptions.Item label={<Text strong>Skin Type</Text>}>
+                  <Tag color="blue" style={{ fontSize: 14, padding: '4px 12px' }}>
+                    {profile.skin_type}
+                  </Tag>
                 </Descriptions.Item>
-                <Descriptions.Item label="Conditions">
+                <Descriptions.Item label={<Text strong>Conditions</Text>}>
                   <Space wrap>
                     {profile.conditions?.map((condition, index) => (
-                      <Tag key={index} color="orange">{condition}</Tag>
+                      <Tag key={index} color="orange" style={{ fontSize: 14, padding: '4px 12px' }}>
+                        {condition}
+                      </Tag>
                     ))}
                   </Space>
                 </Descriptions.Item>
-                <Descriptions.Item label="Confidence Score">
+                <Descriptions.Item label={<Text strong>Confidence</Text>}>
                   <Progress 
                     percent={Math.round((profile.confidence_score || 0.85) * 100)} 
                     status="active"
+                    strokeColor="#3B82F6"
                   />
                 </Descriptions.Item>
               </Descriptions>
             </Card>
 
             {profile.recommendations && (
-              <Card>
-                <Title level={4}>Recommendations</Title>
-                <Space direction="vertical" style={{ width: '100%' }}>
+              <Card style={{ borderRadius: 16, boxShadow: '0 2px 12px rgba(0,0,0,0.08)' }}>
+                <Title level={4} style={{ marginBottom: 16 }}>Recommendations</Title>
+                <Space direction="vertical" style={{ width: '100%' }} size="middle">
                   {profile.recommendations.map((rec, index) => (
-                    <Card key={index} type="inner" size="small">
-                      <Text strong>{rec.category || 'General'}</Text>
+                    <Card 
+                      key={index} 
+                      type="inner" 
+                      size="small"
+                      style={{ borderRadius: 8 }}
+                    >
+                      <Text strong style={{ fontSize: 15 }}>
+                        {rec.category || 'General'}
+                      </Text>
                       <br />
-                      <Text>{rec.advice || rec}</Text>
+                      <Text style={{ fontSize: 14, color: '#666' }}>
+                        {rec.advice || rec}
+                      </Text>
                     </Card>
                   ))}
                 </Space>
               </Card>
             )}
 
-            <Space style={{ width: '100%' }}>
+            <Space direction="vertical" style={{ width: '100%' }} size="small">
               <Button 
                 type="primary" 
                 icon={<ShopOutlined />}
                 onClick={() => navigate('/recommendations')}
                 size="large"
                 block
+                style={{
+                  height: 56,
+                  fontSize: 16,
+                  fontWeight: 600,
+                  borderRadius: 12
+                }}
               >
                 View Product Recommendations
               </Button>
@@ -98,6 +132,11 @@ export default function Results() {
                 onClick={() => navigate('/analysis')}
                 size="large"
                 block
+                style={{
+                  height: 48,
+                  fontSize: 15,
+                  borderRadius: 12
+                }}
               >
                 New Analysis
               </Button>

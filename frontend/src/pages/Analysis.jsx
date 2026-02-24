@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { Layout, Card, Button, Form, Select, Checkbox, Typography, Space, App, Spin } from 'antd';
-import { CameraOutlined, PictureOutlined, ArrowLeftOutlined } from '@ant-design/icons';
-import { takePicture, pickImage } from '../services/camera';
+import { CameraOutlined, ArrowLeftOutlined } from '@ant-design/icons';
+import { takePicture } from '../services/camera';
 import { analyzeImage } from '../services/api';
 import { setCurrentAnalysis, addToHistory } from '../store/slices/analysisSlice';
 
@@ -28,19 +28,9 @@ export default function Analysis() {
     }
   };
 
-  const handlePickImage = async () => {
-    try {
-      const base64 = await pickImage();
-      setImageData(base64);
-      message.success('Image selected!');
-    } catch (error) {
-      message.error('Failed to select image');
-    }
-  };
-
   const onFinish = async (values) => {
     if (!imageData) {
-      message.warning('Please capture or select an image first');
+      message.warning('Please capture a photo first');
       return;
     }
 
@@ -66,78 +56,92 @@ export default function Analysis() {
   };
 
   return (
-    <Layout style={{ minHeight: '100vh' }}>
+    <Layout style={{ minHeight: '100vh', background: '#f5f5f5' }}>
       <Header style={{ 
         background: '#fff', 
-        padding: '0 24px',
+        padding: '0 16px',
         display: 'flex',
         alignItems: 'center',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+        position: 'sticky',
+        top: 0,
+        zIndex: 1
       }}>
         <Button 
           icon={<ArrowLeftOutlined />} 
           onClick={() => navigate('/')}
           type="text"
+          size="large"
         />
-        <Title level={3} style={{ margin: '0 0 0 16px' }}>Skin Analysis</Title>
+        <Title level={4} style={{ margin: '0 0 0 12px' }}>Skin Analysis</Title>
       </Header>
 
-      <Content style={{ padding: '24px' }}>
+      <Content style={{ padding: '16px' }}>
         <div style={{ maxWidth: 600, margin: '0 auto' }}>
-          <Card>
+          <Card 
+            style={{ 
+              borderRadius: 16,
+              boxShadow: '0 2px 12px rgba(0,0,0,0.08)'
+            }}
+          >
             <Space direction="vertical" size="large" style={{ width: '100%' }}>
               <div style={{ textAlign: 'center' }}>
-                <Title level={4}>Capture Your Skin</Title>
+                <Title level={4} style={{ marginBottom: 8 }}>Capture Your Skin</Title>
                 <Text type="secondary">
                   Take a clear photo of your face in good lighting
                 </Text>
               </div>
 
               {imageData && (
-                <div style={{ textAlign: 'center' }}>
+                <div style={{ 
+                  textAlign: 'center',
+                  padding: '16px 0'
+                }}>
                   <img 
                     src={`data:image/jpeg;base64,${imageData}`}
                     alt="Captured"
                     style={{ 
                       maxWidth: '100%', 
                       maxHeight: 300,
-                      borderRadius: 8,
-                      border: '2px solid #e5e7eb'
+                      borderRadius: 12,
+                      border: '2px solid #e5e7eb',
+                      objectFit: 'cover'
                     }}
                   />
                 </div>
               )}
 
-              <Space style={{ width: '100%' }}>
-                <Button
-                  icon={<CameraOutlined />}
-                  onClick={handleTakePhoto}
-                  size="large"
-                  block
-                >
-                  Take Photo
-                </Button>
-                <Button
-                  icon={<PictureOutlined />}
-                  onClick={handlePickImage}
-                  size="large"
-                  block
-                >
-                  Choose from Gallery
-                </Button>
-              </Space>
+              <Button
+                icon={<CameraOutlined />}
+                onClick={handleTakePhoto}
+                size="large"
+                block
+                style={{
+                  height: 56,
+                  fontSize: 16,
+                  fontWeight: 500,
+                  borderRadius: 12
+                }}
+              >
+                Take Photo
+              </Button>
 
               <Form
                 form={form}
                 layout="vertical"
                 onFinish={onFinish}
+                requiredMark="optional"
               >
                 <Form.Item
-                  label="How does your skin feel?"
+                  label={<Text strong>How does your skin feel?</Text>}
                   name="skinFeel"
                   rules={[{ required: true, message: 'Please select an option' }]}
                 >
-                  <Select size="large" placeholder="Select...">
+                  <Select 
+                    size="large" 
+                    placeholder="Select..."
+                    style={{ borderRadius: 8 }}
+                  >
                     <Select.Option value="oily">Oily</Select.Option>
                     <Select.Option value="dry">Dry</Select.Option>
                     <Select.Option value="combination">Combination</Select.Option>
@@ -146,11 +150,15 @@ export default function Analysis() {
                 </Form.Item>
 
                 <Form.Item
-                  label="Current skincare routine"
+                  label={<Text strong>Current skincare routine</Text>}
                   name="routine"
                   rules={[{ required: true, message: 'Please select an option' }]}
                 >
-                  <Select size="large" placeholder="Select...">
+                  <Select 
+                    size="large" 
+                    placeholder="Select..."
+                    style={{ borderRadius: 8 }}
+                  >
                     <Select.Option value="none">None</Select.Option>
                     <Select.Option value="basic">Basic (cleanser + moisturizer)</Select.Option>
                     <Select.Option value="moderate">Moderate (3-5 products)</Select.Option>
@@ -159,22 +167,22 @@ export default function Analysis() {
                 </Form.Item>
 
                 <Form.Item
-                  label="Skin concerns"
+                  label={<Text strong>Skin concerns</Text>}
                   name="concerns"
                 >
-                  <Checkbox.Group>
-                    <Space direction="vertical">
-                      <Checkbox value="acne">Acne</Checkbox>
-                      <Checkbox value="wrinkles">Wrinkles</Checkbox>
-                      <Checkbox value="dark_spots">Dark Spots</Checkbox>
-                      <Checkbox value="redness">Redness</Checkbox>
-                      <Checkbox value="dryness">Dryness</Checkbox>
-                      <Checkbox value="oiliness">Oiliness</Checkbox>
+                  <Checkbox.Group style={{ width: '100%' }}>
+                    <Space direction="vertical" style={{ width: '100%' }}>
+                      <Checkbox value="acne" style={{ fontSize: 15 }}>Acne</Checkbox>
+                      <Checkbox value="wrinkles" style={{ fontSize: 15 }}>Wrinkles</Checkbox>
+                      <Checkbox value="dark_spots" style={{ fontSize: 15 }}>Dark Spots</Checkbox>
+                      <Checkbox value="redness" style={{ fontSize: 15 }}>Redness</Checkbox>
+                      <Checkbox value="dryness" style={{ fontSize: 15 }}>Dryness</Checkbox>
+                      <Checkbox value="oiliness" style={{ fontSize: 15 }}>Oiliness</Checkbox>
                     </Space>
                   </Checkbox.Group>
                 </Form.Item>
 
-                <Form.Item>
+                <Form.Item style={{ marginBottom: 0 }}>
                   <Button 
                     type="primary" 
                     htmlType="submit" 
@@ -182,6 +190,12 @@ export default function Analysis() {
                     block
                     loading={loading}
                     disabled={!imageData}
+                    style={{
+                      height: 56,
+                      fontSize: 16,
+                      fontWeight: 600,
+                      borderRadius: 12
+                    }}
                   >
                     {loading ? <Spin /> : 'Analyze My Skin'}
                   </Button>

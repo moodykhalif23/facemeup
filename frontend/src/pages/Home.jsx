@@ -112,16 +112,19 @@ export default function Home() {
   ];
 
   return (
-    <Layout style={{ minHeight: '100vh' }}>
+    <Layout style={{ minHeight: '100vh', background: '#f5f5f5' }}>
       <Header style={{ 
         background: '#fff', 
-        padding: '0 24px',
+        padding: '0 16px',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+        position: 'sticky',
+        top: 0,
+        zIndex: 10
       }}>
-        <Title level={3} style={{ margin: 0 }}>SkinCare AI</Title>
+        <Title level={4} style={{ margin: 0 }}>SkinCare AI</Title>
         
         <Dropdown 
           menu={{ items: menuItems }}
@@ -142,32 +145,41 @@ export default function Home() {
         </Dropdown>
       </Header>
 
-      <Content style={{ padding: '24px' }}>
+      <Content style={{ padding: '16px' }}>
         <div style={{ maxWidth: 1200, margin: '0 auto' }}>
-          <div style={{ marginBottom: 32, textAlign: 'center' }}>
-            <Title level={2}>Welcome to Your Skincare Journey</Title>
-            <Text type="secondary">
+          <div style={{ marginBottom: 24, textAlign: 'center', padding: '16px 0' }}>
+            <Title level={3} style={{ marginBottom: 8 }}>Welcome to Your Skincare Journey</Title>
+            <Text type="secondary" style={{ fontSize: 15 }}>
               AI-powered skin analysis and personalized recommendations
             </Text>
           </div>
 
-          <Row gutter={[16, 16]}>
+          <Row gutter={[12, 12]}>
             {cardMenuItems.map((item, index) => (
-              <Col xs={24} sm={12} md={8} key={index}>
+              <Col xs={12} sm={12} md={8} key={index}>
                 <Card
                   hoverable
                   onClick={() => navigate(item.path)}
-                  style={{ height: '100%' }}
+                  style={{ 
+                    height: '100%',
+                    borderRadius: 16,
+                    boxShadow: '0 2px 12px rgba(0,0,0,0.08)'
+                  }}
+                  bodyStyle={{ padding: '20px 16px' }}
                 >
                   <div style={{ textAlign: 'center' }}>
                     <div style={{ 
                       color: item.color, 
-                      marginBottom: 16 
+                      marginBottom: 12 
                     }}>
                       {item.icon}
                     </div>
-                    <Title level={4}>{item.title}</Title>
-                    <Text type="secondary">{item.description}</Text>
+                    <Title level={5} style={{ marginBottom: 4, fontSize: 15 }}>
+                      {item.title}
+                    </Title>
+                    <Text type="secondary" style={{ fontSize: 13 }}>
+                      {item.description}
+                    </Text>
                   </div>
                 </Card>
               </Col>
