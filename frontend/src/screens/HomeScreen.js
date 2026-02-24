@@ -32,6 +32,13 @@ export default function HomeScreen({ navigation, user, onLogout }) {
       color: '#FCE7F3',
     },
     {
+      icon: '🎁',
+      title: 'Loyalty & Rewards',
+      description: 'Earn points and redeem rewards',
+      route: 'Loyalty',
+      color: '#FEF3C7',
+    },
+    {
       icon: '📊',
       title: 'Profile History',
       description: 'Track your skin journey',

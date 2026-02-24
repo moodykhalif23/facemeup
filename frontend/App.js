@@ -16,6 +16,7 @@ import CartScreen from "./src/screens/CartScreen";
 import CheckoutScreen from "./src/screens/CheckoutScreen";
 import PaymentScreen from "./src/screens/PaymentScreen";
 import OrderTrackingScreen from "./src/screens/OrderTrackingScreen";
+import LoyaltyScreen from "./src/screens/LoyaltyScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -150,6 +151,13 @@ export default function App() {
             }}
           >
             {(props) => <OrderTrackingScreen {...props} />}
+          </Stack.Screen>
+          
+          <Stack.Screen 
+            name="Loyalty" 
+            options={{ title: 'Loyalty & Rewards' }}
+          >
+            {(props) => <LoyaltyScreen {...props} token={user.token} userId={user.userId} />}
           </Stack.Screen>
         </Stack.Navigator>
       </NavigationContainer>
