@@ -24,5 +24,5 @@ def recommend(
         return RecommendResponse(products=cached)
 
     products = recommend_products(payload.skin_type, payload.conditions, db)
-    cache_set_json(key, [p.model_dump() for p in products], ttl=300)  # Cache for 5 minutes
+    cache_set_json(key, [p.model_dump() for p in products])
     return RecommendResponse(products=products)
