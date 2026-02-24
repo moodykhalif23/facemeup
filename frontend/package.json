@@ -16,6 +16,7 @@
     "@ant-design/react-native": "^4.2.0",
     "@expo/vector-icons": "^14.0.4",
     "@react-native-async-storage/async-storage": "^2.1.0",
+    "@react-native-community/netinfo": "^11.4.1",
     "@react-navigation/bottom-tabs": "^6.6.1",
     "@react-navigation/native": "^6.1.18",
     "@react-navigation/native-stack": "^6.11.0",
@@ -35,7 +36,8 @@
     "react-native-screens": "~4.16.0",
     "react-native-svg": "^15.9.0",
     "react-native-web": "^0.21.0",
-    "react-redux": "^9.2.0"
+    "react-redux": "^9.2.0",
+    "redux-persist": "^6.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.26.0",
