@@ -24,7 +24,10 @@ export default function Analysis() {
       setImageData(base64);
       message.success('Photo captured!');
     } catch (error) {
-      message.error('Failed to capture photo');
+      // Don't show error if user just cancelled
+      if (error.message && !error.message.includes('cancel')) {
+        message.error('Failed to capture photo');
+      }
     }
   };
 
@@ -82,6 +85,9 @@ export default function Analysis() {
             style={{ 
               borderRadius: 16,
               boxShadow: '0 2px 12px rgba(0,0,0,0.08)'
+            }}
+            styles={{
+              body: { padding: 24 }
             }}
           >
             <Space direction="vertical" size="large" style={{ width: '100%' }}>

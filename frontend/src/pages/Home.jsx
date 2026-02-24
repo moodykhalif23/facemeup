@@ -165,7 +165,9 @@ export default function Home() {
                     borderRadius: 16,
                     boxShadow: '0 2px 12px rgba(0,0,0,0.08)'
                   }}
-                  bodyStyle={{ padding: '20px 16px' }}
+                  styles={{
+                    body: { padding: '20px 16px' }
+                  }}
                 >
                   <div style={{ textAlign: 'center' }}>
                     <div style={{ 

@@ -3,9 +3,13 @@ import ReactDOM from 'react-dom/client';
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
 import { ConfigProvider, App as AntApp } from 'antd';
+import { defineCustomElements } from '@ionic/pwa-elements/loader';
 import { store, persistor } from './store';
 import App from './App';
 import './index.css';
+
+// Initialize PWA elements for camera support on web
+defineCustomElements(window);
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
