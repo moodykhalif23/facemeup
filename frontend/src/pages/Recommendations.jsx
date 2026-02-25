@@ -69,7 +69,7 @@ export default function Recommendations() {
           ) : products.length > 0 ? (
             <Row gutter={[16, 16]}>
               {products.map((product) => (
-                <Col xs={12} sm={12} md={8} lg={6} key={product.id}>
+                <Col xs={24} sm={12} md={8} lg={6} key={product.id}>
                   <Card
                     hoverable
                     onClick={() => navigate(`/product/${product.id}`)}
@@ -79,11 +79,13 @@ export default function Recommendations() {
                       height: '100%',
                       cursor: 'pointer',
                       display: 'flex',
-                      flexDirection: 'column'
+                      flexDirection: 'column',
+                      minHeight: isMobile ? 320 : 360,
+                      transition: 'transform 0.2s ease, box-shadow 0.2s ease'
                     }}
                     styles={{
                       body: { 
-                        padding: '16px',
+                        padding: isMobile ? '12px' : '16px',
                         display: 'flex',
                         flexDirection: 'column',
                         flex: 1
@@ -96,11 +98,22 @@ export default function Recommendations() {
                             src={getProxiedImageUrl(product.image_url)} 
                             alt={product.name}
                             style={{ 
-                              height: isMobile ? 140 : 180, 
+                              height: isMobile ? 160 : 180, 
                               objectFit: 'cover',
                               borderRadius: '12px 12px 0 0',
                               width: '100%',
-                              backgroundColor: '#f0f0f0'
+                              backgroundColor: '#f0f0f0',
+                              transition: 'transform 0.3s ease'
+                            }}
+                            onMouseEnter={(e) => {
+                              if (!isMobile) {
+                                e.target.style.transform = 'scale(1.05)';
+                              }
+                            }}
+                            onMouseLeave={(e) => {
+                              if (!isMobile) {
+                                e.target.style.transform = 'scale(1)';
+                              }
                             }}
                             onError={(e) => {
                               e.target.style.display = 'none';
@@ -111,15 +124,16 @@ export default function Recommendations() {
                           />
                         )}
                         <div style={{ 
-                          height: isMobile ? 140 : 180, 
-                          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                          height: isMobile ? 160 : 180, 
+                          background: 'linear-gradient(135deg, #ffff #ffff 0%,  100%)',
                           display: product.image_url ? 'none' : 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
                           borderRadius: '12px 12px 0 0',
                           color: 'white',
-                          fontSize: 16,
-                          fontWeight: 500
+                          fontSize: isMobile ? 18 : 20,
+                          fontWeight: 600,
+                          textShadow: '0 2px 4px rgba(0,0,0,0.3)'
                         }}>
                           {product.name.substring(0, 2).toUpperCase()}
                         </div>
@@ -135,16 +149,18 @@ export default function Recommendations() {
                       <Text 
                         strong 
                         style={{ 
-                          fontSize: 14, 
+                          fontSize: isMobile ? 14 : 15, 
                           display: 'block',
                           marginBottom: 8,
-                          minHeight: 42,
-                          lineHeight: '1.5'
+                          minHeight: isMobile ? 48 : 42,
+                          lineHeight: '1.4',
+                          wordBreak: 'break-word',
+                          color: '#2d3748'
                         }}
                       >
                         {product.name}
                       </Text>
-                      <Text strong style={{ fontSize: 16, color: '#3B82F6', marginTop: 'auto' }}>
+                      <Text strong style={{ fontSize: isMobile ? 16 : 18, color: '#3B82F6', marginTop: 'auto', fontWeight: 700 }}>
                         KSh {product.price ? product.price.toLocaleString() : '0'}
                       </Text>
                     </div>
@@ -155,9 +171,28 @@ export default function Recommendations() {
                         e.stopPropagation();
                         navigate(`/product/${product.id}`);
                       }}
-                      size="middle"
+                      size={isMobile ? "middle" : "large"}
                       block
-                      style={{ borderRadius: 8, fontSize: 14, height: 40 }}
+                      style={{ 
+                        borderRadius: 8, 
+                        fontSize: isMobile ? 14 : 16, 
+                        height: isMobile ? 40 : 44,
+                        fontWeight: 600,
+                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                        transition: 'all 0.2s ease'
+                      }}
+                      onMouseEnter={(e) => {
+                        if (!isMobile) {
+                          e.target.style.transform = 'translateY(-2px)';
+                          e.target.style.boxShadow = '0 8px 15px -3px rgba(0, 0, 0, 0.2)';
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (!isMobile) {
+                          e.target.style.transform = 'translateY(0)';
+                          e.target.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
+                        }
+                      }}
                     >
                       View Details
                     </Button>
@@ -178,7 +213,21 @@ export default function Recommendations() {
                   style={{ 
                     height: 48,
                     fontSize: 16,
-                    borderRadius: 12
+                    borderRadius: 12,
+                    boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)',
+                    transition: 'all 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isMobile) {
+                      e.target.style.transform = 'translateY(-2px)';
+                      e.target.style.boxShadow = '0 8px 20px rgba(59, 130, 246, 0.4)';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isMobile) {
+                      e.target.style.transform = 'translateY(0)';
+                      e.target.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.3)';
+                    }
                   }}
                 >
                   Start Analysis
