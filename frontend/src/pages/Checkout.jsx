@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { Layout, Card, Button, Typography, Form, Input, Space, Divider, App } from 'antd';
@@ -19,6 +19,13 @@ export default function Checkout() {
   const [form] = Form.useForm();
 
   const total = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+  // Redirect to cart if empty
+  useEffect(() => {
+    if (items.length === 0) {
+      navigate('/cart');
+    }
+  }, [items.length, navigate]);
 
   const handleSubmit = async (values) => {
     if (items.length === 0) {
@@ -53,8 +60,8 @@ export default function Checkout() {
     }
   };
 
+  // Don't render if cart is empty
   if (items.length === 0) {
-    navigate('/cart');
     return null;
   }
 

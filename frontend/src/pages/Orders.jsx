@@ -24,31 +24,9 @@ export default function Orders() {
       const response = await getOrders();
       setOrders(response.data.orders || []);
     } catch (error) {
+      console.error('Failed to load orders:', error);
       message.error('Failed to load orders');
-      // Mock data for demo
-      setOrders([
-        {
-          id: 1,
-          order_number: 'ORD-2024-001',
-          created_at: '2024-02-20T10:30:00',
-          status: 'delivered',
-          total: 149.97,
-          items: [
-            { product_name: 'Dr Rashel Salicylic Clear Serum', quantity: 2, price: 49.99 },
-            { product_name: 'Estelm Deep Hydration Cream', quantity: 1, price: 49.99 }
-          ]
-        },
-        {
-          id: 2,
-          order_number: 'ORD-2024-002',
-          created_at: '2024-02-22T14:15:00',
-          status: 'processing',
-          total: 99.98,
-          items: [
-            { product_name: 'Dr Rashel Bright Tone Essence', quantity: 2, price: 49.99 }
-          ]
-        }
-      ]);
+      setOrders([]);
     } finally {
       setLoading(false);
     }
