@@ -50,42 +50,15 @@ python ml/export_tflite.py --model ml/models/best_model.h5
 # Export SavedModel
 python ml/export_savedmodel.py --model ml/models/best_model.h5
 ```
+## Trainin
 
-## Directory Structure
-
-```
-ml/
-├── config.yaml              # Training configuration
-├── data_loader.py           # Dataset loading & preprocessing
-├── model_builder.py         # EfficientNetB0 architecture
-├── train.py                 # Main training script
-├── evaluate.py              # Model evaluation
-├── export_tflite.py         # TFLite conversion
-├── export_savedmodel.py     # SavedModel export
-├── bias_audit.py            # Fitzpatrick scale bias audit
-├── data/                    # Training data
-│   ├── isic/                # ISIC dataset
-│   ├── bitmoji/             # Bitmoji exports
-│   └── processed/           # Preprocessed data
-├── models/                  # Trained models
-│   ├── best_model.h5
-│   └── checkpoints/
-├── logs/                    # TensorBoard logs
-└── scripts/                 # Utility scripts
-    ├── download_isic.py
-    ├── export_bitmoji.py
-    └── visualize_data.py
-```
-
-## Training Strategy
-
-### Phase 1: Feature Extraction (Weeks 1-2)
+### Phase 1: Feature Extraction
 - Freeze all EfficientNetB0 base layers
 - Train only custom classification head
 - 20 epochs, learning rate 1e-3
 - Early stopping patience: 5 epochs
 
-### Phase 2: Fine-Tuning (Weeks 3-4)
+### Phase 2: Fine-Tuning
 - Unfreeze top 30 layers of EfficientNetB0
 - Continue training with reduced learning rate
 - 15 epochs, learning rate 1e-5
@@ -188,12 +161,6 @@ tensorboard --logdir ml/logs
 - Prune unnecessary layers
 - Use smaller base model (MobileNetV2)
 
-## Next Steps
-
-1. ✅ Train model (Weeks 1-4)
-2. ✅ Export TFLite (<5MB)
-3. ✅ Deploy to backend
-4. ✅ Integrate with React Native
 5. ✅ Validate on real users
 
 ## References
