@@ -23,9 +23,8 @@ async def proxy_image(url: str = Query(..., description="Image URL to proxy")):
         The image content with appropriate headers
     """
     try:
-        # Validate URL is from allowed domain
-        if not url.startswith("https://drrashel.co.ke/"):
-            raise HTTPException(status_code=400, detail="Invalid image URL")
+        if not url.startswith("https://"):
+            raise HTTPException(status_code=400, detail="Invalid image URL format. Must be HTTPS.")
         
         # Fetch the image
         async with httpx.AsyncClient(timeout=10.0) as client:
