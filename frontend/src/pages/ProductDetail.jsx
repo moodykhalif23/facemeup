@@ -169,9 +169,16 @@ export default function ProductDetail() {
                 
                 <div style={{ width: '100%', overflow: 'hidden' }}>
                   <Text strong style={{ fontSize: 15 }}>Description</Text>
-                  <Paragraph style={{ marginTop: 8, color: '#666', wordBreak: 'break-word', overflowWrap: 'break-word' }}>
-                    {product.description}
-                  </Paragraph>
+                  <div 
+                    style={{ 
+                      marginTop: 8, 
+                      color: '#666', 
+                      wordBreak: 'break-word', 
+                      overflowWrap: 'break-word',
+                      lineHeight: '1.6'
+                    }}
+                    dangerouslySetInnerHTML={{ __html: product.description }}
+                  />
                 </div>
 
                 {product.benefits && (
