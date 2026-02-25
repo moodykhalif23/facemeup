@@ -123,6 +123,8 @@ def recommend_products(skin_type: str, conditions: list[str], db: Session = None
                     price=product.price or 0,
                     score=round(total_score, 4),
                     matched_ingredients=sorted(set(matched_ingredients + matched_keywords))[:5],  # Show top 5 matches
+                    image_url=product.image_url,
+                    category=product.category,
                 )
             )
     

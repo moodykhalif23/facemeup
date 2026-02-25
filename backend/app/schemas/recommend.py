@@ -13,6 +13,8 @@ class ProductRecommendation(BaseModel):
     price: float
     score: float
     matched_ingredients: list[str]
+    image_url: str | None = None
+    category: str | None = None
 
 
 class RecommendResponse(BaseModel):
