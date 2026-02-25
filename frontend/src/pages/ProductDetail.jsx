@@ -94,7 +94,7 @@ export default function ProductDetail() {
             {/* Product Image */}
             <Card 
               style={{ 
-                borderRadius: 16,
+                borderRadius: 0,
                 overflow: 'hidden',
                 boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
                 height: 'fit-content',
@@ -140,7 +140,7 @@ export default function ProductDetail() {
 
             {/* Product Info */}
             <Card style={{ 
-              borderRadius: 16, 
+              borderRadius: 0, 
               boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
               width: '100%',
               maxWidth: '100%',
@@ -264,7 +264,7 @@ export default function ProductDetail() {
                 height: 52,
                 fontSize: 16,
                 fontWeight: 600,
-                borderRadius: 8,
+                borderRadius: 0,
                 flex: 1
               }}
             >
@@ -282,7 +282,7 @@ export default function ProductDetail() {
           padding: '0 16px'
         }}>
           <Card style={{ 
-            borderRadius: 16, 
+            borderRadius: 0, 
             boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
             background: 'transparent',
             border: 'none'
@@ -320,7 +320,7 @@ export default function ProductDetail() {
                   height: 56,
                   fontSize: 18,
                   fontWeight: 600,
-                  borderRadius: 12,
+                  borderRadius: 0,
                   minWidth: 300,
                   paddingLeft: 32,
                   paddingRight: 32

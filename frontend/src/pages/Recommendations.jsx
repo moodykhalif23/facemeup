@@ -74,7 +74,7 @@ export default function Recommendations() {
                     hoverable
                     onClick={() => navigate(`/product/${product.id}`)}
                     style={{ 
-                      borderRadius: 12,
+                      borderRadius: 0,
                       boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
                       height: '100%',
                       cursor: 'pointer',
@@ -100,7 +100,7 @@ export default function Recommendations() {
                             style={{ 
                               height: isMobile ? 160 : 180, 
                               objectFit: 'cover',
-                              borderRadius: '12px 12px 0 0',
+                              borderRadius: 0,
                               width: '100%',
                               backgroundColor: '#f0f0f0',
                               transition: 'transform 0.3s ease'
@@ -129,7 +129,7 @@ export default function Recommendations() {
                           display: (product.images?.[0]?.src || product.image_url) ? 'none' : 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          borderRadius: '12px 12px 0 0',
+                          borderRadius: 0,
                           color: 'white',
                           fontSize: isMobile ? 18 : 20,
                           fontWeight: 600,
@@ -174,7 +174,7 @@ export default function Recommendations() {
                       size={isMobile ? "middle" : "large"}
                       block
                       style={{ 
-                        borderRadius: 8, 
+                        borderRadius: 0, 
                         fontSize: isMobile ? 14 : 16, 
                         height: isMobile ? 40 : 44,
                         fontWeight: 600,
@@ -201,7 +201,7 @@ export default function Recommendations() {
               ))}
             </Row>
           ) : (
-            <Card style={{ borderRadius: 16, boxShadow: '0 2px 12px rgba(0,0,0,0.08)' }}>
+            <Card style={{ borderRadius: 0, boxShadow: '0 2px 12px rgba(0,0,0,0.08)' }}>
               <div style={{ textAlign: 'center', padding: '50px 20px' }}>
                 <Title level={4}>No recommendations available</Title>
                 <Text type="secondary">Complete a skin analysis to get personalized recommendations</Text>
@@ -213,7 +213,7 @@ export default function Recommendations() {
                   style={{ 
                     height: 48,
                     fontSize: 16,
-                    borderRadius: 12,
+                    borderRadius: 0,
                     boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)',
                     transition: 'all 0.2s ease'
                   }}
