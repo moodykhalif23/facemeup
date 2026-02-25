@@ -121,7 +121,7 @@ export default function ProductDetail() {
                 )}
                 <div style={{
                   height: isDesktop ? 400 : 300,
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  background: 'linear-gradient(135deg, #e0e1e7 0%, #e1dde4 100%)',
                   display: product.image_url ? 'none' : 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
