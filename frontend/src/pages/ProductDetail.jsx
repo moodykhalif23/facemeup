@@ -147,7 +147,19 @@ export default function ProductDetail() {
               overflow: 'hidden'
             }}>
               <Space direction="vertical" size="small" style={{ width: '100%' }}>
-                <Tag color="blue">{product.category}</Tag>
+                <div style={{ 
+                  display: 'flex', 
+                  flexWrap: 'wrap', 
+                  gap: 8, 
+                  width: '100%',
+                  marginBottom: 8 
+                }}>
+                  {product.category && product.category.split(',').map((cat, index) => (
+                    <Tag key={index} color="blue" style={{ margin: 0 }}>
+                      {cat.trim()}
+                    </Tag>
+                  ))}
+                </div>
                 <Title level={3} style={{ margin: '8px 0', wordBreak: 'break-word' }}>{product.name}</Title>
                 <Title level={2} style={{ color: '#3B82F6', margin: '8px 0', wordBreak: 'break-word' }}>
                   KSh {product.price ? product.price.toLocaleString() : '0'}
