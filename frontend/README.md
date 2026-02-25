@@ -78,46 +78,6 @@ npm run android
 # Open in Xcode (Mac only)
 npm run ios
 ```
-
-## Project Structure
-
-```
-frontend/
-├── src/
-│   ├── pages/          # Page components
-│   ├── services/       # API and native services
-│   ├── store/          # Redux store and slices
-│   ├── App.jsx         # Main app component
-│   ├── main.jsx        # Entry point
-│   └── index.css       # Global styles
-├── public/             # Static assets
-├── capacitor.config.json
-├── vite.config.js
-└── package.json
-```
-
-## Available Pages
-
-- `/login` - User login
-- `/register` - User registration
-- `/` - Home dashboard
-- `/analysis` - Skin analysis with camera
-- `/results` - Analysis results
-- `/recommendations` - Product recommendations
-- `/profile` - User profile and history
-- `/cart` - Shopping cart
-- `/checkout` - Checkout process
-- `/orders` - Order history
-- `/loyalty` - Loyalty rewards
-
-## Environment Variables
-
-Create a `.env` file:
-
-```
-VITE_API_URL=http://localhost:8000/api/v1
-```
-
 ## Building for Production
 
 ### Web
@@ -174,7 +134,3 @@ npm install
 ```bash
 npx cap sync
 ```
-
-## License
-
-Private - All rights reserved
