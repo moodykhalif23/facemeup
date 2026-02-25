@@ -81,14 +81,15 @@ export default function ProductDetail() {
     <Layout style={{ minHeight: '100vh', background: '#f5f5f5' }}>
       <AppHeader title="Product Details" showBack />
 
-      <Content style={{ padding: '16px', paddingBottom: 100 }}>
-        <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+      <Content style={{ padding: '16px', paddingBottom: 100, overflowX: 'hidden' }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto', width: '100%' }}>
           {/* Responsive Layout: Stacked on mobile, side-by-side on desktop */}
           <div style={{
             display: 'grid',
             gridTemplateColumns: isDesktop ? '1fr 1fr' : '1fr',
             gap: 16,
-            marginBottom: isDesktop ? 0 : 16
+            marginBottom: isDesktop ? 0 : 16,
+            width: '100%'
           }}>
             {/* Product Image */}
             <Card 
@@ -96,14 +97,16 @@ export default function ProductDetail() {
                 borderRadius: 16,
                 overflow: 'hidden',
                 boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
-                height: 'fit-content'
+                height: 'fit-content',
+                width: '100%',
+                maxWidth: '100%'
               }}
               styles={{ body: { padding: 0 } }}
             >
               <>
-                {product.image_url && (
+                {(product.images?.[0]?.src || product.image_url) && (
                   <img 
-                    src={getProxiedImageUrl(product.image_url)} 
+                    src={getProxiedImageUrl(product.images?.[0]?.src || product.image_url)} 
                     alt={product.name}
                     style={{
                       width: '100%',
@@ -122,7 +125,7 @@ export default function ProductDetail() {
                 <div style={{
                   height: isDesktop ? 400 : 300,
                   background: 'linear-gradient(135deg, #e0e1e7 0%, #e1dde4 100%)',
-                  display: product.image_url ? 'none' : 'flex',
+                  display: (product.images?.[0]?.src || product.image_url) ? 'none' : 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   color: 'white',
@@ -136,19 +139,25 @@ export default function ProductDetail() {
             </Card>
 
             {/* Product Info */}
-            <Card style={{ borderRadius: 16, boxShadow: '0 2px 12px rgba(0,0,0,0.08)' }}>
+            <Card style={{ 
+              borderRadius: 16, 
+              boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
+              width: '100%',
+              maxWidth: '100%',
+              overflow: 'hidden'
+            }}>
               <Space direction="vertical" size="small" style={{ width: '100%' }}>
                 <Tag color="blue">{product.category}</Tag>
-                <Title level={3} style={{ margin: '8px 0' }}>{product.name}</Title>
-                <Title level={2} style={{ color: '#3B82F6', margin: '8px 0' }}>
+                <Title level={3} style={{ margin: '8px 0', wordBreak: 'break-word' }}>{product.name}</Title>
+                <Title level={2} style={{ color: '#3B82F6', margin: '8px 0', wordBreak: 'break-word' }}>
                   KSh {product.price ? product.price.toLocaleString() : '0'}
                 </Title>
                 
                 <Divider style={{ margin: '16px 0' }} />
                 
-                <div>
+                <div style={{ width: '100%', overflow: 'hidden' }}>
                   <Text strong style={{ fontSize: 15 }}>Description</Text>
-                  <Paragraph style={{ marginTop: 8, color: '#666' }}>
+                  <Paragraph style={{ marginTop: 8, color: '#666', wordBreak: 'break-word', overflowWrap: 'break-word' }}>
                     {product.description}
                   </Paragraph>
                 </div>
@@ -156,11 +165,11 @@ export default function ProductDetail() {
                 {product.benefits && (
                   <>
                     <Divider style={{ margin: '16px 0' }} />
-                    <div>
+                    <div style={{ width: '100%', overflow: 'hidden' }}>
                       <Text strong style={{ fontSize: 15 }}>Key Benefits</Text>
                       <ul style={{ marginTop: 8, paddingLeft: 20, color: '#666' }}>
                         {product.benefits.map((benefit, index) => (
-                          <li key={index} style={{ marginBottom: 4 }}>{benefit}</li>
+                          <li key={index} style={{ marginBottom: 4, wordBreak: 'break-word', overflowWrap: 'break-word' }}>{benefit}</li>
                         ))}
                       </ul>
                     </div>
@@ -170,9 +179,9 @@ export default function ProductDetail() {
                 {product.ingredients && (
                   <>
                     <Divider style={{ margin: '16px 0' }} />
-                    <div>
+                    <div style={{ width: '100%', overflow: 'hidden' }}>
                       <Text strong style={{ fontSize: 15 }}>Ingredients</Text>
-                      <Paragraph style={{ marginTop: 8, color: '#666', fontSize: 13 }}>
+                      <Paragraph style={{ marginTop: 8, color: '#666', fontSize: 13, wordBreak: 'break-word', overflowWrap: 'break-word' }}>
                         {product.ingredients}
                       </Paragraph>
                     </div>
@@ -182,9 +191,9 @@ export default function ProductDetail() {
                 {product.usage && (
                   <>
                     <Divider style={{ margin: '16px 0' }} />
-                    <div>
+                    <div style={{ width: '100%', overflow: 'hidden' }}>
                       <Text strong style={{ fontSize: 15 }}>How to Use</Text>
-                      <Paragraph style={{ marginTop: 8, color: '#666' }}>
+                      <Paragraph style={{ marginTop: 8, color: '#666', wordBreak: 'break-word', overflowWrap: 'break-word' }}>
                         {product.usage}
                       </Paragraph>
                     </div>
