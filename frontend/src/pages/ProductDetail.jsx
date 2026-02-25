@@ -49,27 +49,11 @@ export default function ProductDetail() {
       setProduct(response.data);
     } catch (error) {
       message.error('Failed to load product details');
-      // For demo, create a mock product
-      setProduct({
-        id: id,
-        name: 'Premium Skincare Product',
-        price: 49.99,
-        category: 'Moisturizer',
-        description: 'A premium skincare product designed for your specific skin type. This product contains natural ingredients that help nourish and protect your skin.',
-        benefits: [
-          'Deeply hydrates skin',
-          'Reduces fine lines',
-          'Improves skin texture',
-          'Non-comedogenic formula'
-        ],
-        ingredients: 'Aqua, Glycerin, Hyaluronic Acid, Vitamin E, Natural Extracts',
-        usage: 'Apply twice daily to clean, dry skin. Gently massage until fully absorbed.'
-      });
+      navigate('/recommendations');
     } finally {
       setLoading(false);
     }
   };
-
   const handleAddToCart = () => {
     if (product) {
       dispatch(addToCart({
