@@ -93,9 +93,9 @@ export default function Recommendations() {
                     }}
                     cover={
                       <>
-                        {(product.images?.[0]?.src || product.image_url) && (
+                        {product.image_url && (
                           <img 
-                            src={getProxiedImageUrl(product.images?.[0]?.src || product.image_url)} 
+                            src={getProxiedImageUrl(product.image_url)} 
                             alt={product.name}
                             style={{ 
                               height: isMobile ? 160 : 180, 
@@ -126,7 +126,7 @@ export default function Recommendations() {
                         <div style={{ 
                           height: isMobile ? 160 : 180, 
                           background: 'linear-gradient(135deg, #e0e1e7 0%, #e1dde4 100%)',
-                          display: (product.images?.[0]?.src || product.image_url) ? 'none' : 'flex',
+                          display: product.image_url ? 'none' : 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
                           borderRadius: 0,

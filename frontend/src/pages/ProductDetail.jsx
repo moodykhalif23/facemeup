@@ -104,9 +104,9 @@ export default function ProductDetail() {
               styles={{ body: { padding: 0 } }}
             >
               <>
-                {(product.images?.[0]?.src || product.image_url) && (
+                {product.image_url && (
                   <img 
-                    src={getProxiedImageUrl(product.images?.[0]?.src || product.image_url)} 
+                    src={getProxiedImageUrl(product.image_url)} 
                     alt={product.name}
                     style={{
                       width: '100%',
@@ -125,7 +125,7 @@ export default function ProductDetail() {
                 <div style={{
                   height: isDesktop ? 400 : 300,
                   background: 'linear-gradient(135deg, #e0e1e7 0%, #e1dde4 100%)',
-                  display: (product.images?.[0]?.src || product.image_url) ? 'none' : 'flex',
+                  display: product.image_url ? 'none' : 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   color: 'white',
@@ -230,11 +230,10 @@ export default function ProductDetail() {
           boxShadow: '0 -2px 12px rgba(0,0,0,0.1)',
           zIndex: 10
         }}>
-          <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: 12, alignItems: 'flex-end' }}>
             <div style={{ 
               display: 'flex', 
               flexDirection: 'column',
-              alignItems: 'center',
               minWidth: 80
             }}>
               <Text style={{ fontSize: 12, marginBottom: 4, color: '#666' }}>Quantity</Text>
@@ -246,7 +245,13 @@ export default function ProductDetail() {
                 size="large"
                 style={{ 
                   width: 80,
-                  fontSize: 16
+                  fontSize: 16,
+                  borderRadius: 0
+                }}
+                styles={{
+                  input: {
+                    borderRadius: 0
+                  }
                 }}
                 controls={{
                   upIcon: <span style={{ fontSize: 16 }}>+</span>,
@@ -287,11 +292,10 @@ export default function ProductDetail() {
             background: 'transparent',
             border: 'none'
           }}>
-            <div style={{ display: 'flex', gap: 16, alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ display: 'flex', gap: 16, alignItems: 'flex-end', justifyContent: 'center' }}>
               <div style={{ 
                 display: 'flex', 
                 flexDirection: 'column',
-                alignItems: 'center',
                 minWidth: 100
               }}>
                 <Text style={{ fontSize: 14, marginBottom: 8, color: '#666', fontWeight: 500 }}>Quantity</Text>
@@ -303,7 +307,13 @@ export default function ProductDetail() {
                   size="large"
                   style={{ 
                     width: 100,
-                    fontSize: 18
+                    fontSize: 18,
+                    borderRadius: 0
+                  }}
+                  styles={{
+                    input: {
+                      borderRadius: 0
+                    }
                   }}
                   controls={{
                     upIcon: <span style={{ fontSize: 18 }}>+</span>,
