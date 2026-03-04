@@ -146,22 +146,43 @@ def download_file(url: str, dest: Path, label: str):
         raise
 
 
-def extract_zip(zip_path: Path, dest: Path):
-    """Extract zip, with fallback to extracting valid entries on partial files."""
+def extract_zip(zip_path: Path, dest: Path) -> int:
+    """
+    Extract zip file, skipping any entries with bad CRC (partial downloads).
+    Returns count of successfully extracted files.
+    """
     print(f"  Extracting {zip_path.name} …")
-    try:
-        with zipfile.ZipFile(zip_path, "r") as zf:
-            zf.extractall(dest)
-        print(f"  ✓ Extracted to {dest}")
-    except zipfile.BadZipFile:
-        print(f"  ✗ Bad zip — file may be incomplete. Re-run to re-download.")
-        zip_path.unlink(missing_ok=True)
-        raise
+    ok = 0
+    skipped = 0
+    with zipfile.ZipFile(zip_path, "r") as zf:
+        for info in zf.infolist():
+            out = dest / info.filename
+            if out.exists():
+                ok += 1
+                continue
+            try:
+                zf.extract(info, dest)
+                ok += 1
+            except (zipfile.BadZipFile, Exception):
+                skipped += 1
+    if skipped:
+        print(f"  ⚠ Extracted {ok} files, skipped {skipped} with bad CRC")
+    else:
+        print(f"  ✓ Extracted {ok} files to {dest}")
+    return ok
 
 
 # ---------------------------------------------------------------------------
 # Step 1 – Download HAM10000
 # ---------------------------------------------------------------------------
+_MIN_PART1_IMGS = 4000   # enough images to train even if part 1 has some bad CRCs
+_MIN_PART2_IMGS = 2000
+
+
+def _count_imgs(sentinel: Path) -> int:
+    return sum(1 for _ in DATA_DIR.glob("*.jpg"))
+
+
 def download_ham10000():
     print("\n" + "=" * 70)
     print("STEP 1/4  Download HAM10000 (clinician-labeled dermatology images)")
@@ -177,25 +198,38 @@ def download_ham10000():
     download_file(HAM_URLS["metadata"], meta_path, "metadata (tab-separated)")
 
     # ── Images part 1 ─────────────────────────────────────────────────────
+    # Check for already-extracted images directly in DATA_DIR (no subfolder)
+    existing_imgs = _count_imgs(DATA_DIR)
     part1_zip = DATA_DIR / "HAM10000_images_part_1.zip"
-    part1_dir = DATA_DIR / "HAM10000_images_part_1"
-    if not part1_dir.exists():
+    part1_done = DATA_DIR / ".part1_done"
+
+    if part1_done.exists():
+        print(f"  ✓ Part 1 already extracted ({existing_imgs} images present)")
+    elif existing_imgs >= _MIN_PART1_IMGS and not part1_zip.exists():
+        # Images extracted but sentinel missing — create it
+        part1_done.touch()
+        print(f"  ✓ Part 1 images found ({existing_imgs}), marking done")
+    else:
         download_file(HAM_URLS["part1"], part1_zip, "images part 1/2")
         extract_zip(part1_zip, DATA_DIR)
-    else:
-        print(f"  ✓ Already extracted: {part1_dir.name}")
+        part1_zip.unlink(missing_ok=True)   # free disk space
+        part1_done.touch()
+        print(f"  ✓ Part 1 done ({_count_imgs(DATA_DIR)} images)")
 
     # ── Images part 2 ─────────────────────────────────────────────────────
     part2_zip = DATA_DIR / "HAM10000_images_part_2.zip"
-    part2_dir = DATA_DIR / "HAM10000_images_part_2"
-    if not part2_dir.exists():
+    part2_done = DATA_DIR / ".part2_done"
+
+    if part2_done.exists():
+        print(f"  ✓ Part 2 already extracted")
+    else:
         download_file(HAM_URLS["part2"], part2_zip, "images part 2/2")
         extract_zip(part2_zip, DATA_DIR)
-    else:
-        print(f"  ✓ Already extracted: {part2_dir.name}")
+        part2_zip.unlink(missing_ok=True)
+        part2_done.touch()
+        print(f"  ✓ Part 2 done ({_count_imgs(DATA_DIR)} images)")
 
-    # Count
-    all_imgs = list(DATA_DIR.rglob("*.jpg"))
+    all_imgs = list(DATA_DIR.glob("*.jpg"))
     print(f"\n  ✓ Total images available: {len(all_imgs)}")
     return meta_path, all_imgs
 
