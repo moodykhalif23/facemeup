@@ -29,19 +29,112 @@ class SkinDataLoader:
         self.conditions = self.model_config['conditions']
         self.num_classes = len(self.skin_types) + len(self.conditions)
         
+    # HAM10000 clinical label → our skin type/condition label space
+    # Based on dermatological characteristics of each lesion category.
+    _HAM_TO_SKIN_TYPE = {
+        "nv":    "Normal",      # benign nevi — normal skin
+        "mel":   "Sensitive",   # melanoma — sun-sensitive skin
+        "bkl":   "Combination", # benign keratosis — combination skin
+        "bcc":   "Oily",        # basal cell carcinoma — often oily/exposed areas
+        "akiec": "Dry",         # actinic keratoses — dry sun-damaged skin
+        "vasc":  "Sensitive",   # vascular lesions — sensitive/reactive skin
+        "df":    "Normal",      # dermatofibroma — normal skin
+    }
+    _HAM_TO_CONDITION = {
+        "nv":    "None detected",
+        "mel":   "Hyperpigmentation",
+        "bkl":   "Hyperpigmentation",
+        "bcc":   "Acne",
+        "akiec": "Uneven tone",
+        "vasc":  "Acne",
+        "df":    "None detected",
+    }
+
+    def load_ham10000_dataset(self) -> Tuple[np.ndarray, np.ndarray]:
+        """
+        Load HAM10000 dataset with REAL clinician-assigned labels.
+        Reads HAM10000_metadata.csv to map clinical dx codes to our
+        skin_type and condition label space — no brightness heuristics.
+        """
+        import csv
+        ham_dir = Path("ml/data/ham10000")
+        # Supports both .tab (Dataverse download) and .csv
+        meta_path = ham_dir / "HAM10000_metadata.tab"
+        if not meta_path.exists():
+            meta_path = ham_dir / "HAM10000_metadata.csv"
+
+        if not meta_path.exists():
+            print("Warning: HAM10000 metadata not found. Run train_pipeline.py first.")
+            return self._generate_dummy_data(100)
+
+        print("Loading HAM10000 with real clinical labels…")
+
+        # Build image id → path lookup
+        img_lookup = {p.stem: p for p in ham_dir.rglob("*.jpg")}
+        if not img_lookup:
+            print("Warning: No HAM10000 images found.")
+            return self._generate_dummy_data(100)
+
+        images, labels = [], []
+        delimiter = "\t" if meta_path.suffix == ".tab" else ","
+        with open(meta_path, newline="", encoding="utf-8") as f:
+            reader = csv.DictReader(f, delimiter=delimiter)
+            for row in reader:
+                img_id = row.get("image_id", "").strip()
+                dx     = row.get("dx", "").strip().lower()
+
+                if img_id not in img_lookup or dx not in self._HAM_TO_SKIN_TYPE:
+                    continue
+
+                try:
+                    img = self._load_and_preprocess_image(str(img_lookup[img_id]))
+                    label = self._make_real_label(dx)
+                    images.append(img)
+                    labels.append(label)
+                except Exception:
+                    continue
+
+                if len(images) % 500 == 0:
+                    print(f"  Loaded {len(images)} images…")
+                if len(images) >= 5000:
+                    break
+
+        if not images:
+            print("Warning: Could not load HAM10000 images. Falling back to dummy data.")
+            return self._generate_dummy_data(100)
+
+        print(f"✓ Loaded {len(images)} real labeled images from HAM10000")
+        return np.array(images), np.array(labels)
+
+    def _make_real_label(self, dx_code: str) -> np.ndarray:
+        """Build multi-hot label vector from a HAM10000 dx code (no heuristics)."""
+        label_vector = np.zeros(self.num_classes, dtype=np.float32)
+        skin_type = self._HAM_TO_SKIN_TYPE[dx_code]
+        condition  = self._HAM_TO_CONDITION[dx_code]
+        label_vector[self.skin_types.index(skin_type)] = 1.0
+        label_vector[len(self.skin_types) + self.conditions.index(condition)] = 1.0
+        return label_vector
+
     def load_isic_dataset(self) -> Tuple[np.ndarray, np.ndarray]:
         """
-        Load ISIC dataset from TensorFlow Datasets or local directory.
+        Load ISIC dataset. Prefers HAM10000 (real clinical labels).
+        Falls back to local ISIC directory, then dummy data.
+        NOTE: brightness-based synthetic labels are no longer used for real images.
         """
-        print("Loading ISIC dataset...")
+        print("Loading skin dataset…")
+
+        # Prefer HAM10000 (has real labels)
+        ham_dir  = Path("ml/data/ham10000")
+        meta_path = ham_dir / "HAM10000_metadata.csv"
+        if meta_path.exists() and list(ham_dir.rglob("*.jpg")):
+            return self.load_ham10000_dataset()
+
         isic_path = Path(self.dataset_config['isic_path'])
-        
-        # Try loading from TensorFlow Datasets first
+
+        # Try loading from TensorFlow Datasets
         try:
             import tensorflow_datasets as tfds
-            print("Attempting to load ISIC from TensorFlow Datasets...")
-            
-            # Load ISIC 2019 dataset
+            print("Attempting to load ISIC from TensorFlow Datasets…")
             ds, info = tfds.load(
                 'isic2019',
                 split='train',
@@ -49,60 +142,65 @@ class SkinDataLoader:
                 as_supervised=False,
                 data_dir=str(isic_path.parent)
             )
-            
-            images = []
-            labels = []
-            
-            print(f"Processing {info.splits['train'].num_examples} images...")
-            for i, example in enumerate(ds.take(5000)):  
+
+            # ISIC 2019 has a 'label' feature (int) corresponding to:
+            # 0=MEL, 1=NV, 2=BCC, 3=AK, 4=BKL, 5=DF, 6=VASC, 7=SCC, 8=UNK
+            _isic_dx = ["mel", "nv", "bcc", "akiec", "bkl", "df", "vasc", "mel", "nv"]
+
+            images, labels = [], []
+            for i, example in enumerate(ds.take(5000)):
                 if i % 500 == 0:
-                    print(f"  Processed {i} images...")
-                
-                # Extract image
+                    print(f"  Processed {i} images…")
                 img = example['image']
                 img = tf.image.resize(img, self.image_size)
                 img = tf.cast(img, tf.float32) / 255.0
                 images.append(img.numpy())
-            
-                label = self._create_synthetic_label(img.numpy())
-                labels.append(label)
-            
+
+                # Use real ISIC label if available, else fallback
+                dx_int = int(example.get('label', 1))
+                dx_code = _isic_dx[dx_int] if dx_int < len(_isic_dx) else "nv"
+                if dx_code in self._HAM_TO_SKIN_TYPE:
+                    labels.append(self._make_real_label(dx_code))
+                else:
+                    labels.append(self._make_real_label("nv"))
+
             print(f"✓ Loaded {len(images)} images from ISIC dataset")
             return np.array(images), np.array(labels)
-            
+
         except Exception as e:
             print(f"Could not load from TensorFlow Datasets: {e}")
-        
-        # Try loading from local directory
+
+        # Try local ISIC directory (folder name = skin type label)
         if isic_path.exists():
             print(f"Loading from local directory: {isic_path}")
-            images = []
-            labels = []
-            
-            # Load images from directory structure
+            images, labels = [], []
             for img_path in isic_path.rglob('*.jpg'):
                 try:
                     img = self._load_and_preprocess_image(str(img_path))
+                    # Use parent folder name as skin type if it matches
+                    folder = img_path.parent.name
+                    if folder in self.skin_types:
+                        label = np.zeros(self.num_classes, dtype=np.float32)
+                        label[self.skin_types.index(folder)] = 1.0
+                        label[len(self.skin_types) + self.conditions.index("None detected")] = 1.0
+                    else:
+                        # No recognizable folder label — skip rather than guess
+                        continue
                     images.append(img)
-                    
-                    # Create label from directory structure or filename
-                    label = self._create_synthetic_label(img)
                     labels.append(label)
-                    
                     if len(images) % 100 == 0:
-                        print(f"  Loaded {len(images)} images...")
-                    
-                    if len(images) >= 5000:  # Limit dataset size
+                        print(f"  Loaded {len(images)} images…")
+                    if len(images) >= 5000:
                         break
-                except Exception as e:
+                except Exception:
                     continue
-            
+
             if images:
-                print(f"✓ Loaded {len(images)} images from local directory")
+                print(f"✓ Loaded {len(images)} labeled images from local directory")
                 return np.array(images), np.array(labels)
-        
-        print(f"Warning: No ISIC data found. Using dummy data.")
-        print("To download ISIC dataset, run: python ml/scripts/download_isic.py")
+
+        print("Warning: No real data found. Using synthetic fallback.")
+        print("For real training, run: python ml/train_pipeline.py")
         return self._generate_dummy_data(100)
     
     def load_bitmoji_dataset(self) -> Tuple[np.ndarray, np.ndarray]:

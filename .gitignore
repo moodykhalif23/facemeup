@@ -2,14 +2,45 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
+
+# Environment files (contain secrets)
 .env
+.env.local
+.env.*.local
+
+# Python virtual environments
 .venv/
+.venv
+venv/
+
+# Node
 node_modules/
+
+# OS
 .DS_Store
+Thumbs.db
+
+# Test / lint caches
 coverage/
 .pytest_cache/
 backend/.mypy_cache/
 backend/.ruff_cache/
+
+# Frontend
 frontend/.expo/
-.venv
+
+# IDE
 .vscode
+.idea/
+
+# ML training data (large, re-downloadable)
+backend/ml/data/
+backend/ml/checkpoints/
+backend/ml/logs/
+backend/ml/training.log
+
+# Trained model artifacts (generated, not source)
+backend/app/models_artifacts/
+
+# Zip archives
+*.zip
