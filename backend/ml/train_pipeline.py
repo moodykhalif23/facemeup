@@ -16,10 +16,8 @@ import os
 import sys
 import csv
 import time
-import shutil
 import zipfile
 import argparse
-import urllib.request
 from pathlib import Path
 
 import requests
@@ -96,21 +94,24 @@ _CHUNK = 8 * 1024 * 1024  # 8 MB chunks
 
 
 def download_file(url: str, dest: Path, label: str):
-    """Download with requests streaming + resume support."""
+    """Download with requests streaming + resume support via .part files."""
+    if dest.exists():
+        print(f"  ✓ Already downloaded: {dest.name}")
+        return
+
     headers = {
         "User-Agent": "Mozilla/5.0 (compatible; SkinCareML/1.0; Python/3.11)",
         "Accept": "*/*",
     }
 
-    # Resume support: send Range header if partial file exists
-    existing = dest.stat().st_size if dest.exists() else 0
+    # Resume a previous partial download if a .part file exists
+    tmp = dest.with_suffix(dest.suffix + ".part")
+    existing = tmp.stat().st_size if tmp.exists() else 0
     if existing:
         headers["Range"] = f"bytes={existing}-"
         print(f"\n  Resuming {label} from {existing/1e6:.1f} MB …")
     else:
         print(f"\n  Downloading {label} …")
-
-    tmp = dest.with_suffix(dest.suffix + ".part")
 
     try:
         with requests.get(url, headers=headers, stream=True, timeout=60) as r:
@@ -141,9 +142,7 @@ def download_file(url: str, dest: Path, label: str):
 
     except Exception as e:
         print(f"\n  ✗ Failed: {label}: {e}")
-        # Keep .part file so next run can resume
-        if tmp.exists() and not existing:
-            tmp.rename(dest)  # save progress for resume
+        # Leave the .part file in place so the next run can resume
         raise
 
 
@@ -359,7 +358,6 @@ def create_real_datasets(label_index: dict, config: dict):
 # Step 4 – Train & export
 # ---------------------------------------------------------------------------
 def build_model(config: dict, phase: int):
-    import tensorflow as tf
     from tensorflow import keras
     from tensorflow.keras import layers
 
@@ -604,7 +602,7 @@ def main():
         sys.exit(1)
 
     # ── Step 3: Datasets ─────────────────────────────────────────────────
-    train_ds, val_ds, test_ds, test_items = create_real_datasets(label_index, config)
+    train_ds, val_ds, test_ds, _ = create_real_datasets(label_index, config)
 
     # ── Step 4: Train ────────────────────────────────────────────────────
     model = None
