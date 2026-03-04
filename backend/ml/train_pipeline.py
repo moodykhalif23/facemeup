@@ -22,6 +22,8 @@ import argparse
 import urllib.request
 from pathlib import Path
 
+import requests
+
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 
 import numpy as np
@@ -90,41 +92,72 @@ _META_FILENAME = "HAM10000_metadata.tab"   # tab-separated values
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
-def _progress_hook(block_num, block_size, total_size):
-    downloaded = block_num * block_size
-    if total_size > 0:
-        pct = min(100, downloaded * 100 / total_size)
-        mb = downloaded / 1_048_576
-        total_mb = total_size / 1_048_576
-        bar = "█" * int(pct / 2) + "░" * (50 - int(pct / 2))
-        print(f"\r  [{bar}] {pct:5.1f}%  {mb:.1f}/{total_mb:.1f} MB", end="", flush=True)
+_CHUNK = 8 * 1024 * 1024  # 8 MB chunks
 
 
 def download_file(url: str, dest: Path, label: str):
-    if dest.exists():
-        print(f"  ✓ Already downloaded: {dest.name}")
-        return
-    print(f"\n  Downloading {label} …")
+    """Download with requests streaming + resume support."""
+    headers = {
+        "User-Agent": "Mozilla/5.0 (compatible; SkinCareML/1.0; Python/3.11)",
+        "Accept": "*/*",
+    }
+
+    # Resume support: send Range header if partial file exists
+    existing = dest.stat().st_size if dest.exists() else 0
+    if existing:
+        headers["Range"] = f"bytes={existing}-"
+        print(f"\n  Resuming {label} from {existing/1e6:.1f} MB …")
+    else:
+        print(f"\n  Downloading {label} …")
+
+    tmp = dest.with_suffix(dest.suffix + ".part")
+
     try:
-        opener = urllib.request.build_opener()
-        opener.addheaders = [
-            ("User-Agent", "Mozilla/5.0 (compatible; SkinCareML/1.0; Python/3.11)"),
-            ("Accept", "*/*"),
-        ]
-        urllib.request.install_opener(opener)
-        urllib.request.urlretrieve(url, dest, _progress_hook)
-        print()  # newline after progress bar
-        print(f"  ✓ Saved: {dest}")
+        with requests.get(url, headers=headers, stream=True, timeout=60) as r:
+            r.raise_for_status()
+            total = int(r.headers.get("Content-Length", 0)) + existing
+            mode = "ab" if existing else "wb"
+
+            downloaded = existing
+            last_print = time.time()
+
+            with open(tmp, mode) as f:
+                for chunk in r.iter_content(chunk_size=_CHUNK):
+                    if chunk:
+                        f.write(chunk)
+                        downloaded += len(chunk)
+                        now = time.time()
+                        if now - last_print >= 5:  # print every 5s
+                            pct = (downloaded / total * 100) if total else 0
+                            mb = downloaded / 1e6
+                            total_mb = total / 1e6
+                            bar = "█" * int(pct / 2) + "░" * (50 - int(pct / 2))
+                            print(f"  [{bar}] {pct:5.1f}%  {mb:.0f}/{total_mb:.0f} MB",
+                                  flush=True)
+                            last_print = now
+
+        tmp.rename(dest)
+        print(f"  ✓ Saved: {dest}  ({dest.stat().st_size/1e6:.1f} MB)")
+
     except Exception as e:
-        print(f"\n  ✗ Failed to download {label}: {e}")
+        print(f"\n  ✗ Failed: {label}: {e}")
+        # Keep .part file so next run can resume
+        if tmp.exists() and not existing:
+            tmp.rename(dest)  # save progress for resume
         raise
 
 
 def extract_zip(zip_path: Path, dest: Path):
+    """Extract zip, with fallback to extracting valid entries on partial files."""
     print(f"  Extracting {zip_path.name} …")
-    with zipfile.ZipFile(zip_path, "r") as zf:
-        zf.extractall(dest)
-    print(f"  ✓ Extracted to {dest}")
+    try:
+        with zipfile.ZipFile(zip_path, "r") as zf:
+            zf.extractall(dest)
+        print(f"  ✓ Extracted to {dest}")
+    except zipfile.BadZipFile:
+        print(f"  ✗ Bad zip — file may be incomplete. Re-run to re-download.")
+        zip_path.unlink(missing_ok=True)
+        raise
 
 
 # ---------------------------------------------------------------------------
