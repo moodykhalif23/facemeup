@@ -336,7 +336,9 @@ def create_real_datasets(label_index: dict, config: dict):
 
     def load_image(path_str: str) -> np.ndarray:
         raw = tf.io.read_file(path_str)
-        img = tf.image.decode_jpeg(raw, channels=3)
+        img = tf.image.decode_jpeg(raw, channels=3,
+                                   try_recover_truncated=True,
+                                   acceptable_fraction=0.5)
         img = tf.image.resize(img, [IMG_SIZE, IMG_SIZE])
         img = tf.cast(img, tf.float32) / 255.0
         return img
@@ -425,7 +427,7 @@ def build_model(config: dict, phase: int):
     x = layers.Dense(arch["dense_units"], activation=arch["dense_activation"], name="dense")(x)
     if arch["dropout_rate"] > 0:
         x = layers.Dropout(arch["dropout_rate"], name="dropout")(x)
-    outputs = layers.Dense(NUM_CLASSES, activation="softmax", name="output")(x)
+    outputs = layers.Dense(NUM_CLASSES, activation="sigmoid", name="output")(x)
 
     model = keras.Model(inputs=inputs, outputs=outputs, name=f"SkinAnalysis_P{phase}")
 
@@ -434,9 +436,9 @@ def build_model(config: dict, phase: int):
 
     model.compile(
         optimizer=optimizer,
-        loss=keras.losses.CategoricalCrossentropy(),
+        loss=keras.losses.BinaryCrossentropy(),
         metrics=[
-            keras.metrics.CategoricalAccuracy(name="accuracy"),
+            keras.metrics.BinaryAccuracy(name="accuracy"),
             keras.metrics.Precision(name="precision"),
             keras.metrics.Recall(name="recall"),
         ],
