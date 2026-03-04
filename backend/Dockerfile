@@ -11,8 +11,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # Install Python dependencies
 COPY requirements.txt /app/requirements.txt
-RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --upgrade pip --root-user-action=ignore && \
+    pip install --no-cache-dir -r requirements.txt --root-user-action=ignore
 
 
 COPY alembic.ini /app/alembic.ini
