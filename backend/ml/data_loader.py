@@ -29,7 +29,6 @@ class SkinDataLoader:
         self.conditions = self.model_config['conditions']
         self.num_classes = len(self.skin_types) + len(self.conditions)
         
-    # HAM10000 clinical label → our skin type/condition label space
     # Based on dermatological characteristics of each lesion category.
     _HAM_TO_SKIN_TYPE = {
         "nv":    "Normal",      # benign nevi — normal skin
@@ -58,7 +57,6 @@ class SkinDataLoader:
         """
         import csv
         ham_dir = Path("ml/data/ham10000")
-        # Supports both .tab (Dataverse download) and .csv
         meta_path = ham_dir / "HAM10000_metadata.tab"
         if not meta_path.exists():
             meta_path = ham_dir / "HAM10000_metadata.csv"
