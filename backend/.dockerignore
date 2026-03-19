@@ -1,0 +1,15 @@
+# Exclude large ML dataset from build context — it's mounted as a volume at runtime
+ml/data/ham10000
+ml/data/face_captures
+ml/data/training_queue
+
+# Python cache
+__pycache__
+*.pyc
+*.pyo
+.pytest_cache
+
+# Dev artifacts
+.env
+*.log
+.git
