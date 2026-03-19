@@ -24,6 +24,8 @@ class SkinProfile(BaseModel):
     conditions: list[str]
     confidence: float
     face_quality_score: float | None = None
+    skin_type_scores: dict[str, float] | None = None   # probability per skin type
+    condition_scores: dict[str, float] | None = None   # probability per condition
 
 
 class AnalyzeResponse(BaseModel):

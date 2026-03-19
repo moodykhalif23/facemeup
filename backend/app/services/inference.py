@@ -80,7 +80,31 @@ def _questionnaire_profile(questionnaire: Optional[Dict]) -> SkinProfile:
     conditions = list({_CONCERN_MAP[c] for c in raw_concerns if c in _CONCERN_MAP})
     if not conditions:
         conditions = ["None detected"]
-    return SkinProfile(skin_type=skin_type, conditions=conditions, confidence=0.72)
+
+    confidence = 0.72
+    all_skin = ["Oily", "Dry", "Combination", "Normal", "Sensitive"]
+    all_cond  = ["Acne", "Hyperpigmentation", "Uneven tone", "Dehydration", "None detected"]
+
+    # Synthesise scores: detected label gets `confidence`, rest share remainder equally
+    remainder = round((1.0 - confidence) / (len(all_skin) - 1), 4)
+    skin_type_scores = {s: (round(confidence, 4) if s == skin_type else remainder) for s in all_skin}
+
+    cond_detected = set(conditions) - {"None detected"}
+    remainder_c = round((1.0 - 0.65 * len(cond_detected)) / max(1, len(all_cond) - len(cond_detected)), 4)
+    condition_scores = {
+        c: (0.65 if c in cond_detected else remainder_c)
+        for c in all_cond
+    }
+    if "None detected" in conditions:
+        condition_scores["None detected"] = round(confidence, 4)
+
+    return SkinProfile(
+        skin_type=skin_type,
+        conditions=conditions,
+        confidence=confidence,
+        skin_type_scores=skin_type_scores,
+        condition_scores=condition_scores,
+    )
 
 
 def run_skin_inference(
@@ -159,12 +183,25 @@ def run_skin_inference(
         # Use the highest confidence score as overall confidence
         confidence = float(max(skin_confidence, np.max(cond_scores) if len(cond_scores) > 0 else 0.5))
         
+        skin_type_scores = {
+            skin_labels[i]: round(float(probs[i]), 4)
+            for i in range(len(skin_labels))
+            if i < len(probs)
+        }
+        condition_scores = {
+            condition_labels[i]: round(float(cond_scores[i]), 4)
+            for i in range(len(condition_labels))
+            if i < len(cond_scores)
+        }
+
         return (
             SkinProfile(
                 skin_type=skin_type,
                 conditions=conditions,
                 confidence=round(confidence, 4),
                 face_quality_score=round(face_quality_score, 4) if face_quality_score else None,
+                skin_type_scores=skin_type_scores,
+                condition_scores=condition_scores,
             ),
             "server_savedmodel",
         )

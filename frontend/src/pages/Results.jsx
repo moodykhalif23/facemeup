@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 import { Layout, Card, Button, Typography, Tag, Space, Progress } from 'antd';
 import { ShopOutlined } from '@ant-design/icons';
 import AppHeader from '../components/AppHeader';
+import SkinCharts from '../components/SkinCharts';
 
 const { Content } = Layout;
 const { Title, Text } = Typography;
@@ -169,6 +170,9 @@ export default function Results() {
                 New Analysis
               </Button>
             </Space>
+
+            {/* ── Visualisation breakdown (ECharts) ── */}
+            <SkinCharts profile={profile} />
           </Space>
         </div>
       </Content>
