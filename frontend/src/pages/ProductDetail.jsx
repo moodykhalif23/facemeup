@@ -67,8 +67,10 @@ export default function ProductDetail() {
     return (
       <Layout style={{ minHeight: '100vh', background: 'var(--background)' }}>
         <AppHeader title="Product Details" showBack />
-        <Content style={{ padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <Text style={{ color: 'var(--muted-foreground)' }}>Loading...</Text>
+        <Content>
+          <div style={{ padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Text style={{ color: 'var(--muted-foreground)' }}>Loading...</Text>
+          </div>
         </Content>
       </Layout>
     );
@@ -78,8 +80,8 @@ export default function ProductDetail() {
     <Layout style={{ minHeight: '100vh', background: 'var(--background)' }}>
       <AppHeader title="Product Details" showBack />
 
-      <Content style={{ paddingTop: 16, paddingLeft: 16, paddingRight: 16, paddingBottom: 100, overflowX: 'hidden' }}>
-        <div style={{ maxWidth: 1200, margin: '0 auto', width: '100%' }}>
+      <Content style={{ overflowX: 'hidden' }}>
+        <div style={{ padding: '16px 16px 100px', maxWidth: 1200, margin: '0 auto', width: '100%' }}>
           <div style={{
             display: 'grid',
             gridTemplateColumns: isDesktop ? '1fr 1fr' : '1fr',
