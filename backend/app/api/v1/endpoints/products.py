@@ -84,5 +84,19 @@ def reseed_catalog(
     db: Session = Depends(get_db),
     _: User = Depends(require_roles("admin")),
 ) -> dict[str, int]:
+    from sqlalchemy import delete
+    from app.services.bootstrap import DEFAULT_PRODUCTS
+    from app.core.redis_client import get_redis_client
+
+    db.execute(delete(ProductCatalog))
+    db.commit()
+    try:
+        get_redis_client().delete("products:catalog")
+    except Exception:
+        pass
+
+    db.add_all(DEFAULT_PRODUCTS)
+    db.commit()
+
     count = db.execute(select(ProductCatalog)).scalars().all()
     return {"products": len(count)}
