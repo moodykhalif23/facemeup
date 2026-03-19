@@ -18,29 +18,6 @@ const getProxiedImageUrl = (imageUrl) => {
   return `${baseUrl}/api/v1/proxy/image?url=${encodeURIComponent(imageUrl)}`;
 };
 
-const CATEGORY_STYLES = {
-  Serum:        { gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' },
-  Moisturizer:  { gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)' },
-  Cleanser:     { gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)' },
-  Toner:        { gradient: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)' },
-  Treatment:    { gradient: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)' },
-  Sunscreen:    { gradient: 'linear-gradient(135deg, #f7971e 0%, #ffd200 100%)' },
-  Mask:         { gradient: 'linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%)' },
-  Exfoliant:    { gradient: 'linear-gradient(135deg, #fccb90 0%, #d57eeb 100%)' },
-  'Eye Cream':  { gradient: 'linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%)' },
-  'Eye Serum':  { gradient: 'linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%)' },
-  Essence:      { gradient: 'linear-gradient(135deg, #96fbc4 0%, #f9f586 100%)' },
-  'Body Lotion':{ gradient: 'linear-gradient(135deg, #fddb92 0%, #d1fdff 100%)' },
-  'Body Balm':  { gradient: 'linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%)' },
-  'Body Milk':  { gradient: 'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)' },
-  'Body Wash':  { gradient: 'linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%)' },
-  'Lip Care':   { gradient: 'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)' },
-  Powder:       { gradient: 'linear-gradient(135deg, #e0e0e0 0%, #f5f5f5 100%)' },
-  Gel:          { gradient: 'linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%)' },
-};
-
-const getProductVisual = (category) =>
-  CATEGORY_STYLES[category] || { gradient: 'linear-gradient(135deg, #c3cfe2 0%, #a8b8d0 100%)' };
 
 export default function ProductDetail() {
   const navigate = useNavigate();
@@ -126,7 +103,6 @@ export default function ProductDetail() {
               styles={{ body: { padding: 0 } }}
             >
               {(() => {
-                const visual = getProductVisual(product.category);
                 const proxied = getProxiedImageUrl(product.image_url);
                 const imgH = isDesktop ? 400 : 300;
                 return (
@@ -146,20 +122,19 @@ export default function ProductDetail() {
                       display: proxied ? 'none' : 'flex',
                       width: '100%',
                       height: '100%',
-                      background: visual.gradient,
+                      background: '#ffffff',
+                      border: '1px solid #f0f0f0',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      flexDirection: 'column',
                       position: proxied ? 'absolute' : 'relative',
                       top: 0, left: 0,
                     }}>
                       <span style={{
                         fontSize: 13,
-                        fontWeight: 700,
-                        color: 'rgba(255,255,255,0.9)',
+                        fontWeight: 600,
+                        color: '#bbb',
                         textTransform: 'uppercase',
                         letterSpacing: 2,
-                        textShadow: '0 1px 3px rgba(0,0,0,0.25)',
                       }}>
                         {product.category || 'Skincare'}
                       </span>

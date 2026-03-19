@@ -23,6 +23,7 @@ def analyze(
     if payload.landmarks:
         landmarks = [{"x": lm.x, "y": lm.y, "z": lm.z} for lm in payload.landmarks]
     
-    profile, mode = run_skin_inference(payload.image_base64, landmarks)
+    questionnaire = payload.questionnaire.model_dump() if payload.questionnaire else None
+    profile, mode = run_skin_inference(payload.image_base64, landmarks, questionnaire)
     append_profile(db, current_user.id, profile.skin_type, profile.conditions, profile.confidence)
     return AnalyzeResponse(profile=profile, inference_mode=mode)

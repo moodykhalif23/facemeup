@@ -54,16 +54,40 @@ def _preprocess_image(image_base64: str, landmarks: Optional[List[Dict]] = None)
     return np.expand_dims(arr, axis=0)
 
 
-def _default_profile() -> SkinProfile:
-    """Fallback profile when model inference fails"""
-    return SkinProfile(
-        skin_type="Combination",
-        conditions=["Dehydration"],
-        confidence=0.65,
-    )
+_SKIN_FEEL_MAP = {
+    "oily": "Oily",
+    "dry": "Dry",
+    "combination": "Combination",
+    "normal": "Normal",
+    "sensitive": "Sensitive",
+}
+
+_CONCERN_MAP = {
+    "acne": "Acne",
+    "dark_spots": "Hyperpigmentation",
+    "wrinkles": "Uneven tone",
+    "redness": "Sensitive",
+    "dryness": "Dehydration",
+    "oiliness": "Acne",
+}
 
 
-def run_skin_inference(image_base64: str, landmarks: Optional[List[Dict]] = None) -> tuple[SkinProfile, str]:
+def _questionnaire_profile(questionnaire: Optional[Dict]) -> SkinProfile:
+    """Derive skin profile from questionnaire when model is unavailable"""
+    q = questionnaire or {}
+    skin_type = _SKIN_FEEL_MAP.get((q.get("skin_feel") or "").lower(), "Combination")
+    raw_concerns = q.get("concerns") or []
+    conditions = list({_CONCERN_MAP[c] for c in raw_concerns if c in _CONCERN_MAP})
+    if not conditions:
+        conditions = ["None detected"]
+    return SkinProfile(skin_type=skin_type, conditions=conditions, confidence=0.72)
+
+
+def run_skin_inference(
+    image_base64: str,
+    landmarks: Optional[List[Dict]] = None,
+    questionnaire: Optional[Dict] = None,
+) -> tuple[SkinProfile, str]:
     """
     Run skin analysis inference on the provided image
     
@@ -89,7 +113,7 @@ def run_skin_inference(image_base64: str, landmarks: Optional[List[Dict]] = None
         batch = _preprocess_image(image_base64, landmarks)
         infer = model.signatures.get("serving_default")
         if infer is None:
-            return _default_profile(), "savedmodel_missing_signature"
+            return _questionnaire_profile(questionnaire), "savedmodel_missing_signature"
 
         tensor = tf.convert_to_tensor(batch, dtype=tf.float32)
         input_args = infer.structured_input_signature[1]
@@ -101,11 +125,11 @@ def run_skin_inference(image_base64: str, landmarks: Optional[List[Dict]] = None
 
         values = list(outputs.values())
         if not values:
-            return _default_profile(), "savedmodel_empty_output"
+            return _questionnaire_profile(questionnaire), "savedmodel_empty_output"
 
         probs = np.array(values[0].numpy()[0], dtype=np.float32)
         if probs.size == 0:
-            return _default_profile(), "savedmodel_empty_probs"
+            return _questionnaire_profile(questionnaire), "savedmodel_empty_probs"
 
         # Determine skin type (first N labels)
         top_skin_idx = int(np.argmax(probs[: len(skin_labels)])) if len(probs) >= len(skin_labels) else 0
@@ -145,6 +169,5 @@ def run_skin_inference(image_base64: str, landmarks: Optional[List[Dict]] = None
             "server_savedmodel",
         )
     except Exception as e:
-        # Log the error for debugging
         print(f"Inference error: {e}")
-        return _default_profile(), "server_savedmodel_fallback"
+        return _questionnaire_profile(questionnaire), "questionnaire_fallback"
