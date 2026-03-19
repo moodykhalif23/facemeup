@@ -1,6 +1,5 @@
 import ReactECharts from 'echarts-for-react';
 
-// ─── Seaborn-inspired palette aligned with the app theme ─────────────────────
 const SKIN_PALETTE = {
   Oily:        '#F97316',   // amber-500
   Dry:         '#0EA5E9',   // sky-500
@@ -17,14 +16,123 @@ const COND_PALETTE = {
   'None detected':   '#10B981',   // emerald-500
 };
 
-// ─── Shared ECharts base theme ────────────────────────────────────────────────
+// Shared ECharts base theme
 const baseTextStyle = { color: 'var(--muted-foreground)', fontFamily: 'inherit', fontSize: 12 };
 const baseGrid      = { left: 16, right: 32, top: 8, bottom: 8, containLabel: true };
 
-// ─── Horizontal-bar option factory ───────────────────────────────────────────
+
+function makeSkinTypeBarOption({ skinData, detectedType }) {
+  const labels  = skinData.map((d) => d.name);
+  const values  = skinData.map((d) => Math.round(d.value * 100));
+  const colors  = skinData.map((d) => ({
+    value: Math.round(d.value * 100),
+    itemStyle: {
+      color:   SKIN_PALETTE[d.name] || '#F97316',
+      opacity: d.name === detectedType ? 1 : 0.5,
+      borderRadius: [4, 4, 0, 0],
+    },
+  }));
+
+  return {
+    backgroundColor: 'transparent',
+    title: {
+      text:    'Skin Type Confidence',
+      subtext: `Detected: ${detectedType}`,
+      textStyle:    { color: 'var(--card-foreground)', fontSize: 14, fontWeight: 700 },
+      subtextStyle: { color: 'var(--primary)', fontSize: 12 },
+    },
+    tooltip: {
+      trigger: 'axis',
+      axisPointer: { type: 'shadow' },
+      backgroundColor: 'var(--popover)',
+      borderColor:     'var(--border)',
+      textStyle:       { color: 'var(--popover-foreground)', fontSize: 12 },
+      formatter: (params) => `${params[0].name}: <b>${params[0].value}%</b>`,
+    },
+    legend: {
+      data:      ['Confidence %'],
+      top:       28,
+      textStyle: baseTextStyle,
+    },
+    toolbox: {
+      show: true,
+      orient: 'vertical',
+      right: 8,
+      top: 'center',
+      feature: {
+        magicType: {
+          show: true,
+          type: ['line', 'bar'],
+          title: { line: 'Line', bar: 'Bar' },
+        },
+        restore:      { show: true, title: 'Reset' },
+        saveAsImage:  { show: true, title: 'Save' },
+      },
+      iconStyle: {
+        borderColor: 'var(--muted-foreground)',
+      },
+    },
+    calculable: true,
+    grid: { left: 16, right: 56, top: 70, bottom: 8, containLabel: true },
+    xAxis: [
+      {
+        type:  'category',
+        data:  labels,
+        axisLabel: baseTextStyle,
+        axisLine: { lineStyle: { color: 'var(--border)' } },
+        axisTick: { show: false },
+      },
+    ],
+    yAxis: [
+      {
+        type: 'value',
+        min:  0,
+        max:  100,
+        axisLabel: { ...baseTextStyle, formatter: '{value}%' },
+        splitLine: { lineStyle: { color: 'var(--border)', type: 'dashed' } },
+        axisLine:  { show: false },
+        axisTick:  { show: false },
+      },
+    ],
+    series: [
+      {
+        name: 'Confidence %',
+        type: 'bar',
+        data: colors,
+        barMaxWidth: 48,
+        label: {
+          show:      true,
+          position:  'top',
+          formatter: ({ value }) => `${value}%`,
+          color:     'var(--muted-foreground)',
+          fontSize:  11,
+        },
+        markPoint: {
+          data: [
+            { type: 'max', name: 'Max', label: { color: '#fff', fontSize: 11 } },
+            { type: 'min', name: 'Min', label: { color: '#fff', fontSize: 11 } },
+          ],
+          symbolSize: 52,
+          itemStyle: { opacity: 0.85 },
+        },
+        markLine: {
+          data: [{ type: 'average', name: 'Avg' }],
+          lineStyle: { color: 'var(--primary)', type: 'dashed' },
+          label: {
+            formatter: ({ value }) => `Avg ${Math.round(value)}%`,
+            color: 'var(--primary)',
+            fontSize: 11,
+          },
+        },
+        emphasis: { focus: 'self' },
+      },
+    ],
+  };
+}
+
+// Horizontal-bar option factory
 function makeHBarOption({ data, palette, selectedKey }) {
-  // data: [{ name, value }]  — value is 0-1 probability
-  const sorted = [...data].sort((a, b) => a.value - b.value); // ascending so largest is on top
+  const sorted = [...data].sort((a, b) => a.value - b.value);
 
   return {
     backgroundColor: 'transparent',
@@ -44,10 +152,7 @@ function makeHBarOption({ data, palette, selectedKey }) {
       type: 'value',
       min: 0,
       max: 1,
-      axisLabel: {
-        ...baseTextStyle,
-        formatter: (v) => `${Math.round(v * 100)}%`,
-      },
+      axisLabel: { ...baseTextStyle, formatter: (v) => `${Math.round(v * 100)}%` },
       splitLine: { lineStyle: { color: 'var(--border)', type: 'dashed' } },
       axisLine: { show: false },
       axisTick: { show: false },
@@ -55,10 +160,7 @@ function makeHBarOption({ data, palette, selectedKey }) {
     yAxis: {
       type: 'category',
       data: sorted.map((d) => d.name),
-      axisLabel: {
-        ...baseTextStyle,
-        rich: {},
-      },
+      axisLabel: baseTextStyle,
       axisLine: { show: false },
       axisTick: { show: false },
     },
@@ -87,7 +189,7 @@ function makeHBarOption({ data, palette, selectedKey }) {
   };
 }
 
-// ─── Radar option (condition overview) ───────────────────────────────────────
+// Radar option
 function makeRadarOption({ condData, selectedKeys }) {
   const indicators = condData.map(({ name }) => ({
     name,
@@ -136,7 +238,7 @@ function makeRadarOption({ condData, selectedKeys }) {
   };
 }
 
-// ─── Face quality gauge ───────────────────────────────────────────────────────
+// Face quality gauge
 function makeGaugeOption(score) {
   const pct = Math.round(score * 100);
   const color =
@@ -188,11 +290,10 @@ function makeGaugeOption(score) {
   };
 }
 
-// ─── Main component ───────────────────────────────────────────────────────────
+// Main component
 export default function SkinCharts({ profile }) {
   const { skin_type, conditions = [], skin_type_scores, condition_scores, face_quality_score } = profile;
 
-  // Fallback: synthesise from skin_type + confidence if scores not provided
   const allSkinTypes  = ['Oily', 'Dry', 'Combination', 'Normal', 'Sensitive'];
   const allConditions = ['Acne', 'Hyperpigmentation', 'Uneven tone', 'Dehydration', 'None detected'];
 
@@ -227,12 +328,11 @@ export default function SkinCharts({ profile }) {
       {/* Section header */}
       <p style={{ ...sectionTitle, marginBottom: 0 }}>Detailed Breakdown</p>
 
-      {/* Skin type probability bars */}
+      {/* Skin type vertical bar — rainfall style with toolbox + markPoint */}
       <div style={card}>
-        <p style={sectionTitle}>Skin Type Scores</p>
         <ReactECharts
-          option={makeHBarOption({ data: skinData, palette: SKIN_PALETTE, selectedKey: skin_type })}
-          style={{ height: 180 }}
+          option={makeSkinTypeBarOption({ skinData, detectedType: skin_type })}
+          style={{ height: 280 }}
           opts={{ renderer: 'svg' }}
         />
       </div>
