@@ -94,15 +94,7 @@ function makeSkinTypeBarOption({ skinData, detectedType }) {
           symbolSize: 52,
           itemStyle: { opacity: 0.85 },
         },
-        markLine: {
-          data: [{ type: 'average', name: 'Avg' }],
-          lineStyle: { color: 'var(--primary)', type: 'dashed' },
-          label: {
-            formatter: ({ value }) => `Avg ${Math.round(value)}%`,
-            color: 'var(--primary)',
-            fontSize: 11,
-          },
-        },
+        markLine: { data: [] },
         emphasis: { focus: 'self' },
       },
     ],
