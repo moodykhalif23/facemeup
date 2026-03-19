@@ -129,11 +129,7 @@ function makeNightingaleOption({ condData, selectedKeys }) {
         center:    ['50%', '46%'],
         roseType:  'area',
         itemStyle: { borderRadius: 8, borderColor: 'var(--card)', borderWidth: 2 },
-        label: {
-          color:    'var(--muted-foreground)',
-          fontSize: 11,
-          formatter: ({ name, value }) => `${name}\n${Math.round(value * 100)}%`,
-        },
+        label:     { show: false },
         labelLine: { show: false },
         emphasis: {
           label:     { fontSize: 13, fontWeight: 700 },
