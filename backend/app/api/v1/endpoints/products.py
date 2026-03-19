@@ -26,7 +26,7 @@ def list_products(db: Session = Depends(get_db)) -> list[Product]:
             id=row.sku,
             sku=row.sku,
             name=row.name,
-            price=row.price or 29.99,
+            price=row.price,
             ingredients=[v for v in row.ingredients_csv.split(",") if v],
             stock=row.stock,
             image_url=row.image_url,
@@ -53,23 +53,38 @@ def get_product(product_id: str, db: Session = Depends(get_db)) -> ProductDetail
     if not row:
         raise HTTPException(status_code=404, detail="Product not found")
     
-    # Parse benefits from description or use defaults
-    benefits = [
-        "Deeply hydrates skin",
-        "Reduces fine lines",
-        "Improves skin texture",
-        "Non-comedogenic formula"
-    ]
-    
+    # Derive benefits from ingredients in the product
+    ingredient_benefits = {
+        "Salicylic Acid": "Unclogs pores and reduces acne",
+        "Niacinamide": "Minimizes pores and controls oil",
+        "Hyaluronic Acid": "Deeply hydrates and plumps skin",
+        "Retinol": "Reduces fine lines and firms skin",
+        "Vitamin C": "Brightens skin and fades dark spots",
+        "Ceramides": "Restores and strengthens skin barrier",
+        "Glycolic Acid": "Exfoliates and improves texture",
+        "Tea Tree": "Targets blemishes and bacteria",
+        "Peptides": "Boosts collagen and firms skin",
+        "Alpha Arbutin": "Fades dark spots and evens tone",
+        "Kojic Acid": "Lightens hyperpigmentation",
+        "Centella": "Soothes and calms irritated skin",
+        "Shea Butter": "Deeply nourishes and moisturizes",
+        "Zinc": "Controls sebum and reduces inflammation",
+        "Aloe Vera": "Soothes and hydrates sensitive skin",
+    }
+    ingredients_list = [v.strip() for v in row.ingredients_csv.split(",") if v.strip()]
+    benefits = [ingredient_benefits[i] for i in ingredients_list if i in ingredient_benefits][:4]
+    if not benefits:
+        benefits = [f"Formulated with {ingredients_list[0]}" if ingredients_list else "Premium skincare formula"]
+
     product = ProductDetail(
         id=row.sku,
         sku=row.sku,
         name=row.name,
-        price=row.price or 29.99,
+        price=row.price,
         category=row.category or "Skincare",
         description=row.description or f"Premium skincare product: {row.name}",
         benefits=benefits,
-        ingredients=", ".join([v for v in row.ingredients_csv.split(",") if v]),
+        ingredients=", ".join(ingredients_list),
         usage="Apply twice daily to clean, dry skin. Gently massage until fully absorbed.",
         stock=row.stock,
         image_url=row.image_url

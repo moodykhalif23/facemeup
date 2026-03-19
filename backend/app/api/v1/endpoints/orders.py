@@ -126,7 +126,7 @@ def get_order(
     
     for item_data in items_data:
         product_name = item_data.get('product_name', 'Product')
-        price = item_data.get('price', 29.99)
+        price = item_data.get('price', 0.0)
         quantity = item_data.get('quantity', 1)
         
         items.append(OrderItemDetail(

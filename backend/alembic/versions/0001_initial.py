@@ -76,29 +76,7 @@ def upgrade() -> None:
     )
     op.create_index(op.f("ix_loyalty_ledger_user_id"), "loyalty_ledger", ["user_id"], unique=False)
 
-    op.bulk_insert(
-        sa.table(
-            "product_catalog",
-            sa.column("sku", sa.String),
-            sa.column("name", sa.String),
-            sa.column("ingredients_csv", sa.String),
-            sa.column("stock", sa.Integer),
-        ),
-        [
-            {
-                "sku": "DRR-ACN-001",
-                "name": "Dr Rashel Salicylic Clear Serum",
-                "ingredients_csv": "Salicylic Acid,Niacinamide,Tea Tree",
-                "stock": 24,
-            },
-            {
-                "sku": "EST-HYD-010",
-                "name": "Estelin Deep Hydration Cream",
-                "ingredients_csv": "Hyaluronic Acid,Ceramides,Glycerin",
-                "stock": 18,
-            },
-        ],
-    )
+    # Products are seeded via app/services/bootstrap.py on startup (106 real products)
 
 
 def downgrade() -> None:
