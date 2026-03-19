@@ -40,7 +40,6 @@ export default function Register() {
       <Card style={{ width: '100%', maxWidth: 400 }}>
         <div style={{ textAlign: 'center', marginBottom: 24 }}>
           <Title level={4} style={{ margin: 0 }}>Create Account</Title>
-          <Text type="secondary">Join SkinCare AI today</Text>
         </div>
 
         <Form
