@@ -100,6 +100,10 @@ export default function Recommendations() {
                           overflow: 'hidden',
                           position: 'relative',
                           flexShrink: 0,
+                          background: 'var(--muted)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
                         }}>
                           {proxied ? (
                             <img
@@ -108,11 +112,12 @@ export default function Recommendations() {
                               style={{
                                 width: '100%',
                                 height: '100%',
-                                objectFit: 'cover',
+                                objectFit: 'contain',
                                 display: 'block',
+                                padding: '8px',
                                 transition: 'transform 0.35s ease',
                               }}
-                              onMouseEnter={(e) => { if (!isMobile) e.currentTarget.style.transform = 'scale(1.06)'; }}
+                              onMouseEnter={(e) => { if (!isMobile) e.currentTarget.style.transform = 'scale(1.05)'; }}
                               onMouseLeave={(e) => { if (!isMobile) e.currentTarget.style.transform = 'scale(1)'; }}
                               onError={(e) => {
                                 e.currentTarget.style.display = 'none';
@@ -125,8 +130,6 @@ export default function Recommendations() {
                             display: proxied ? 'none' : 'flex',
                             width: '100%',
                             height: '100%',
-                            background: 'var(--muted)',
-                            border: '1px solid var(--border)',
                             alignItems: 'center',
                             justifyContent: 'center',
                             flexDirection: 'column',

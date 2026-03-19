@@ -78,7 +78,7 @@ export default function ProductDetail() {
     <Layout style={{ minHeight: '100vh', background: 'var(--background)' }}>
       <AppHeader title="Product Details" showBack />
 
-      <Content style={{ padding: '16px', paddingBottom: 100, overflowX: 'hidden' }}>
+      <Content style={{ paddingTop: 16, paddingLeft: 16, paddingRight: 16, paddingBottom: 100, overflowX: 'hidden' }}>
         <div style={{ maxWidth: 1200, margin: '0 auto', width: '100%' }}>
           <div style={{
             display: 'grid',
@@ -104,12 +104,20 @@ export default function ProductDetail() {
                 const proxied = getProxiedImageUrl(product.image_url);
                 const imgH = isDesktop ? 400 : 300;
                 return (
-                  <div style={{ height: imgH, overflow: 'hidden', position: 'relative' }}>
+                  <div style={{
+                    height: imgH,
+                    overflow: 'hidden',
+                    position: 'relative',
+                    background: 'var(--muted)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}>
                     {proxied && (
                       <img
                         src={proxied}
                         alt={product.name}
-                        style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                        style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block', padding: '12px' }}
                         onError={(e) => {
                           e.currentTarget.style.display = 'none';
                           e.currentTarget.nextSibling.style.display = 'flex';
@@ -120,8 +128,6 @@ export default function ProductDetail() {
                       display: proxied ? 'none' : 'flex',
                       width: '100%',
                       height: '100%',
-                      background: 'var(--muted)',
-                      border: '1px solid var(--border)',
                       alignItems: 'center',
                       justifyContent: 'center',
                       position: proxied ? 'absolute' : 'relative',
