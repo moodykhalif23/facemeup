@@ -36,48 +36,43 @@ export default function Analysis() {
       message.warning('Please capture your face first');
       return;
     }
+    if (loading) return;
 
     setLoading(true);
     try {
-      // Convert blob to base64
-      const reader = new FileReader();
-      reader.readAsDataURL(capturedImage);
-      
-      reader.onloadend = async () => {
-        const base64Image = reader.result.split(',')[1];
+      const base64Image = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(capturedImage);
+        reader.onloadend = () => resolve(reader.result.split(',')[1]);
+        reader.onerror = reject;
+      });
 
-        const questionnaire = {
-          skin_feel: values.skinFeel,
-          routine: values.routine,
-          concerns: values.concerns || [],
-        };
-
-        // Send to backend for analysis
-        const response = await api.post('/analyze', {
-          image_base64: base64Image,
-          questionnaire,
-          landmarks: landmarks.map(lm => ({
-            x: lm.x,
-            y: lm.y,
-            z: lm.z
-          }))
-        });
-
-        // Store result and navigate
-        dispatch(setCurrentAnalysis(response.data));
-        dispatch(addToHistory(response.data));
-        try {
-          await api.post('/training/submit', {
-            image_base64: base64Image,
-            skin_type: response.data.profile.skin_type,
-            conditions: response.data.profile.conditions || [],
-          });
-        } catch (trainErr) {
-          console.warn('Training submission failed:', trainErr);
-        }
-
-        navigate('/results');
+      const questionnaire = {
+        skin_feel: values.skinFeel,
+        routine: values.routine,
+        concerns: values.concerns || [],
       };
+
+      const response = await api.post('/analyze', {
+        image_base64: base64Image,
+        questionnaire,
+        landmarks: landmarks.map(lm => ({ x: lm.x, y: lm.y, z: lm.z }))
+      });
+
+      dispatch(setCurrentAnalysis(response.data));
+      dispatch(addToHistory(response.data));
+
+      try {
+        await api.post('/training/submit', {
+          image_base64: base64Image,
+          skin_type: response.data.profile.skin_type,
+          conditions: response.data.profile.conditions || [],
+        });
+      } catch (trainErr) {
+        console.warn('Training submission failed:', trainErr);
+      }
+
+      navigate('/results');
     } catch (error) {
       console.error('Analysis failed:', error);
       message.error(error.response?.data?.error?.message || 'Analysis failed. Please try again.');
@@ -207,7 +202,7 @@ export default function Analysis() {
                           borderRadius: 12
                         }}
                       >
-                        {loading ? <Spin /> : 'Analyze My Skin'}
+                        {loading ? 'Analyzing...' : 'Analyze My Skin'}
                       </Button>
 
                       <Button 
