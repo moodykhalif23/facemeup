@@ -152,7 +152,7 @@ function makeNightingaleOption({ condData, selectedKeys }) {
 function makeRadarOption({ condData, selectedKeys }) {
   const indicators = condData.map(({ name }) => ({
     name,
-    max: 1,
+    max: 100, 
     nameTextStyle: { ...baseTextStyle, fontSize: 11 },
   }));
 
@@ -163,11 +163,14 @@ function makeRadarOption({ condData, selectedKeys }) {
       backgroundColor: 'var(--popover)',
       borderColor: 'var(--border)',
       textStyle: { color: 'var(--popover-foreground)', fontSize: 12 },
+      formatter: ({ value }) =>
+        indicators.map((ind, i) => `${ind.name}: <b>${value[i]}%</b>`).join('<br/>'),
     },
     radar: {
       indicator: indicators,
       shape: 'polygon',
-      splitNumber: 4,
+      splitNumber: 5,
+      alignTicks: false,
       axisName: { color: 'var(--muted-foreground)', fontSize: 11 },
       splitLine: { lineStyle: { color: 'var(--border)', opacity: 0.5 } },
       splitArea: { show: false },
@@ -178,7 +181,7 @@ function makeRadarOption({ condData, selectedKeys }) {
         type: 'radar',
         data: [
           {
-            value: condData.map((d) => d.value),
+            value: condData.map((d) => Math.round(d.value * 100)),  // scale to 0-100
             name: 'Condition Score',
             symbol: 'circle',
             symbolSize: 5,
