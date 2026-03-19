@@ -118,6 +118,9 @@ function makeNightingaleOption({ condData, selectedKeys }) {
       icon:      'circle',
     },
     toolbox: { show: false },
+    grid:    { show: false },
+    xAxis:   { show: false },
+    yAxis:   { show: false },
     series: [
       {
         name:      'Condition Score',
