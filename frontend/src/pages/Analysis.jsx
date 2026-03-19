@@ -82,15 +82,17 @@ export default function Analysis() {
   };
 
   return (
-    <Layout style={{ minHeight: '100vh', background: '#f5f5f5' }}>
+    <Layout style={{ minHeight: '100vh', background: 'var(--background)' }}>
       <AppHeader title="AI Skin Analysis" showBack />
 
       <Content style={{ padding: '16px' }}>
         <div style={{ maxWidth: 600, margin: '0 auto' }}>
-          <Card 
-            style={{ 
-              borderRadius: 16,
-              boxShadow: '0 2px 12px rgba(0,0,0,0.08)'
+          <Card
+            style={{
+              borderRadius: 12,
+              boxShadow: 'var(--card-shadow)',
+              border: '1px solid var(--border)',
+              background: 'var(--card)',
             }}
             styles={{
               body: { padding: 24 }
@@ -98,9 +100,11 @@ export default function Analysis() {
           >
             <Space direction="vertical" size="large" style={{ width: '100%' }}>
               <div style={{ textAlign: 'center' }}>
-                <ScanOutlined style={{ fontSize: 48, color: '#1890ff', marginBottom: 16 }} />
-                <Title level={4} style={{ marginBottom: 8 }}>AI Face Detection</Title>
-                <Text type="secondary">
+                <ScanOutlined style={{ fontSize: 48, color: 'var(--primary)', marginBottom: 16 }} />
+                <Title level={4} style={{ marginBottom: 8, color: 'var(--card-foreground)' }}>
+                  AI Face Detection
+                </Title>
+                <Text style={{ color: 'var(--muted-foreground)' }}>
                   Position your face in the frame for automatic detection and analysis
                 </Text>
               </div>
@@ -112,18 +116,15 @@ export default function Analysis() {
                 />
               ) : (
                 <>
-                  <div style={{ 
-                    textAlign: 'center',
-                    padding: '16px 0'
-                  }}>
-                    <img 
+                  <div style={{ textAlign: 'center', padding: '16px 0' }}>
+                    <img
                       src={URL.createObjectURL(capturedImage)}
                       alt="Captured Face"
-                      style={{ 
-                        maxWidth: '100%', 
+                      style={{
+                        maxWidth: '100%',
                         maxHeight: 300,
                         borderRadius: 12,
-                        border: '2px solid #52c41a',
+                        border: '2px solid #10B981',
                         objectFit: 'cover'
                       }}
                     />
@@ -139,15 +140,11 @@ export default function Analysis() {
                     requiredMark="optional"
                   >
                     <Form.Item
-                      label={<Text strong>How does your skin feel?</Text>}
+                      label={<Text strong style={{ color: 'var(--card-foreground)' }}>How does your skin feel?</Text>}
                       name="skinFeel"
                       rules={[{ required: true, message: 'Please select an option' }]}
                     >
-                      <Select 
-                        size="large" 
-                        placeholder="Select..."
-                        style={{ borderRadius: 8 }}
-                      >
+                      <Select size="large" placeholder="Select...">
                         <Select.Option value="oily">Oily</Select.Option>
                         <Select.Option value="dry">Dry</Select.Option>
                         <Select.Option value="combination">Combination</Select.Option>
@@ -156,15 +153,11 @@ export default function Analysis() {
                     </Form.Item>
 
                     <Form.Item
-                      label={<Text strong>Current skincare routine</Text>}
+                      label={<Text strong style={{ color: 'var(--card-foreground)' }}>Current skincare routine</Text>}
                       name="routine"
                       rules={[{ required: true, message: 'Please select an option' }]}
                     >
-                      <Select 
-                        size="large" 
-                        placeholder="Select..."
-                        style={{ borderRadius: 8 }}
-                      >
+                      <Select size="large" placeholder="Select...">
                         <Select.Option value="none">None</Select.Option>
                         <Select.Option value="basic">Basic (cleanser + moisturizer)</Select.Option>
                         <Select.Option value="moderate">Moderate (3-5 products)</Select.Option>
@@ -173,7 +166,7 @@ export default function Analysis() {
                     </Form.Item>
 
                     <Form.Item
-                      label={<Text strong>Skin concerns</Text>}
+                      label={<Text strong style={{ color: 'var(--card-foreground)' }}>Skin concerns</Text>}
                       name="concerns"
                     >
                       <Checkbox.Group style={{ width: '100%' }}>
@@ -189,23 +182,18 @@ export default function Analysis() {
                     </Form.Item>
 
                     <Space direction="vertical" style={{ width: '100%' }} size="middle">
-                      <Button 
-                        type="primary" 
-                        htmlType="submit" 
+                      <Button
+                        type="primary"
+                        htmlType="submit"
                         size="large"
                         block
                         loading={loading}
-                        style={{
-                          height: 56,
-                          fontSize: 16,
-                          fontWeight: 600,
-                          borderRadius: 12
-                        }}
+                        style={{ height: 56, fontSize: 16, fontWeight: 600 }}
                       >
                         {loading ? 'Analyzing...' : 'Analyze My Skin'}
                       </Button>
 
-                      <Button 
+                      <Button
                         size="large"
                         block
                         onClick={() => {
@@ -214,10 +202,7 @@ export default function Analysis() {
                           setFaceDetected(false);
                           form.resetFields();
                         }}
-                        style={{
-                          height: 48,
-                          borderRadius: 12
-                        }}
+                        style={{ height: 48 }}
                       >
                         Retake Photo
                       </Button>
@@ -227,9 +212,16 @@ export default function Analysis() {
               )}
 
               {!capturedImage && (
-                <div className="instructions">
-                  <Title level={5}>Tips for Best Results:</Title>
-                  <ul style={{ paddingLeft: 20, margin: '8px 0' }}>
+                <div style={{
+                  padding: '16px',
+                  borderRadius: 8,
+                  background: 'var(--muted)',
+                  border: '1px solid var(--border)',
+                }}>
+                  <Title level={5} style={{ color: 'var(--card-foreground)', marginBottom: 8 }}>
+                    Tips for Best Results:
+                  </Title>
+                  <ul style={{ paddingLeft: 20, margin: 0, color: 'var(--muted-foreground)' }}>
                     <li>Ensure good lighting on your face</li>
                     <li>Remove glasses if possible</li>
                     <li>Look directly at the camera</li>

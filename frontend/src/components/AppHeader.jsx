@@ -1,14 +1,17 @@
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { Layout, Typography, Space, Avatar, Dropdown, Button, Badge } from 'antd';
-import { 
+import {
   UserOutlined,
   LogoutOutlined,
   GiftOutlined,
   ShoppingCartOutlined,
-  ArrowLeftOutlined
+  ArrowLeftOutlined,
+  SunOutlined,
+  MoonOutlined
 } from '@ant-design/icons';
 import { logout } from '../store/slices/authSlice';
+import { useTheme } from '../contexts/ThemeContext';
 
 const { Header } = Layout;
 const { Title } = Typography;
@@ -18,8 +21,8 @@ export default function AppHeader({ title, showBack = false }) {
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
   const { items } = useSelector((state) => state.cart);
+  const { isDark, toggleTheme } = useTheme();
 
-  // Calculate total cart items
   const cartCount = items.reduce((total, item) => total + item.quantity, 0);
 
   const handleLogout = () => {
@@ -27,7 +30,6 @@ export default function AppHeader({ title, showBack = false }) {
     navigate('/login');
   };
 
-  // Get user initials for avatar
   const getUserInitials = () => {
     if (user?.email) {
       return user.email.substring(0, 2).toUpperCase();
@@ -35,7 +37,6 @@ export default function AppHeader({ title, showBack = false }) {
     return 'U';
   };
 
-  // Dropdown menu items
   const menuItems = [
     {
       key: 'profile',
@@ -78,49 +79,64 @@ export default function AppHeader({ title, showBack = false }) {
   ];
 
   return (
-    <Header style={{ 
-      background: '#fff', 
+    <Header style={{
+      background: 'var(--card)',
       padding: '0 16px',
       display: 'flex',
       justifyContent: 'space-between',
       alignItems: 'center',
-      boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+      boxShadow: 'var(--card-shadow)',
+      borderBottom: '1px solid var(--border)',
       position: 'sticky',
       top: 0,
-      zIndex: 10
+      zIndex: 10,
     }}>
       <div style={{ display: 'flex', alignItems: 'center' }}>
         {showBack && (
-          <Button 
-            icon={<ArrowLeftOutlined />} 
+          <Button
+            icon={<ArrowLeftOutlined />}
             onClick={() => navigate(-1)}
             type="text"
             size="large"
-            style={{ marginRight: 8 }}
+            style={{ marginRight: 8, color: 'var(--foreground)' }}
           />
         )}
-        <Title level={4} style={{ margin: 0 }}>{title || 'SkinCare AI'}</Title>
+        <Title level={4} style={{ margin: 0, color: 'var(--foreground)', fontFamily: "'Oxanium', sans-serif" }}>
+          {title || 'SkinCare AI'}
+        </Title>
       </div>
-      
-      <Dropdown 
-        menu={{ items: menuItems }}
-        placement="bottomRight"
-        trigger={['click']}
-      >
-        <Space style={{ cursor: 'pointer' }}>
-          <Badge count={cartCount} offset={[-5, 5]}>
-            <Avatar 
-              style={{ 
-                backgroundColor: '#3B82F6',
-                cursor: 'pointer'
-              }}
-              size="large"
-            >
-              {getUserInitials()}
-            </Avatar>
-          </Badge>
-        </Space>
-      </Dropdown>
+
+      <Space size={8}>
+        <Button
+          type="text"
+          icon={isDark ? <SunOutlined /> : <MoonOutlined />}
+          onClick={toggleTheme}
+          size="large"
+          style={{ color: 'var(--muted-foreground)' }}
+        />
+        <Dropdown
+          menu={{ items: menuItems }}
+          placement="bottomRight"
+          trigger={['click']}
+        >
+          <Space style={{ cursor: 'pointer' }}>
+            <Badge count={cartCount} offset={[-5, 5]}>
+              <Avatar
+                style={{
+                  backgroundColor: 'var(--primary)',
+                  cursor: 'pointer',
+                  color: 'var(--primary-foreground)',
+                  fontFamily: "'Oxanium', sans-serif",
+                  fontWeight: 600,
+                }}
+                size="large"
+              >
+                {getUserInitials()}
+              </Avatar>
+            </Badge>
+          </Space>
+        </Dropdown>
+      </Space>
     </Header>
   );
 }

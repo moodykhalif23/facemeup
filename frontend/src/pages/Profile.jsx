@@ -36,7 +36,7 @@ export default function Profile() {
   };
 
   return (
-    <Layout style={{ minHeight: '100vh' }}>
+    <Layout style={{ minHeight: '100vh', background: 'var(--background)' }}>
       <AppHeader title="Profile History" showBack />
 
       <Content style={{ padding: '24px' }}>
@@ -46,25 +46,37 @@ export default function Profile() {
               <Spin size="large" />
             </div>
           ) : (
-            <Card>
-              <Title level={4}>Analysis History</Title>
+            <Card style={{
+              borderRadius: 12,
+              border: '1px solid var(--border)',
+              background: 'var(--card)',
+              boxShadow: 'var(--card-shadow)',
+            }}>
+              <Title level={4} style={{ color: 'var(--card-foreground)', marginBottom: 16 }}>
+                Analysis History
+              </Title>
               {history.length > 0 ? (
                 <Timeline>
                   {history.map((item, index) => (
-                    <Timeline.Item 
+                    <Timeline.Item
                       key={index}
-                      dot={<ClockCircleOutlined />}
+                      dot={<ClockCircleOutlined style={{ color: 'var(--primary)' }} />}
                     >
-                      <Card size="small" style={{ marginBottom: 16 }}>
-                        <Text strong>Skin Type: </Text>
-                        <Tag color="blue">{item.profile?.skin_type}</Tag>
+                      <Card size="small" style={{
+                        marginBottom: 16,
+                        border: '1px solid var(--border)',
+                        background: 'var(--muted)',
+                        borderRadius: 8,
+                      }}>
+                        <Text strong style={{ color: 'var(--card-foreground)' }}>Skin Type: </Text>
+                        <Tag color="orange">{item.profile?.skin_type}</Tag>
                         <br />
-                        <Text strong>Conditions: </Text>
+                        <Text strong style={{ color: 'var(--card-foreground)' }}>Conditions: </Text>
                         {item.profile?.conditions?.map((c, i) => (
                           <Tag key={i} color="orange">{c}</Tag>
                         ))}
                         <br />
-                        <Text type="secondary">
+                        <Text style={{ color: 'var(--muted-foreground)', fontSize: 13 }}>
                           {new Date(item.timestamp || Date.now()).toLocaleDateString()}
                         </Text>
                       </Card>
@@ -73,7 +85,7 @@ export default function Profile() {
                 </Timeline>
               ) : (
                 <div style={{ textAlign: 'center', padding: '50px' }}>
-                  <Text type="secondary">No analysis history yet</Text>
+                  <Text style={{ color: 'var(--muted-foreground)' }}>No analysis history yet</Text>
                   <br /><br />
                   <Button type="primary" onClick={() => navigate('/analysis')}>
                     Start Your First Analysis

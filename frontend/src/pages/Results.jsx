@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { Layout, Card, Button, Typography, Descriptions, Tag, Space, Progress } from 'antd';
+import { Layout, Card, Button, Typography, Tag, Space, Progress } from 'antd';
 import { ShopOutlined } from '@ant-design/icons';
 import AppHeader from '../components/AppHeader';
 
@@ -13,21 +13,26 @@ export default function Results() {
 
   if (!currentAnalysis) {
     return (
-      <Layout style={{ minHeight: '100vh', background: '#f5f5f5' }}>
+      <Layout style={{ minHeight: '100vh', background: 'var(--background)' }}>
         <AppHeader title="Analysis Results" showBack />
-        <Content style={{ 
-          padding: '24px', 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'center' 
+        <Content style={{
+          padding: '24px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
         }}>
-          <Card style={{ borderRadius: 16, textAlign: 'center' }}>
-            <Title level={4}>No analysis data available</Title>
-            <Button 
-              type="primary" 
+          <Card style={{
+            borderRadius: 12,
+            textAlign: 'center',
+            border: '1px solid var(--border)',
+            background: 'var(--card)',
+          }}>
+            <Title level={4} style={{ color: 'var(--card-foreground)' }}>No analysis data available</Title>
+            <Button
+              type="primary"
               onClick={() => navigate('/analysis')}
               size="large"
-              style={{ marginTop: 16, borderRadius: 8 }}
+              style={{ marginTop: 16 }}
             >
               Start New Analysis
             </Button>
@@ -40,43 +45,48 @@ export default function Results() {
   const { profile } = currentAnalysis;
 
   return (
-    <Layout style={{ minHeight: '100vh', background: '#f5f5f5' }}>
+    <Layout style={{ minHeight: '100vh', background: 'var(--background)' }}>
       <AppHeader title="Analysis Results" showBack />
 
       <Content style={{ padding: '16px' }}>
         <div style={{ maxWidth: 800, margin: '0 auto' }}>
           <Space direction="vertical" size="middle" style={{ width: '100%' }}>
-            {/* Skin Profile - No Card Background */}
+            {/* Skin Profile */}
             <div>
-              <Title level={4} style={{ marginBottom: 16, textAlign: 'center' }}>Skin Profile</Title>
-              <div style={{ 
-                background: '#fff',
+              <Title level={4} style={{ marginBottom: 16, textAlign: 'center', color: 'var(--foreground)' }}>
+                Skin Profile
+              </Title>
+              <div style={{
+                background: 'var(--card)',
                 borderRadius: 12,
                 overflow: 'hidden',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.06)'
+                boxShadow: 'var(--card-shadow)',
+                border: '1px solid var(--border)',
               }}>
-                {/* Skin Type */}
-                <div style={{ 
+                <div style={{
                   display: 'flex',
                   alignItems: 'center',
                   padding: '16px',
-                  borderBottom: '1px solid #f0f0f0'
+                  borderBottom: '1px solid var(--border)'
                 }}>
-                  <Text strong style={{ flex: '0 0 120px', fontSize: 15 }}>Skin Type</Text>
+                  <Text strong style={{ flex: '0 0 120px', fontSize: 15, color: 'var(--card-foreground)' }}>
+                    Skin Type
+                  </Text>
                   <div style={{ flex: 1 }}>
-                    <Tag color="blue" style={{ fontSize: 14, padding: '6px 16px', margin: 0 }}>
+                    <Tag color="orange" style={{ fontSize: 14, padding: '6px 16px', margin: 0 }}>
                       {profile.skin_type}
                     </Tag>
                   </div>
                 </div>
 
-                {/* Conditions */}
-                <div style={{ 
+                <div style={{
                   display: 'flex',
                   padding: '16px',
-                  borderBottom: '1px solid #f0f0f0'
+                  borderBottom: '1px solid var(--border)'
                 }}>
-                  <Text strong style={{ flex: '0 0 120px', fontSize: 15 }}>Conditions</Text>
+                  <Text strong style={{ flex: '0 0 120px', fontSize: 15, color: 'var(--card-foreground)' }}>
+                    Conditions
+                  </Text>
                   <div style={{ flex: 1 }}>
                     <Space wrap size={[8, 8]}>
                       {profile.conditions?.map((condition, index) => (
@@ -88,18 +98,19 @@ export default function Results() {
                   </div>
                 </div>
 
-                {/* Confidence */}
-                <div style={{ 
+                <div style={{
                   display: 'flex',
                   alignItems: 'center',
                   padding: '16px'
                 }}>
-                  <Text strong style={{ flex: '0 0 120px', fontSize: 15 }}>Confidence</Text>
+                  <Text strong style={{ flex: '0 0 120px', fontSize: 15, color: 'var(--card-foreground)' }}>
+                    Confidence
+                  </Text>
                   <div style={{ flex: 1, paddingRight: 8 }}>
-                    <Progress 
-                      percent={Math.round((profile.confidence || 0.85) * 100)} 
+                    <Progress
+                      percent={Math.round((profile.confidence || 0.85) * 100)}
                       status="active"
-                      strokeColor="#3B82F6"
+                      strokeColor="var(--primary)"
                       style={{ margin: 0 }}
                     />
                   </div>
@@ -108,21 +119,28 @@ export default function Results() {
             </div>
 
             {profile.recommendations && (
-              <Card style={{ borderRadius: 16, boxShadow: '0 2px 12px rgba(0,0,0,0.08)' }}>
-                <Title level={4} style={{ marginBottom: 16 }}>Recommendations</Title>
+              <Card style={{
+                borderRadius: 12,
+                boxShadow: 'var(--card-shadow)',
+                border: '1px solid var(--border)',
+                background: 'var(--card)',
+              }}>
+                <Title level={4} style={{ marginBottom: 16, color: 'var(--card-foreground)' }}>
+                  Recommendations
+                </Title>
                 <Space direction="vertical" style={{ width: '100%' }} size="middle">
                   {profile.recommendations.map((rec, index) => (
-                    <Card 
-                      key={index} 
-                      type="inner" 
+                    <Card
+                      key={index}
+                      type="inner"
                       size="small"
-                      style={{ borderRadius: 8 }}
+                      style={{ borderRadius: 8, border: '1px solid var(--border)' }}
                     >
-                      <Text strong style={{ fontSize: 15 }}>
+                      <Text strong style={{ fontSize: 15, color: 'var(--card-foreground)' }}>
                         {rec.category || 'General'}
                       </Text>
                       <br />
-                      <Text style={{ fontSize: 14, color: '#666' }}>
+                      <Text style={{ fontSize: 14, color: 'var(--muted-foreground)' }}>
                         {rec.advice || rec}
                       </Text>
                     </Card>
@@ -132,30 +150,21 @@ export default function Results() {
             )}
 
             <Space direction="vertical" style={{ width: '100%' }} size="small">
-              <Button 
-                type="primary" 
+              <Button
+                type="primary"
                 icon={<ShopOutlined />}
                 onClick={() => navigate('/recommendations')}
                 size="large"
                 block
-                style={{
-                  height: 56,
-                  fontSize: 16,
-                  fontWeight: 600,
-                  borderRadius: 12
-                }}
+                style={{ height: 56, fontSize: 16, fontWeight: 600 }}
               >
                 View Product Recommendations
               </Button>
-              <Button 
+              <Button
                 onClick={() => navigate('/analysis')}
                 size="large"
                 block
-                style={{
-                  height: 48,
-                  fontSize: 15,
-                  borderRadius: 12
-                }}
+                style={{ height: 48, fontSize: 15 }}
               >
                 New Analysis
               </Button>

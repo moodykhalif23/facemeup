@@ -18,7 +18,6 @@ const getProxiedImageUrl = (imageUrl) => {
   return `${baseUrl}/api/v1/proxy/image?url=${encodeURIComponent(imageUrl)}`;
 };
 
-
 export default function ProductDetail() {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -30,10 +29,7 @@ export default function ProductDetail() {
   const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 768);
 
   useEffect(() => {
-    const handleResize = () => {
-      setIsDesktop(window.innerWidth >= 768);
-    };
-    
+    const handleResize = () => setIsDesktop(window.innerWidth >= 768);
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
@@ -54,6 +50,7 @@ export default function ProductDetail() {
       setLoading(false);
     }
   };
+
   const handleAddToCart = () => {
     if (product) {
       dispatch(addToCart({
@@ -68,22 +65,21 @@ export default function ProductDetail() {
 
   if (loading || !product) {
     return (
-      <Layout style={{ minHeight: '100vh', background: '#f5f5f5' }}>
+      <Layout style={{ minHeight: '100vh', background: 'var(--background)' }}>
         <AppHeader title="Product Details" showBack />
         <Content style={{ padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <Text>Loading...</Text>
+          <Text style={{ color: 'var(--muted-foreground)' }}>Loading...</Text>
         </Content>
       </Layout>
     );
   }
 
   return (
-    <Layout style={{ minHeight: '100vh', background: '#f5f5f5' }}>
+    <Layout style={{ minHeight: '100vh', background: 'var(--background)' }}>
       <AppHeader title="Product Details" showBack />
 
       <Content style={{ padding: '16px', paddingBottom: 100, overflowX: 'hidden' }}>
         <div style={{ maxWidth: 1200, margin: '0 auto', width: '100%' }}>
-          {/* Responsive Layout: Stacked on mobile, side-by-side on desktop */}
           <div style={{
             display: 'grid',
             gridTemplateColumns: isDesktop ? '1fr 1fr' : '1fr',
@@ -94,9 +90,11 @@ export default function ProductDetail() {
             {/* Product Image */}
             <Card
               style={{
-                borderRadius: 8,
+                borderRadius: 10,
                 overflow: 'hidden',
-                boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
+                boxShadow: 'var(--card-shadow)',
+                border: '1px solid var(--border)',
+                background: 'var(--card)',
                 height: 'fit-content',
                 width: '100%',
               }}
@@ -122,8 +120,8 @@ export default function ProductDetail() {
                       display: proxied ? 'none' : 'flex',
                       width: '100%',
                       height: '100%',
-                      background: '#ffffff',
-                      border: '1px solid #f0f0f0',
+                      background: 'var(--muted)',
+                      border: '1px solid var(--border)',
                       alignItems: 'center',
                       justifyContent: 'center',
                       position: proxied ? 'absolute' : 'relative',
@@ -132,7 +130,7 @@ export default function ProductDetail() {
                       <span style={{
                         fontSize: 13,
                         fontWeight: 600,
-                        color: '#bbb',
+                        color: 'var(--muted-foreground)',
                         textTransform: 'uppercase',
                         letterSpacing: 2,
                       }}>
@@ -146,40 +144,38 @@ export default function ProductDetail() {
 
             {/* Product Info */}
             <Card style={{
-              borderRadius: 8,
-              boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
+              borderRadius: 10,
+              boxShadow: 'var(--card-shadow)',
+              border: '1px solid var(--border)',
+              background: 'var(--card)',
               width: '100%',
               maxWidth: '100%',
               overflow: 'hidden'
             }}>
               <Space direction="vertical" size="small" style={{ width: '100%' }}>
-                <div style={{ 
-                  display: 'flex', 
-                  flexWrap: 'wrap', 
-                  gap: 8, 
-                  width: '100%',
-                  marginBottom: 8 
-                }}>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, width: '100%', marginBottom: 8 }}>
                   {product.category && product.category.split(',').map((cat, index) => (
-                    <Tag key={index} color="blue" style={{ margin: 0 }}>
+                    <Tag key={index} color="orange" style={{ margin: 0 }}>
                       {cat.trim()}
                     </Tag>
                   ))}
                 </div>
-                <Title level={3} style={{ margin: '8px 0', wordBreak: 'break-word' }}>{product.name}</Title>
-                <Title level={2} style={{ color: '#3B82F6', margin: '8px 0', wordBreak: 'break-word' }}>
+                <Title level={3} style={{ margin: '8px 0', wordBreak: 'break-word', color: 'var(--card-foreground)' }}>
+                  {product.name}
+                </Title>
+                <Title level={2} style={{ color: 'var(--primary)', margin: '8px 0', wordBreak: 'break-word' }}>
                   KSh {product.price ? product.price.toLocaleString() : '0'}
                 </Title>
-                
-                <Divider style={{ margin: '16px 0' }} />
-                
+
+                <Divider style={{ margin: '16px 0', borderColor: 'var(--border)' }} />
+
                 <div style={{ width: '100%', overflow: 'hidden' }}>
-                  <Text strong style={{ fontSize: 15 }}>Description</Text>
-                  <div 
-                    style={{ 
-                      marginTop: 8, 
-                      color: '#666', 
-                      wordBreak: 'break-word', 
+                  <Text strong style={{ fontSize: 15, color: 'var(--card-foreground)' }}>Description</Text>
+                  <div
+                    style={{
+                      marginTop: 8,
+                      color: 'var(--muted-foreground)',
+                      wordBreak: 'break-word',
                       overflowWrap: 'break-word',
                       lineHeight: '1.6'
                     }}
@@ -189,12 +185,14 @@ export default function ProductDetail() {
 
                 {product.benefits && (
                   <>
-                    <Divider style={{ margin: '16px 0' }} />
+                    <Divider style={{ margin: '16px 0', borderColor: 'var(--border)' }} />
                     <div style={{ width: '100%', overflow: 'hidden' }}>
-                      <Text strong style={{ fontSize: 15 }}>Key Benefits</Text>
-                      <ul style={{ marginTop: 8, paddingLeft: 20, color: '#666' }}>
+                      <Text strong style={{ fontSize: 15, color: 'var(--card-foreground)' }}>Key Benefits</Text>
+                      <ul style={{ marginTop: 8, paddingLeft: 20, color: 'var(--muted-foreground)' }}>
                         {product.benefits.map((benefit, index) => (
-                          <li key={index} style={{ marginBottom: 4, wordBreak: 'break-word', overflowWrap: 'break-word' }}>{benefit}</li>
+                          <li key={index} style={{ marginBottom: 4, wordBreak: 'break-word', overflowWrap: 'break-word' }}>
+                            {benefit}
+                          </li>
                         ))}
                       </ul>
                     </div>
@@ -203,10 +201,10 @@ export default function ProductDetail() {
 
                 {product.ingredients && (
                   <>
-                    <Divider style={{ margin: '16px 0' }} />
+                    <Divider style={{ margin: '16px 0', borderColor: 'var(--border)' }} />
                     <div style={{ width: '100%', overflow: 'hidden' }}>
-                      <Text strong style={{ fontSize: 15 }}>Ingredients</Text>
-                      <Paragraph style={{ marginTop: 8, color: '#666', fontSize: 13, wordBreak: 'break-word', overflowWrap: 'break-word' }}>
+                      <Text strong style={{ fontSize: 15, color: 'var(--card-foreground)' }}>Ingredients</Text>
+                      <Paragraph style={{ marginTop: 8, color: 'var(--muted-foreground)', fontSize: 13, wordBreak: 'break-word', overflowWrap: 'break-word' }}>
                         {product.ingredients}
                       </Paragraph>
                     </div>
@@ -215,10 +213,10 @@ export default function ProductDetail() {
 
                 {product.usage && (
                   <>
-                    <Divider style={{ margin: '16px 0' }} />
+                    <Divider style={{ margin: '16px 0', borderColor: 'var(--border)' }} />
                     <div style={{ width: '100%', overflow: 'hidden' }}>
-                      <Text strong style={{ fontSize: 15 }}>How to Use</Text>
-                      <Paragraph style={{ marginTop: 8, color: '#666', wordBreak: 'break-word', overflowWrap: 'break-word' }}>
+                      <Text strong style={{ fontSize: 15, color: 'var(--card-foreground)' }}>How to Use</Text>
+                      <Paragraph style={{ marginTop: 8, color: 'var(--muted-foreground)', wordBreak: 'break-word', overflowWrap: 'break-word' }}>
                         {product.usage}
                       </Paragraph>
                     </div>
@@ -230,42 +228,30 @@ export default function ProductDetail() {
         </div>
       </Content>
 
-      {/* Fixed Bottom Bar - Only on Mobile */}
+      {/* Fixed Bottom Bar - Mobile */}
       {!isDesktop && (
         <div style={{
           position: 'fixed',
           bottom: 0,
           left: 0,
           right: 0,
-          background: 'rgba(255, 255, 255, 0.95)',
+          background: 'var(--card)',
           backdropFilter: 'blur(10px)',
           padding: '12px 16px',
-          boxShadow: '0 -2px 12px rgba(0,0,0,0.1)',
+          boxShadow: '0 -2px 12px rgba(0,0,0,0.12)',
+          borderTop: '1px solid var(--border)',
           zIndex: 10
         }}>
           <div style={{ display: 'flex', gap: 12, alignItems: 'flex-end' }}>
-            <div style={{ 
-              display: 'flex', 
-              flexDirection: 'column',
-              minWidth: 80
-            }}>
-              <Text style={{ fontSize: 12, marginBottom: 4, color: '#666' }}>Quantity</Text>
+            <div style={{ display: 'flex', flexDirection: 'column', minWidth: 80 }}>
+              <Text style={{ fontSize: 12, marginBottom: 4, color: 'var(--muted-foreground)' }}>Quantity</Text>
               <InputNumber
                 min={1}
                 max={10}
                 value={quantity}
                 onChange={setQuantity}
                 size="large"
-                style={{ 
-                  width: 80,
-                  fontSize: 16,
-                  borderRadius: 8
-                }}
-                styles={{
-                  input: {
-                    borderRadius: 8
-                  }
-                }}
+                style={{ width: 80, fontSize: 16 }}
                 controls={{
                   upIcon: <span style={{ fontSize: 16 }}>+</span>,
                   downIcon: <span style={{ fontSize: 16 }}>−</span>
@@ -278,13 +264,7 @@ export default function ProductDetail() {
               onClick={handleAddToCart}
               size="large"
               block
-              style={{
-                height: 52,
-                fontSize: 16,
-                fontWeight: 600,
-                borderRadius: 8,
-                flex: 1
-              }}
+              style={{ height: 52, fontSize: 16, fontWeight: 600, flex: 1 }}
             >
               Add to Cart
             </Button>
@@ -292,42 +272,25 @@ export default function ProductDetail() {
         </div>
       )}
 
-      {/* Desktop: Add to Cart Section Inside Card */}
+      {/* Desktop: Add to Cart */}
       {isDesktop && (
-        <div style={{ 
-          maxWidth: 1200, 
-          margin: '16px auto 0',
-          padding: '0 16px'
-        }}>
-          <Card style={{ 
-            borderRadius: 8, 
-            boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
-            background: 'transparent',
-            border: 'none'
+        <div style={{ maxWidth: 1200, margin: '16px auto 0', padding: '0 16px' }}>
+          <Card style={{
+            borderRadius: 10,
+            boxShadow: 'var(--card-shadow)',
+            border: '1px solid var(--border)',
+            background: 'var(--card)',
           }}>
             <div style={{ display: 'flex', gap: 16, alignItems: 'flex-end', justifyContent: 'center' }}>
-              <div style={{ 
-                display: 'flex', 
-                flexDirection: 'column',
-                minWidth: 100
-              }}>
-                <Text style={{ fontSize: 14, marginBottom: 8, color: '#666', fontWeight: 500 }}>Quantity</Text>
+              <div style={{ display: 'flex', flexDirection: 'column', minWidth: 100 }}>
+                <Text style={{ fontSize: 14, marginBottom: 8, color: 'var(--muted-foreground)', fontWeight: 500 }}>Quantity</Text>
                 <InputNumber
                   min={1}
                   max={10}
                   value={quantity}
                   onChange={setQuantity}
                   size="large"
-                  style={{ 
-                    width: 100,
-                    fontSize: 18,
-                    borderRadius: 8
-                  }}
-                  styles={{
-                    input: {
-                      borderRadius: 8
-                    }
-                  }}
+                  style={{ width: 100, fontSize: 18 }}
                   controls={{
                     upIcon: <span style={{ fontSize: 18 }}>+</span>,
                     downIcon: <span style={{ fontSize: 18 }}>−</span>
@@ -339,15 +302,7 @@ export default function ProductDetail() {
                 icon={<ShoppingCartOutlined />}
                 onClick={handleAddToCart}
                 size="large"
-                style={{
-                  height: 56,
-                  fontSize: 18,
-                  fontWeight: 600,
-                  borderRadius: 8,
-                  minWidth: 300,
-                  paddingLeft: 32,
-                  paddingRight: 32
-                }}
+                style={{ height: 56, fontSize: 18, fontWeight: 600, minWidth: 300, paddingLeft: 32, paddingRight: 32 }}
               >
                 Add to Cart
               </Button>

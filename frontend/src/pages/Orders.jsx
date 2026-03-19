@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Layout, Card, Typography, List, Tag, Space, Empty, Spin, App } from 'antd';
 import { ShoppingOutlined, ClockCircleOutlined } from '@ant-design/icons';
 import { getOrders } from '../services/api';
@@ -9,7 +8,6 @@ const { Content } = Layout;
 const { Title, Text } = Typography;
 
 export default function Orders() {
-  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [orders, setOrders] = useState([]);
   const { message } = App.useApp();
@@ -45,9 +43,9 @@ export default function Orders() {
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'short', 
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
       day: 'numeric',
       hour: '2-digit',
       minute: '2-digit'
@@ -55,7 +53,7 @@ export default function Orders() {
   };
 
   return (
-    <Layout style={{ minHeight: '100vh', background: '#f5f5f5' }}>
+    <Layout style={{ minHeight: '100vh', background: 'var(--background)' }}>
       <AppHeader title="My Orders" showBack />
 
       <Content style={{ padding: '16px' }}>
@@ -69,27 +67,28 @@ export default function Orders() {
               {orders.map((order) => (
                 <Card
                   key={order.id}
-                  style={{ 
+                  style={{
                     borderRadius: 12,
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.06)'
+                    boxShadow: 'var(--card-shadow)',
+                    border: '1px solid var(--border)',
+                    background: 'var(--card)',
                   }}
                   styles={{ body: { padding: '16px' } }}
                 >
-                  {/* Order Header */}
-                  <div style={{ 
-                    display: 'flex', 
-                    justifyContent: 'space-between', 
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
                     alignItems: 'flex-start',
                     marginBottom: 12,
                     flexWrap: 'wrap',
                     gap: 8
                   }}>
                     <div>
-                      <Text strong style={{ fontSize: 16 }}>
+                      <Text strong style={{ fontSize: 16, color: 'var(--card-foreground)' }}>
                         {order.order_number}
                       </Text>
                       <br />
-                      <Text type="secondary" style={{ fontSize: 13 }}>
+                      <Text style={{ fontSize: 13, color: 'var(--muted-foreground)' }}>
                         <ClockCircleOutlined /> {formatDate(order.created_at)}
                       </Text>
                     </div>
@@ -98,26 +97,21 @@ export default function Orders() {
                     </Tag>
                   </div>
 
-                  {/* Order Items */}
                   <List
                     size="small"
                     dataSource={order.items}
                     renderItem={(item) => (
                       <List.Item style={{ padding: '8px 0', border: 'none' }}>
                         <div style={{ width: '100%' }}>
-                          <div style={{ 
-                            display: 'flex', 
-                            justifyContent: 'space-between',
-                            alignItems: 'center'
-                          }}>
-                            <Text style={{ fontSize: 14 }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <Text style={{ fontSize: 14, color: 'var(--card-foreground)' }}>
                               {item.product_name}
                             </Text>
-                            <Text strong style={{ fontSize: 14 }}>
+                            <Text strong style={{ fontSize: 14, color: 'var(--card-foreground)' }}>
                               KSh {item.price ? item.price.toLocaleString() : '0'}
                             </Text>
                           </div>
-                          <Text type="secondary" style={{ fontSize: 12 }}>
+                          <Text style={{ fontSize: 12, color: 'var(--muted-foreground)' }}>
                             Qty: {item.quantity}
                           </Text>
                         </div>
@@ -126,16 +120,15 @@ export default function Orders() {
                     style={{ marginBottom: 12 }}
                   />
 
-                  {/* Order Total */}
-                  <div style={{ 
-                    borderTop: '1px solid #f0f0f0',
+                  <div style={{
+                    borderTop: '1px solid var(--border)',
                     paddingTop: 12,
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center'
                   }}>
-                    <Text strong style={{ fontSize: 15 }}>Total</Text>
-                    <Text strong style={{ fontSize: 18, color: '#3B82F6' }}>
+                    <Text strong style={{ fontSize: 15, color: 'var(--card-foreground)' }}>Total</Text>
+                    <Text strong style={{ fontSize: 18, color: 'var(--primary)' }}>
                       KSh {order.total ? order.total.toLocaleString() : '0'}
                     </Text>
                   </div>
@@ -143,13 +136,18 @@ export default function Orders() {
               ))}
             </Space>
           ) : (
-            <Card style={{ borderRadius: 16, boxShadow: '0 2px 12px rgba(0,0,0,0.08)' }}>
+            <Card style={{
+              borderRadius: 12,
+              boxShadow: 'var(--card-shadow)',
+              border: '1px solid var(--border)',
+              background: 'var(--card)',
+            }}>
               <Empty
-                image={<ShoppingOutlined style={{ fontSize: 64, color: '#d9d9d9' }} />}
+                image={<ShoppingOutlined style={{ fontSize: 64, color: 'var(--border)' }} />}
                 description={
                   <div>
-                    <Title level={4} style={{ marginTop: 16 }}>No orders yet</Title>
-                    <Text type="secondary">Start shopping to see your orders here</Text>
+                    <Title level={4} style={{ marginTop: 16, color: 'var(--card-foreground)' }}>No orders yet</Title>
+                    <Text style={{ color: 'var(--muted-foreground)' }}>Start shopping to see your orders here</Text>
                   </div>
                 }
               />

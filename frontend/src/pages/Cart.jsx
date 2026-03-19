@@ -26,19 +26,25 @@ export default function Cart() {
   };
 
   return (
-    <Layout style={{ minHeight: '100vh', background: '#f5f5f5' }}>
+    <Layout style={{ minHeight: '100vh', background: 'var(--background)' }}>
       <AppHeader title="Shopping Cart" showBack />
 
       <Content style={{ padding: '16px' }}>
         <div style={{ maxWidth: 800, margin: '0 auto' }}>
           {items.length > 0 ? (
             <>
-              <Card style={{ borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.06)', marginBottom: 16 }}>
+              <Card style={{
+                borderRadius: 12,
+                boxShadow: 'var(--card-shadow)',
+                border: '1px solid var(--border)',
+                background: 'var(--card)',
+                marginBottom: 16,
+              }}>
                 <List
                   dataSource={items}
                   renderItem={(item) => (
                     <List.Item
-                      style={{ padding: '16px 0' }}
+                      style={{ padding: '16px 0', borderColor: 'var(--border)' }}
                       actions={[
                         <InputNumber
                           key="quantity"
@@ -60,31 +66,33 @@ export default function Cart() {
                       ]}
                     >
                       <List.Item.Meta
-                        title={<Text strong style={{ fontSize: 15 }}>{item.name}</Text>}
-                        description={<Text style={{ fontSize: 14 }}>KSh {item.price ? item.price.toLocaleString() : '0'} each</Text>}
+                        title={<Text strong style={{ fontSize: 15, color: 'var(--card-foreground)' }}>{item.name}</Text>}
+                        description={<Text style={{ fontSize: 14, color: 'var(--muted-foreground)' }}>KSh {item.price ? item.price.toLocaleString() : '0'} each</Text>}
                       />
                     </List.Item>
                   )}
                 />
               </Card>
 
-              <Card style={{ borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
+              <Card style={{
+                borderRadius: 12,
+                boxShadow: 'var(--card-shadow)',
+                border: '1px solid var(--border)',
+                background: 'var(--card)',
+              }}>
                 <Space direction="vertical" style={{ width: '100%' }} size={16}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Text strong style={{ fontSize: 16 }}>Total:</Text>
-                    <Title level={3} style={{ margin: 0, color: '#3B82F6' }}>KSh {total.toLocaleString()}</Title>
+                    <Text strong style={{ fontSize: 16, color: 'var(--card-foreground)' }}>Total:</Text>
+                    <Title level={3} style={{ margin: 0, color: 'var(--primary)' }}>
+                      KSh {total.toLocaleString()}
+                    </Title>
                   </div>
-                  <Button 
-                    type="primary" 
-                    size="large" 
+                  <Button
+                    type="primary"
+                    size="large"
                     block
                     onClick={() => navigate('/checkout')}
-                    style={{ 
-                      height: 52,
-                      fontSize: 16,
-                      fontWeight: 600,
-                      borderRadius: 8
-                    }}
+                    style={{ height: 52, fontSize: 16, fontWeight: 600 }}
                   >
                     Proceed to Checkout
                   </Button>
@@ -92,27 +100,29 @@ export default function Cart() {
               </Card>
             </>
           ) : (
-            <Card style={{ borderRadius: 16, boxShadow: '0 2px 12px rgba(0,0,0,0.08)' }}>
+            <Card style={{
+              borderRadius: 12,
+              boxShadow: 'var(--card-shadow)',
+              border: '1px solid var(--border)',
+              background: 'var(--card)',
+            }}>
               <Empty
-                image={<ShoppingOutlined style={{ fontSize: 64, color: '#d9d9d9' }} />}
+                image={<ShoppingOutlined style={{ fontSize: 64, color: 'var(--border)' }} />}
                 description={
                   <div>
-                    <Title level={4} style={{ marginTop: 16 }}>Your cart is empty</Title>
-                    <Text type="secondary">Add some products to get started</Text>
+                    <Title level={4} style={{ marginTop: 16, color: 'var(--card-foreground)' }}>
+                      Your cart is empty
+                    </Title>
+                    <Text style={{ color: 'var(--muted-foreground)' }}>Add some products to get started</Text>
                   </div>
                 }
               >
-                <Button 
-                  type="primary" 
+                <Button
+                  type="primary"
                   icon={<ShoppingOutlined />}
                   onClick={() => navigate('/recommendations')}
                   size="large"
-                  style={{ 
-                    height: 48,
-                    fontSize: 16,
-                    borderRadius: 12,
-                    marginTop: 16
-                  }}
+                  style={{ height: 48, fontSize: 16, marginTop: 16 }}
                 >
                   Browse Products
                 </Button>

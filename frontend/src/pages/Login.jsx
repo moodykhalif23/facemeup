@@ -35,15 +35,28 @@ export default function Login() {
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
-      background: '#ffffff',
+      background: 'var(--background)',
       padding: '20px'
     }}>
       <div style={{ textAlign: 'center', marginBottom: 24 }}>
-        <Title level={2} style={{ margin: 0 }}>SkinCare AI</Title>
+        <Title level={2} style={{ margin: 0, color: 'var(--foreground)', fontFamily: "'Oxanium', sans-serif" }}>
+          SkinCare AI
+        </Title>
+        <Text style={{ color: 'var(--muted-foreground)', fontSize: 14 }}>
+          Your personal AI skincare advisor
+        </Text>
       </div>
-      <Card style={{ width: '100%', maxWidth: 400 }}>
+
+      <Card style={{
+        width: '100%',
+        maxWidth: 400,
+        borderRadius: 12,
+        border: '1px solid var(--border)',
+        background: 'var(--card)',
+        boxShadow: 'var(--card-shadow)',
+      }}>
         <div style={{ textAlign: 'center', marginBottom: 24 }}>
-          <Text type="secondary">Sign in to your account</Text>
+          <Text style={{ color: 'var(--muted-foreground)' }}>Sign in to your account</Text>
         </div>
 
         <Form
@@ -59,9 +72,9 @@ export default function Login() {
               { type: 'email', message: 'Please enter a valid email!' }
             ]}
           >
-            <Input 
-              prefix={<UserOutlined />} 
-              placeholder="Email" 
+            <Input
+              prefix={<UserOutlined style={{ color: 'var(--muted-foreground)' }} />}
+              placeholder="Email"
               size="large"
             />
           </Form.Item>
@@ -71,26 +84,27 @@ export default function Login() {
             rules={[{ required: true, message: 'Please input your password!' }]}
           >
             <Input.Password
-              prefix={<LockOutlined />}
+              prefix={<LockOutlined style={{ color: 'var(--muted-foreground)' }} />}
               placeholder="Password"
               size="large"
             />
           </Form.Item>
 
           <Form.Item>
-            <Button 
-              type="primary" 
-              htmlType="submit" 
+            <Button
+              type="primary"
+              htmlType="submit"
               loading={loading}
               block
               size="large"
+              style={{ height: 48, fontWeight: 600 }}
             >
               Sign In
             </Button>
           </Form.Item>
 
           <div style={{ textAlign: 'center' }}>
-            <Text>Don't have an account? </Text>
+            <Text style={{ color: 'var(--muted-foreground)' }}>Don't have an account? </Text>
             <Link to="/register">Sign up</Link>
           </div>
         </Form>

@@ -17,9 +17,6 @@ const getProxiedImageUrl = (imageUrl) => {
   return `${baseUrl}/api/v1/proxy/image?url=${encodeURIComponent(imageUrl)}`;
 };
 
-const PLACEHOLDER_BG = '#ffffff';
-const PLACEHOLDER_BORDER = '1px solid #f0f0f0';
-
 export default function Recommendations() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -56,10 +53,9 @@ export default function Recommendations() {
   };
 
   const imgHeight = isMobile ? 160 : 180;
-  const cardRadius = 8;
 
   return (
-    <Layout style={{ minHeight: '100vh', background: '#f5f5f5' }}>
+    <Layout style={{ minHeight: '100vh', background: 'var(--background)' }}>
       <AppHeader title="Recommendations" showBack />
 
       <Content style={{ padding: '16px' }}>
@@ -79,8 +75,10 @@ export default function Recommendations() {
                       hoverable
                       onClick={() => navigate(`/product/${product.id}`)}
                       style={{
-                        borderRadius: cardRadius,
-                        boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
+                        borderRadius: 10,
+                        boxShadow: 'var(--card-shadow)',
+                        border: '1px solid var(--border)',
+                        background: 'var(--card)',
                         overflow: 'hidden',
                         height: '100%',
                         cursor: 'pointer',
@@ -97,14 +95,12 @@ export default function Recommendations() {
                         },
                       }}
                       cover={
-                        <div
-                          style={{
-                            height: imgHeight,
-                            overflow: 'hidden',
-                            position: 'relative',
-                            flexShrink: 0,
-                          }}
-                        >
+                        <div style={{
+                          height: imgHeight,
+                          overflow: 'hidden',
+                          position: 'relative',
+                          flexShrink: 0,
+                        }}>
                           {proxied ? (
                             <img
                               src={proxied}
@@ -125,26 +121,23 @@ export default function Recommendations() {
                             />
                           ) : null}
 
-                          {/* Placeholder — shown when no real image */}
-                          <div
-                            style={{
-                              display: proxied ? 'none' : 'flex',
-                              width: '100%',
-                              height: '100%',
-                              background: PLACEHOLDER_BG,
-                              border: PLACEHOLDER_BORDER,
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              flexDirection: 'column',
-                              position: proxied ? 'absolute' : 'relative',
-                              top: 0,
-                              left: 0,
-                            }}
-                          >
+                          <div style={{
+                            display: proxied ? 'none' : 'flex',
+                            width: '100%',
+                            height: '100%',
+                            background: 'var(--muted)',
+                            border: '1px solid var(--border)',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            flexDirection: 'column',
+                            position: proxied ? 'absolute' : 'relative',
+                            top: 0,
+                            left: 0,
+                          }}>
                             <span style={{
                               fontSize: 11,
                               fontWeight: 600,
-                              color: '#bbb',
+                              color: 'var(--muted-foreground)',
                               textTransform: 'uppercase',
                               letterSpacing: 1,
                             }}>
@@ -162,13 +155,13 @@ export default function Recommendations() {
                             display: 'block',
                             marginBottom: 8,
                             lineHeight: '1.4',
-                            color: '#2d3748',
+                            color: 'var(--card-foreground)',
                             flex: 1,
                           }}
                         >
                           {product.name}
                         </Text>
-                        <Text strong style={{ fontSize: isMobile ? 15 : 17, color: '#3B82F6', fontWeight: 700 }}>
+                        <Text strong style={{ fontSize: isMobile ? 15 : 17, color: 'var(--primary)', fontWeight: 700 }}>
                           KSh {product.price ? product.price.toLocaleString() : '—'}
                         </Text>
                       </div>
@@ -180,7 +173,6 @@ export default function Recommendations() {
                         size={isMobile ? 'middle' : 'large'}
                         block
                         style={{
-                          borderRadius: 10,
                           fontSize: isMobile ? 13 : 14,
                           height: isMobile ? 38 : 42,
                           fontWeight: 600,
@@ -194,16 +186,23 @@ export default function Recommendations() {
               })}
             </Row>
           ) : (
-            <Card style={{ borderRadius: cardRadius, boxShadow: '0 2px 12px rgba(0,0,0,0.08)' }}>
+            <Card style={{
+              borderRadius: 10,
+              boxShadow: 'var(--card-shadow)',
+              border: '1px solid var(--border)',
+              background: 'var(--card)',
+            }}>
               <div style={{ textAlign: 'center', padding: '50px 20px' }}>
-                <Title level={4}>No recommendations available</Title>
-                <Text type="secondary">Complete a skin analysis to get personalized recommendations</Text>
+                <Title level={4} style={{ color: 'var(--card-foreground)' }}>No recommendations available</Title>
+                <Text style={{ color: 'var(--muted-foreground)' }}>
+                  Complete a skin analysis to get personalized recommendations
+                </Text>
                 <br /><br />
                 <Button
                   type="primary"
                   onClick={() => navigate('/analysis')}
                   size="large"
-                  style={{ height: 48, fontSize: 16, borderRadius: 10 }}
+                  style={{ height: 48, fontSize: 16 }}
                 >
                   Start Analysis
                 </Button>

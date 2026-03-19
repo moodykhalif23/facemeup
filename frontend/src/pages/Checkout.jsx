@@ -20,7 +20,6 @@ export default function Checkout() {
 
   const total = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
-  // Redirect to cart if empty
   useEffect(() => {
     if (items.length === 0) {
       navigate('/cart');
@@ -51,7 +50,6 @@ export default function Checkout() {
       navigate('/orders');
     } catch (error) {
       console.error('Order creation error:', error);
-      // For demo, still clear cart and navigate
       dispatch(clearCart());
       message.success('Order placed successfully!');
       navigate('/orders');
@@ -60,47 +58,53 @@ export default function Checkout() {
     }
   };
 
-  // Don't render if cart is empty
   if (items.length === 0) {
     return null;
   }
 
   return (
-    <Layout style={{ minHeight: '100vh', background: '#f5f5f5' }}>
+    <Layout style={{ minHeight: '100vh', background: 'var(--background)' }}>
       <AppHeader title="Checkout" showBack />
 
       <Content style={{ padding: '16px' }}>
         <div style={{ maxWidth: 800, margin: '0 auto' }}>
           {/* Order Summary */}
-          <Card 
-            title={<Text strong style={{ fontSize: 16 }}>Order Summary</Text>}
-            style={{ borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.06)', marginBottom: 16 }}
+          <Card
+            title={<Text strong style={{ fontSize: 16, color: 'var(--card-foreground)' }}>Order Summary</Text>}
+            style={{
+              borderRadius: 12,
+              boxShadow: 'var(--card-shadow)',
+              border: '1px solid var(--border)',
+              background: 'var(--card)',
+              marginBottom: 16,
+            }}
           >
             <Space direction="vertical" style={{ width: '100%' }} size={8}>
               {items.map((item) => (
                 <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <Text>{item.name} x {item.quantity}</Text>
-                  <Text strong>KSh {((item.price * item.quantity) || 0).toLocaleString()}</Text>
+                  <Text style={{ color: 'var(--card-foreground)' }}>{item.name} x {item.quantity}</Text>
+                  <Text strong style={{ color: 'var(--card-foreground)' }}>KSh {((item.price * item.quantity) || 0).toLocaleString()}</Text>
                 </div>
               ))}
-              <Divider style={{ margin: '12px 0' }} />
+              <Divider style={{ margin: '12px 0', borderColor: 'var(--border)' }} />
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Text strong style={{ fontSize: 16 }}>Total:</Text>
-                <Title level={3} style={{ margin: 0, color: '#3B82F6' }}>KSh {total.toLocaleString()}</Title>
+                <Text strong style={{ fontSize: 16, color: 'var(--card-foreground)' }}>Total:</Text>
+                <Title level={3} style={{ margin: 0, color: 'var(--primary)' }}>KSh {total.toLocaleString()}</Title>
               </div>
             </Space>
           </Card>
 
           {/* Shipping & Payment Form */}
-          <Card 
-            title={<Text strong style={{ fontSize: 16 }}>Shipping & Payment</Text>}
-            style={{ borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}
+          <Card
+            title={<Text strong style={{ fontSize: 16, color: 'var(--card-foreground)' }}>Shipping & Payment</Text>}
+            style={{
+              borderRadius: 12,
+              boxShadow: 'var(--card-shadow)',
+              border: '1px solid var(--border)',
+              background: 'var(--card)',
+            }}
           >
-            <Form
-              form={form}
-              layout="vertical"
-              onFinish={handleSubmit}
-            >
+            <Form form={form} layout="vertical" onFinish={handleSubmit}>
               <Form.Item
                 label="Full Name"
                 name="fullName"
@@ -114,11 +118,7 @@ export default function Checkout() {
                 name="address"
                 rules={[{ required: true, message: 'Please enter your address' }]}
               >
-                <Input.TextArea 
-                  size="large" 
-                  rows={3} 
-                  placeholder="123 Main St, City, State, ZIP"
-                />
+                <Input.TextArea size="large" rows={3} placeholder="123 Main St, City, State, ZIP" />
               </Form.Item>
 
               <Form.Item
@@ -129,17 +129,17 @@ export default function Checkout() {
                 <Input size="large" placeholder="+1 234 567 8900" />
               </Form.Item>
 
-              <Divider />
+              <Divider style={{ borderColor: 'var(--border)' }} />
 
               <Form.Item
                 label="Card Number"
                 name="cardNumber"
                 rules={[{ required: true, message: 'Please enter card number' }]}
               >
-                <Input 
-                  size="large" 
+                <Input
+                  size="large"
                   placeholder="1234 5678 9012 3456"
-                  prefix={<CreditCardOutlined />}
+                  prefix={<CreditCardOutlined style={{ color: 'var(--muted-foreground)' }} />}
                 />
               </Form.Item>
 
@@ -164,20 +164,15 @@ export default function Checkout() {
               </Space>
 
               <Form.Item style={{ marginTop: 24, marginBottom: 0 }}>
-                <Button 
-                  type="primary" 
+                <Button
+                  type="primary"
                   htmlType="submit"
-                  size="large" 
+                  size="large"
                   block
                   loading={loading}
-                  style={{ 
-                    height: 52,
-                    fontSize: 16,
-                    fontWeight: 600,
-                    borderRadius: 8
-                  }}
+                  style={{ height: 52, fontSize: 16, fontWeight: 600 }}
                 >
-                  Place Order - KSh {total.toLocaleString()}
+                  Place Order — KSh {total.toLocaleString()}
                 </Button>
               </Form.Item>
             </Form>
