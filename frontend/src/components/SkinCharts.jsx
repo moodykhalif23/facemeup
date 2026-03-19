@@ -49,31 +49,10 @@ function makeSkinTypeBarOption({ skinData, detectedType }) {
       textStyle:       { color: 'var(--popover-foreground)', fontSize: 12 },
       formatter: (params) => `${params[0].name}: <b>${params[0].value}%</b>`,
     },
-    legend: {
-      data:      ['Confidence %'],
-      top:       28,
-      textStyle: baseTextStyle,
-    },
-    toolbox: {
-      show: true,
-      orient: 'vertical',
-      right: 8,
-      top: 'center',
-      feature: {
-        magicType: {
-          show: true,
-          type: ['line', 'bar'],
-          title: { line: 'Line', bar: 'Bar' },
-        },
-        restore:      { show: true, title: 'Reset' },
-        saveAsImage:  { show: true, title: 'Save' },
-      },
-      iconStyle: {
-        borderColor: 'var(--muted-foreground)',
-      },
-    },
+    legend: { show: false },
+    toolbox: { show: false },
     calculable: true,
-    grid: { left: 16, right: 56, top: 70, bottom: 8, containLabel: true },
+    grid: { left: 16, right: 24, top: 56, bottom: 8, containLabel: true },
     xAxis: [
       {
         type:  'category',
