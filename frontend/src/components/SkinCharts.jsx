@@ -18,7 +18,6 @@ const COND_PALETTE = {
 
 // Shared ECharts base theme
 const baseTextStyle = { color: 'var(--muted-foreground)', fontFamily: 'inherit', fontSize: 12 };
-const baseGrid      = { left: 16, right: 32, top: 8, bottom: 8, containLabel: true };
 
 
 function makeSkinTypeBarOption({ skinData, detectedType }) {
@@ -101,60 +100,50 @@ function makeSkinTypeBarOption({ skinData, detectedType }) {
   };
 }
 
-// Horizontal-bar option factory
-function makeHBarOption({ data, palette, selectedKey }) {
-  const sorted = [...data].sort((a, b) => a.value - b.value);
-
+// Nightingale rose pie — condition scores
+function makeNightingaleOption({ condData, selectedKeys }) {
   return {
     backgroundColor: 'transparent',
-    grid: baseGrid,
     tooltip: {
-      trigger: 'axis',
-      axisPointer: { type: 'shadow' },
+      trigger: 'item',
       backgroundColor: 'var(--popover)',
-      borderColor: 'var(--border)',
-      textStyle: { color: 'var(--popover-foreground)', fontSize: 12 },
-      formatter: (params) => {
-        const { name, value } = params[0];
-        return `${name}: <b>${Math.round(value * 100)}%</b>`;
-      },
+      borderColor:     'var(--border)',
+      textStyle:       { color: 'var(--popover-foreground)', fontSize: 12 },
+      formatter: ({ name, value, percent }) =>
+        `${name}<br/><b>${Math.round(value * 100)}%</b> (${percent}%)`,
     },
-    xAxis: {
-      type: 'value',
-      min: 0,
-      max: 1,
-      axisLabel: { ...baseTextStyle, formatter: (v) => `${Math.round(v * 100)}%` },
-      splitLine: { lineStyle: { color: 'var(--border)', type: 'dashed' } },
-      axisLine: { show: false },
-      axisTick: { show: false },
+    legend: {
+      top:       'bottom',
+      textStyle: { color: 'var(--muted-foreground)', fontSize: 11 },
+      icon:      'circle',
     },
-    yAxis: {
-      type: 'category',
-      data: sorted.map((d) => d.name),
-      axisLabel: baseTextStyle,
-      axisLine: { show: false },
-      axisTick: { show: false },
-    },
+    toolbox: { show: false },
     series: [
       {
-        type: 'bar',
-        data: sorted.map((d) => ({
+        name:      'Condition Score',
+        type:      'pie',
+        radius:    ['20%', '72%'],
+        center:    ['50%', '46%'],
+        roseType:  'area',
+        itemStyle: { borderRadius: 8, borderColor: 'var(--card)', borderWidth: 2 },
+        label: {
+          color:    'var(--muted-foreground)',
+          fontSize: 11,
+          formatter: ({ name, value }) => `${name}\n${Math.round(value * 100)}%`,
+        },
+        labelLine: { show: false },
+        emphasis: {
+          label:     { fontSize: 13, fontWeight: 700 },
+          itemStyle: { shadowBlur: 12, shadowColor: 'rgba(0,0,0,0.4)' },
+        },
+        data: condData.map((d) => ({
           value: d.value,
+          name:  d.name,
           itemStyle: {
-            color: palette[d.name] || 'var(--primary)',
-            opacity: d.name === selectedKey ? 1 : 0.55,
-            borderRadius: [0, 4, 4, 0],
+            color:   COND_PALETTE[d.name] || 'var(--primary)',
+            opacity: selectedKeys.includes(d.name) ? 1 : 0.55,
           },
         })),
-        barMaxWidth: 28,
-        label: {
-          show: true,
-          position: 'right',
-          formatter: ({ value }) => `${Math.round(value * 100)}%`,
-          color: 'var(--muted-foreground)',
-          fontSize: 11,
-        },
-        emphasis: { focus: 'self' },
       },
     ],
   };
@@ -318,12 +307,12 @@ export default function SkinCharts({ profile }) {
         />
       </div>
 
-      {/* Condition probability bars */}
+      {/* Condition Nightingale rose */}
       <div style={card}>
         <p style={sectionTitle}>Condition Scores</p>
         <ReactECharts
-          option={makeHBarOption({ data: condData, palette: COND_PALETTE, selectedKey: conditions[0] })}
-          style={{ height: 180 }}
+          option={makeNightingaleOption({ condData, selectedKeys: conditions })}
+          style={{ height: 320 }}
           opts={{ renderer: 'svg' }}
         />
       </div>
