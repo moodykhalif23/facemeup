@@ -1,0 +1,62 @@
+import base64
+import os
+import uuid
+from datetime import datetime
+
+from fastapi import APIRouter, Depends, BackgroundTasks
+from pydantic import BaseModel
+from sqlalchemy.orm import Session
+
+from app.core.database import get_db
+from app.core.deps import get_current_user
+from app.models.user import User
+
+router = APIRouter()
+
+TRAINING_DIR = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)),
+    "..", "..", "..", "..", "ml", "data", "user_captured"
+)
+
+VALID_SKIN_TYPES = {"Oily", "Dry", "Combination", "Normal", "Sensitive"}
+
+
+class TrainingSubmitRequest(BaseModel):
+    image_base64: str
+    skin_type: str
+    conditions: list[str] = []
+
+
+def _save_training_image(image_base64: str, skin_type: str) -> str:
+    """Save a captured face image to the user_captured training directory."""
+    # Normalise skin type to a safe folder name
+    safe_skin_type = skin_type if skin_type in VALID_SKIN_TYPES else "Unknown"
+    dest_dir = os.path.join(TRAINING_DIR, safe_skin_type)
+    os.makedirs(dest_dir, exist_ok=True)
+
+    timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+    filename = f"capture_{timestamp}_{uuid.uuid4().hex[:8]}.jpg"
+    filepath = os.path.join(dest_dir, filename)
+
+    image_bytes = base64.b64decode(image_base64)
+    with open(filepath, "wb") as f:
+        f.write(image_bytes)
+
+    return filepath
+
+
+@router.post("/submit")
+def submit_training_image(
+    payload: TrainingSubmitRequest,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> dict:
+    """
+    Accept a captured face image for model training.
+    Image is saved to ml/data/user_captured/{skin_type}/ for inclusion in next training run.
+    """
+    background_tasks.add_task(
+        _save_training_image, payload.image_base64, payload.skin_type
+    )
+    return {"status": "queued", "message": "Image submitted for training"}

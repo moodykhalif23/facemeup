@@ -9,6 +9,7 @@ from app.core.config import settings
 from app.core.database import SessionLocal
 from app.core.errors import register_exception_handlers
 from app.services.bootstrap import seed_products
+from app.services.training_scheduler import process_user_captured_images
 
 
 logger = logging.getLogger(__name__)
@@ -23,7 +24,24 @@ async def lifespan(_: FastAPI):
         logger.exception("Startup seed skipped because database is unavailable")
     finally:
         db.close()
+
+    # Start APScheduler for training data sync
+    from apscheduler.schedulers.background import BackgroundScheduler
+    scheduler = BackgroundScheduler()
+    scheduler.add_job(
+        process_user_captured_images,
+        trigger="interval",
+        hours=6,
+        id="training_data_sync",
+        replace_existing=True,
+    )
+    scheduler.start()
+    logger.info("Training data scheduler started (runs every 6 hours)")
+
     yield
+
+    scheduler.shutdown(wait=False)
+    logger.info("Training data scheduler stopped")
 
 
 app = FastAPI(title=settings.app_name, lifespan=lifespan)

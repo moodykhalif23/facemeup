@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Form, Input, Button, Card, Typography, App } from 'antd';
+import { Form, Input, Button, Card, Typography, App, Checkbox } from 'antd';
 import { UserOutlined, LockOutlined, MailOutlined } from '@ant-design/icons';
 import { register } from '../services/api';
 
@@ -106,10 +106,34 @@ export default function Register() {
             />
           </Form.Item>
 
+          <Form.Item
+            name="acceptTerms"
+            valuePropName="checked"
+            rules={[
+              {
+                validator(_, value) {
+                  if (value) return Promise.resolve();
+                  return Promise.reject(new Error('You must accept the Terms & Conditions to continue'));
+                },
+              },
+            ]}
+          >
+            <Checkbox>
+              I agree to the{' '}
+              <a href="/terms" target="_blank" rel="noopener noreferrer">
+                Terms & Conditions
+              </a>{' '}
+              and{' '}
+              <a href="/privacy" target="_blank" rel="noopener noreferrer">
+                Privacy Policy
+              </a>
+            </Checkbox>
+          </Form.Item>
+
           <Form.Item>
-            <Button 
-              type="primary" 
-              htmlType="submit" 
+            <Button
+              type="primary"
+              htmlType="submit"
               loading={loading}
               block
               size="large"

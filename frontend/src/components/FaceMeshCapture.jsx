@@ -7,6 +7,7 @@ const FaceMeshCapture = ({ onCapture, onFaceDetected }) => {
   const canvasRef = useRef(null);
   const [isInitialized, setIsInitialized] = useState(false);
   const [faceDetected, setFaceDetected] = useState(false);
+  const [isFaceClose, setIsFaceClose] = useState(false);
   const [error, setError] = useState(null);
   const faceMeshRef = useRef(null);
   const cameraRef = useRef(null);
@@ -57,17 +58,23 @@ const FaceMeshCapture = ({ onCapture, onFaceDetected }) => {
 
           if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
             setFaceDetected(true);
-            
+
             // Draw face mesh
             const landmarks = results.multiFaceLandmarks[0];
             drawFaceMesh(ctx, landmarks, canvas.width, canvas.height);
-            
+
+            // Compute face bounding box width as a fraction of canvas width
+            const xs = landmarks.map(lm => lm.x);
+            const faceFraction = Math.max(...xs) - Math.min(...xs);
+            setIsFaceClose(faceFraction > 0.4);
+
             // Notify parent component
             if (onFaceDetected) {
               onFaceDetected(landmarks);
             }
           } else {
             setFaceDetected(false);
+            setIsFaceClose(false);
           }
           
           isProcessingRef.current = false;
@@ -174,6 +181,10 @@ const FaceMeshCapture = ({ onCapture, onFaceDetected }) => {
       alert('No face detected. Please position your face in the frame.');
       return;
     }
+    if (!isFaceClose) {
+      alert('Please move closer for better quality');
+      return;
+    }
 
     const canvas = canvasRef.current;
     canvas.toBlob((blob) => {
@@ -214,12 +225,16 @@ const FaceMeshCapture = ({ onCapture, onFaceDetected }) => {
         style={{
           width: '100%',
           maxWidth: '640px',
-          border: faceDetected ? '3px solid #52c41a' : '3px solid #ff4d4f',
+          border: isFaceClose
+            ? '3px solid #52c41a'
+            : faceDetected
+              ? '3px solid #fa8c16'
+              : '3px solid #ff4d4f',
           borderRadius: '8px',
           backgroundColor: '#000'
         }}
       />
-      <div className="face-mesh-status" style={{ 
+      <div className="face-mesh-status" style={{
         marginTop: '1rem',
         textAlign: 'center'
       }}>
@@ -227,27 +242,34 @@ const FaceMeshCapture = ({ onCapture, onFaceDetected }) => {
           <p style={{ color: '#1890ff' }}>Initializing camera...</p>
         )}
         {isInitialized && (
-          <p style={{ 
-            color: faceDetected ? '#52c41a' : '#ff4d4f',
+          <p style={{
+            color: isFaceClose ? '#52c41a' : faceDetected ? '#fa8c16' : '#ff4d4f',
             fontSize: '1.1rem',
             fontWeight: 500
           }}>
-            {faceDetected ? '✓ Face Detected' : '✗ No Face Detected'}
+            {isFaceClose
+              ? '✓ Face Detected — Ready to capture'
+              : faceDetected
+                ? '⚠ Move closer for better quality'
+                : '✗ No Face Detected'}
           </p>
         )}
       </div>
+      <p style={{ textAlign: 'center', color: '#888', fontSize: '0.9rem', margin: '0.5rem 0' }}>
+        Position your face so it fills most of the frame, then capture.
+      </p>
       <button
         onClick={captureFace}
-        disabled={!faceDetected}
+        disabled={!faceDetected || !isFaceClose}
         style={{
           marginTop: '1rem',
           padding: '0.75rem 1.5rem',
           fontSize: '1rem',
-          backgroundColor: faceDetected ? '#52c41a' : '#d9d9d9',
+          backgroundColor: faceDetected && isFaceClose ? '#52c41a' : '#d9d9d9',
           color: 'white',
           border: 'none',
           borderRadius: '8px',
-          cursor: faceDetected ? 'pointer' : 'not-allowed',
+          cursor: faceDetected && isFaceClose ? 'pointer' : 'not-allowed',
           width: '100%',
           fontWeight: 600,
           transition: 'all 0.3s'

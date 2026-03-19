@@ -66,6 +66,16 @@ export default function Analysis() {
         // Store result and navigate
         dispatch(setCurrentAnalysis(response.data));
         dispatch(addToHistory(response.data));
+        try {
+          await api.post('/training/submit', {
+            image_base64: base64Image,
+            skin_type: response.data.profile.skin_type,
+            conditions: response.data.profile.conditions || [],
+          });
+        } catch (trainErr) {
+          console.warn('Training submission failed:', trainErr);
+        }
+
         navigate('/results');
       };
     } catch (error) {
