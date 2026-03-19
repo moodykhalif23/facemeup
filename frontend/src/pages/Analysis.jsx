@@ -11,24 +11,39 @@ import api from '../services/api';
 const { Content } = Layout;
 const { Title, Text } = Typography;
 
+/** Convert a Blob to a base64 string (without the data: prefix). */
+const blobToBase64 = (blob) =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(blob);
+    reader.onloadend = () => resolve(reader.result.split(',')[1]);
+    reader.onerror   = reject;
+  });
+
 export default function Analysis() {
   const [form] = Form.useForm();
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading]           = useState(false);
   const [capturedImage, setCapturedImage] = useState(null);
-  const [landmarks, setLandmarks] = useState(null);
-  const [faceDetected, setFaceDetected] = useState(false);
+  const [allCaptures, setAllCaptures]   = useState([]);   // all phase blobs
+  const [landmarks, setLandmarks]       = useState(null);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { message } = App.useApp();
 
-  const handleFaceDetected = (detectedLandmarks) => {
-    setLandmarks(detectedLandmarks);
-    setFaceDetected(true);
+  /**
+   * Called by FaceMeshCapture when the capture flow completes.
+   * mainBlob  – the front-facing image used for analysis
+   * captures  – array of { phase, blob, landmarks } for all captured poses
+   */
+  const handleCapture = (mainBlob, captures = []) => {
+    setCapturedImage(mainBlob);
+    setAllCaptures(captures);
+    message.success(`${captures.length} pose${captures.length !== 1 ? 's' : ''} captured! Complete the questionnaire below.`);
   };
 
-  const handleCapture = (blob) => {
-    setCapturedImage(blob);
-    message.success('Face captured! Please complete the questionnaire.');
+  /** Called on every frame — keeps the latest landmarks for the analysis request. */
+  const handleFaceDetected = (detectedLandmarks) => {
+    setLandmarks(detectedLandmarks);
   };
 
   const onFinish = async (values) => {
@@ -40,37 +55,43 @@ export default function Analysis() {
 
     setLoading(true);
     try {
-      const base64Image = await new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(capturedImage);
-        reader.onloadend = () => resolve(reader.result.split(',')[1]);
-        reader.onerror = reject;
-      });
+      // ── 1. Run analysis with the front-facing image ──────────────────────
+      const base64Image = await blobToBase64(capturedImage);
 
       const questionnaire = {
         skin_feel: values.skinFeel,
-        routine: values.routine,
-        concerns: values.concerns || [],
+        routine:   values.routine,
+        concerns:  values.concerns || [],
       };
 
       const response = await api.post('/analyze', {
         image_base64: base64Image,
         questionnaire,
-        landmarks: landmarks.map(lm => ({ x: lm.x, y: lm.y, z: lm.z }))
+        landmarks: landmarks.map(({ x, y, z }) => ({ x, y, z })),
       });
 
       dispatch(setCurrentAnalysis(response.data));
       dispatch(addToHistory(response.data));
 
-      try {
-        await api.post('/training/submit', {
-          image_base64: base64Image,
-          skin_type: response.data.profile.skin_type,
-          conditions: response.data.profile.conditions || [],
-        });
-      } catch (trainErr) {
-        console.warn('Training submission failed:', trainErr);
-      }
+      // ── 2. Submit ALL captured poses to training (background learning) ───
+      // Use all phase captures if available, otherwise fall back to just the main image
+      const captures = allCaptures.length > 0 ? allCaptures : [{ blob: capturedImage }];
+
+      const trainingPayload = {
+        skin_type:  response.data.profile.skin_type,
+        conditions: response.data.profile.conditions || [],
+      };
+
+      await Promise.allSettled(
+        captures.map(async (capture) => {
+          try {
+            const img = await blobToBase64(capture.blob);
+            await api.post('/training/submit', { image_base64: img, ...trainingPayload });
+          } catch (e) {
+            console.warn(`Training submit failed for phase "${capture.phase ?? 'main'}":`, e);
+          }
+        })
+      );
 
       navigate('/results');
     } catch (error) {
@@ -94,9 +115,7 @@ export default function Analysis() {
               border: '1px solid var(--border)',
               background: 'var(--card)',
             }}
-            styles={{
-              body: { padding: 24 }
-            }}
+            styles={{ body: { padding: 24 } }}
           >
             <Space direction="vertical" size="large" style={{ width: '100%' }}>
               <div style={{ textAlign: 'center' }}>
@@ -105,10 +124,12 @@ export default function Analysis() {
                   AI Face Detection
                 </Title>
                 <Text style={{ color: 'var(--muted-foreground)' }}>
-                  Position your face in the frame for automatic detection and analysis
+                  Follow the on-screen prompts to capture 5 poses for a complete skin analysis.
+                  The system will auto-capture each pose when you hold it steady.
                 </Text>
               </div>
 
+              {/* ── Capture phase ── */}
               {!capturedImage ? (
                 <FaceMeshCapture
                   onCapture={handleCapture}
@@ -116,23 +137,47 @@ export default function Analysis() {
                 />
               ) : (
                 <>
-                  <div style={{ textAlign: 'center', padding: '16px 0' }}>
+                  {/* Preview + summary */}
+                  <div style={{ textAlign: 'center', padding: '8px 0' }}>
                     <img
                       src={URL.createObjectURL(capturedImage)}
                       alt="Captured Face"
                       style={{
                         maxWidth: '100%',
-                        maxHeight: 300,
+                        maxHeight: 260,
                         borderRadius: 12,
                         border: '2px solid #10B981',
-                        objectFit: 'cover'
+                        objectFit: 'contain',
+                        background: 'var(--muted)',
                       }}
                     />
-                    <div style={{ marginTop: 12 }}>
-                      <Text type="success" strong>✓ Face Captured Successfully</Text>
+                    <div style={{ marginTop: 10 }}>
+                      <Text type="success" strong>
+                        ✓ {allCaptures.length > 0 ? `${allCaptures.length} poses` : 'Face'} captured
+                      </Text>
                     </div>
+                    {allCaptures.length > 1 && (
+                      <div style={{ display: 'flex', justifyContent: 'center', gap: 6, marginTop: 8, flexWrap: 'wrap' }}>
+                        {allCaptures.map((c) => (
+                          <span
+                            key={c.phase}
+                            style={{
+                              fontSize: 11,
+                              padding: '2px 8px',
+                              borderRadius: 10,
+                              background: 'var(--muted)',
+                              border: '1px solid var(--border)',
+                              color: 'var(--muted-foreground)',
+                            }}
+                          >
+                            {c.phase}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
+                  {/* ── Questionnaire ── */}
                   <Form
                     form={form}
                     layout="vertical"
@@ -144,7 +189,7 @@ export default function Analysis() {
                       name="skinFeel"
                       rules={[{ required: true, message: 'Please select an option' }]}
                     >
-                      <Select size="large" placeholder="Select...">
+                      <Select size="large" placeholder="Select…">
                         <Select.Option value="oily">Oily</Select.Option>
                         <Select.Option value="dry">Dry</Select.Option>
                         <Select.Option value="combination">Combination</Select.Option>
@@ -157,10 +202,10 @@ export default function Analysis() {
                       name="routine"
                       rules={[{ required: true, message: 'Please select an option' }]}
                     >
-                      <Select size="large" placeholder="Select...">
+                      <Select size="large" placeholder="Select…">
                         <Select.Option value="none">None</Select.Option>
-                        <Select.Option value="basic">Basic (cleanser + moisturizer)</Select.Option>
-                        <Select.Option value="moderate">Moderate (3-5 products)</Select.Option>
+                        <Select.Option value="basic">Basic (cleanser + moisturiser)</Select.Option>
+                        <Select.Option value="moderate">Moderate (3–5 products)</Select.Option>
                         <Select.Option value="extensive">Extensive (6+ products)</Select.Option>
                       </Select>
                     </Form.Item>
@@ -171,12 +216,12 @@ export default function Analysis() {
                     >
                       <Checkbox.Group style={{ width: '100%' }}>
                         <Space direction="vertical" style={{ width: '100%' }}>
-                          <Checkbox value="acne" style={{ fontSize: 15 }}>Acne</Checkbox>
-                          <Checkbox value="wrinkles" style={{ fontSize: 15 }}>Wrinkles</Checkbox>
+                          <Checkbox value="acne"       style={{ fontSize: 15 }}>Acne</Checkbox>
+                          <Checkbox value="wrinkles"   style={{ fontSize: 15 }}>Wrinkles</Checkbox>
                           <Checkbox value="dark_spots" style={{ fontSize: 15 }}>Dark Spots</Checkbox>
-                          <Checkbox value="redness" style={{ fontSize: 15 }}>Redness</Checkbox>
-                          <Checkbox value="dryness" style={{ fontSize: 15 }}>Dryness</Checkbox>
-                          <Checkbox value="oiliness" style={{ fontSize: 15 }}>Oiliness</Checkbox>
+                          <Checkbox value="redness"    style={{ fontSize: 15 }}>Redness</Checkbox>
+                          <Checkbox value="dryness"    style={{ fontSize: 15 }}>Dryness</Checkbox>
+                          <Checkbox value="oiliness"   style={{ fontSize: 15 }}>Oiliness</Checkbox>
                         </Space>
                       </Checkbox.Group>
                     </Form.Item>
@@ -190,7 +235,7 @@ export default function Analysis() {
                         loading={loading}
                         style={{ height: 56, fontSize: 16, fontWeight: 600 }}
                       >
-                        {loading ? 'Analyzing...' : 'Analyze My Skin'}
+                        {loading ? 'Analysing…' : 'Analyse My Skin'}
                       </Button>
 
                       <Button
@@ -198,13 +243,13 @@ export default function Analysis() {
                         block
                         onClick={() => {
                           setCapturedImage(null);
+                          setAllCaptures([]);
                           setLandmarks(null);
-                          setFaceDetected(false);
                           form.resetFields();
                         }}
                         style={{ height: 48 }}
                       >
-                        Retake Photo
+                        Retake Photos
                       </Button>
                     </Space>
                   </Form>
@@ -221,12 +266,12 @@ export default function Analysis() {
                   <Title level={5} style={{ color: 'var(--card-foreground)', marginBottom: 8 }}>
                     Tips for Best Results:
                   </Title>
-                  <ul style={{ paddingLeft: 20, margin: 0, color: 'var(--muted-foreground)' }}>
-                    <li>Ensure good lighting on your face</li>
+                  <ul style={{ paddingLeft: 20, margin: 0, color: 'var(--muted-foreground)', lineHeight: 1.8 }}>
+                    <li>Good even lighting — avoid harsh shadows</li>
                     <li>Remove glasses if possible</li>
-                    <li>Look directly at the camera</li>
-                    <li>Keep your face centered in the frame</li>
-                    <li>Wait for the green border (face detected)</li>
+                    <li>Hold each pose steady until the ring completes</li>
+                    <li>Tilt slowly — the guide arrow shows the target direction</li>
+                    <li>Use <strong>Capture Now</strong> or <strong>Skip</strong> if stuck on a pose</li>
                   </ul>
                 </div>
               )}
