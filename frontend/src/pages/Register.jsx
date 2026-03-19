@@ -25,17 +25,21 @@ export default function Register() {
   };
 
   return (
-    <div style={{ 
-      minHeight: '100vh', 
-      display: 'flex', 
-      alignItems: 'center', 
+    <div style={{
+      minHeight: '100vh',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
       justifyContent: 'center',
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      background: '#ffffff',
       padding: '20px'
     }}>
+      <div style={{ textAlign: 'center', marginBottom: 24 }}>
+        <Title level={2} style={{ margin: 0 }}>SkinCare AI</Title>
+      </div>
       <Card style={{ width: '100%', maxWidth: 400 }}>
         <div style={{ textAlign: 'center', marginBottom: 24 }}>
-          <Title level={2}>Create Account</Title>
+          <Title level={4} style={{ margin: 0 }}>Create Account</Title>
           <Text type="secondary">Join SkinCare AI today</Text>
         </div>
 
