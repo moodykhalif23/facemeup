@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { Layout, Card, Button, Typography, Space, InputNumber, Divider, Tag, App } from 'antd';
-import { ShoppingCartOutlined, HeartOutlined } from '@ant-design/icons';
+import { ShoppingCartOutlined } from '@ant-design/icons';
 import { getProduct } from '../services/api';
 import { addToCart } from '../store/slices/cartSlice';
 import AppHeader from '../components/AppHeader';
@@ -12,12 +12,35 @@ const { Title, Text, Paragraph } = Typography;
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
 
-// Helper function to get proxied image URL
 const getProxiedImageUrl = (imageUrl) => {
   if (!imageUrl) return null;
   const baseUrl = API_BASE_URL.replace('/api/v1', '');
   return `${baseUrl}/api/v1/proxy/image?url=${encodeURIComponent(imageUrl)}`;
 };
+
+const CATEGORY_STYLES = {
+  Serum:        { gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' },
+  Moisturizer:  { gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)' },
+  Cleanser:     { gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)' },
+  Toner:        { gradient: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)' },
+  Treatment:    { gradient: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)' },
+  Sunscreen:    { gradient: 'linear-gradient(135deg, #f7971e 0%, #ffd200 100%)' },
+  Mask:         { gradient: 'linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%)' },
+  Exfoliant:    { gradient: 'linear-gradient(135deg, #fccb90 0%, #d57eeb 100%)' },
+  'Eye Cream':  { gradient: 'linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%)' },
+  'Eye Serum':  { gradient: 'linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%)' },
+  Essence:      { gradient: 'linear-gradient(135deg, #96fbc4 0%, #f9f586 100%)' },
+  'Body Lotion':{ gradient: 'linear-gradient(135deg, #fddb92 0%, #d1fdff 100%)' },
+  'Body Balm':  { gradient: 'linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%)' },
+  'Body Milk':  { gradient: 'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)' },
+  'Body Wash':  { gradient: 'linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%)' },
+  'Lip Care':   { gradient: 'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)' },
+  Powder:       { gradient: 'linear-gradient(135deg, #e0e0e0 0%, #f5f5f5 100%)' },
+  Gel:          { gradient: 'linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%)' },
+};
+
+const getProductVisual = (category) =>
+  CATEGORY_STYLES[category] || { gradient: 'linear-gradient(135deg, #c3cfe2 0%, #a8b8d0 100%)' };
 
 export default function ProductDetail() {
   const navigate = useNavigate();
@@ -92,55 +115,63 @@ export default function ProductDetail() {
             width: '100%'
           }}>
             {/* Product Image */}
-            <Card 
-              style={{ 
-                borderRadius: 0,
+            <Card
+              style={{
+                borderRadius: 8,
                 overflow: 'hidden',
                 boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
                 height: 'fit-content',
                 width: '100%',
-                maxWidth: '100%'
               }}
               styles={{ body: { padding: 0 } }}
             >
-              <>
-                {product.image_url && (
-                  <img 
-                    src={getProxiedImageUrl(product.image_url)} 
-                    alt={product.name}
-                    style={{
+              {(() => {
+                const visual = getProductVisual(product.category);
+                const proxied = getProxiedImageUrl(product.image_url);
+                const imgH = isDesktop ? 400 : 300;
+                return (
+                  <div style={{ height: imgH, overflow: 'hidden', position: 'relative' }}>
+                    {proxied && (
+                      <img
+                        src={proxied}
+                        alt={product.name}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                          e.currentTarget.nextSibling.style.display = 'flex';
+                        }}
+                      />
+                    )}
+                    <div style={{
+                      display: proxied ? 'none' : 'flex',
                       width: '100%',
-                      height: isDesktop ? 400 : 300,
-                      objectFit: 'cover',
-                      backgroundColor: '#f0f0f0'
-                    }}
-                    onError={(e) => {
-                      e.target.style.display = 'none';
-                      if (e.target.nextSibling) {
-                        e.target.nextSibling.style.display = 'flex';
-                      }
-                    }}
-                  />
-                )}
-                <div style={{
-                  height: isDesktop ? 400 : 300,
-                  background: 'linear-gradient(135deg, #e0e1e7 0%, #e1dde4 100%)',
-                  display: product.image_url ? 'none' : 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: 'white',
-                  fontSize: 48,
-                  fontWeight: 600,
-                  letterSpacing: 2
-                }}>
-                  {product.name.substring(0, 2).toUpperCase()}
-                </div>
-              </>
+                      height: '100%',
+                      background: visual.gradient,
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexDirection: 'column',
+                      position: proxied ? 'absolute' : 'relative',
+                      top: 0, left: 0,
+                    }}>
+                      <span style={{
+                        fontSize: 13,
+                        fontWeight: 700,
+                        color: 'rgba(255,255,255,0.9)',
+                        textTransform: 'uppercase',
+                        letterSpacing: 2,
+                        textShadow: '0 1px 3px rgba(0,0,0,0.25)',
+                      }}>
+                        {product.category || 'Skincare'}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })()}
             </Card>
 
             {/* Product Info */}
-            <Card style={{ 
-              borderRadius: 0, 
+            <Card style={{
+              borderRadius: 8,
               boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
               width: '100%',
               maxWidth: '100%',
@@ -253,11 +284,11 @@ export default function ProductDetail() {
                 style={{ 
                   width: 80,
                   fontSize: 16,
-                  borderRadius: 0
+                  borderRadius: 8
                 }}
                 styles={{
                   input: {
-                    borderRadius: 0
+                    borderRadius: 8
                   }
                 }}
                 controls={{
@@ -276,7 +307,7 @@ export default function ProductDetail() {
                 height: 52,
                 fontSize: 16,
                 fontWeight: 600,
-                borderRadius: 0,
+                borderRadius: 8,
                 flex: 1
               }}
             >
@@ -294,7 +325,7 @@ export default function ProductDetail() {
           padding: '0 16px'
         }}>
           <Card style={{ 
-            borderRadius: 0, 
+            borderRadius: 8, 
             boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
             background: 'transparent',
             border: 'none'
@@ -315,11 +346,11 @@ export default function ProductDetail() {
                   style={{ 
                     width: 100,
                     fontSize: 18,
-                    borderRadius: 0
+                    borderRadius: 8
                   }}
                   styles={{
                     input: {
-                      borderRadius: 0
+                      borderRadius: 8
                     }
                   }}
                   controls={{
@@ -337,7 +368,7 @@ export default function ProductDetail() {
                   height: 56,
                   fontSize: 18,
                   fontWeight: 600,
-                  borderRadius: 0,
+                  borderRadius: 8,
                   minWidth: 300,
                   paddingLeft: 32,
                   paddingRight: 32
