@@ -85,14 +85,7 @@ function makeSkinTypeBarOption({ skinData, detectedType }) {
           color:     'var(--muted-foreground)',
           fontSize:  11,
         },
-        markPoint: {
-          data: [
-            { type: 'max', name: 'Max', label: { color: '#fff', fontSize: 11 } },
-            { type: 'min', name: 'Min', label: { color: '#fff', fontSize: 11 } },
-          ],
-          symbolSize: 52,
-          itemStyle: { opacity: 0.85 },
-        },
+        markPoint: { data: [] },
         markLine: { data: [] },
         emphasis: { focus: 'self' },
       },
