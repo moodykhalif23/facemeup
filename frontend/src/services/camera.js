@@ -3,12 +3,10 @@ import { Capacitor } from '@capacitor/core';
 
 export const takePicture = async () => {
   try {
-    // On web, use file input with camera capture
     if (Capacitor.getPlatform() === 'web') {
       return await captureFromWebCamera();
     }
     
-    // On native platforms, use Capacitor Camera
     const image = await Camera.getPhoto({
       quality: 80,
       allowEditing: false,
@@ -26,13 +24,12 @@ export const takePicture = async () => {
   }
 };
 
-// Web-specific camera capture using file input
 const captureFromWebCamera = () => {
   return new Promise((resolve, reject) => {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'image/*';
-    input.capture = 'environment'; // Use back camera on mobile web
+    input.capture = 'environment';
     
     input.onchange = async (e) => {
       const file = e.target.files?.[0];
