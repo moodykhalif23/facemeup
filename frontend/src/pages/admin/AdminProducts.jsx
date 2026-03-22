@@ -103,6 +103,7 @@ export default function AdminProducts() {
       dataIndex: 'image_url',
       key: 'image_url',
       width: 60,
+      responsive: ['md'],
       render: (url) =>
         url ? (
           <Image src={url} width={44} height={44} style={{ objectFit: 'cover', borderRadius: 6 }} preview={false} />
@@ -115,6 +116,7 @@ export default function AdminProducts() {
       dataIndex: 'sku',
       key: 'sku',
       width: 120,
+      responsive: ['lg'],
       render: (v) => <Text code style={{ fontSize: 12 }}>{v}</Text>,
     },
     { title: 'Name', dataIndex: 'name', key: 'name', ellipsis: true },
@@ -122,15 +124,19 @@ export default function AdminProducts() {
       title: 'Category',
       dataIndex: 'category',
       key: 'category',
-      width: 120,
-      render: (v) => v ? <Tag>{v}</Tag> : '—',
+      width: 160,
+      ellipsis: true,
+      responsive: ['md'],
+      render: (v) => v ? (
+        <Tag style={{ maxWidth: 140, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{v}</Tag>
+      ) : '—',
     },
     {
       title: 'Price',
       dataIndex: 'price',
       key: 'price',
-      width: 100,
-      render: (v) => `KES ${(v ?? 0).toLocaleString()}`,
+      width: 110,
+      render: (v) => <Text style={{ whiteSpace: 'nowrap' }}>{`KES ${(v ?? 0).toLocaleString()}`}</Text>,
       sorter: (a, b) => a.price - b.price,
     },
     {
@@ -184,7 +190,8 @@ export default function AdminProducts() {
         loading={loading}
         size="small"
         pagination={{ pageSize: 20 }}
-        scroll={{ x: 700 }}
+        tableLayout="fixed"
+        scroll={{ x: 'max-content' }}
         style={{ background: 'var(--card)', borderRadius: 10, border: '1px solid var(--border)' }}
       />
 
