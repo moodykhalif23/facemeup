@@ -84,6 +84,7 @@ export default function AdminUsers() {
       dataIndex: 'role',
       key: 'role',
       width: 160,
+      responsive: ['sm'],
       filters: ROLES.map((r) => ({ text: r, value: r })),
       onFilter: (value, record) => record.role === value,
       render: (role, record) =>
@@ -106,6 +107,7 @@ export default function AdminUsers() {
       width: 120,
       render: (v) => new Date(v).toLocaleDateString(),
       sorter: (a, b) => new Date(a.created_at) - new Date(b.created_at),
+      responsive: ['sm'],
     },
     {
       title: '',
@@ -130,15 +132,22 @@ export default function AdminUsers() {
 
   return (
     <AdminLayout>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 20,
+        gap: 12,
+        flexWrap: 'wrap',
+      }}>
         <Title level={4} style={{ margin: 0, color: 'var(--foreground)' }}>Users</Title>
-        <Space>
+        <Space style={{ width: '100%', maxWidth: 420 }}>
           <Input
             prefix={<SearchOutlined />}
             placeholder="Search by email or name"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            style={{ width: 240 }}
+            style={{ width: '100%' }}
             allowClear
           />
           <Button icon={<ReloadOutlined />} onClick={load}>Refresh</Button>
