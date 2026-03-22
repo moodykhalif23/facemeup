@@ -124,6 +124,32 @@ function App() {
                 </PrivateRoute>
               }
             />
+
+            {/* Admin routes */}
+            <Route
+              path="/admin"
+              element={<AdminRoute><AdminDashboard /></AdminRoute>}
+            />
+            <Route
+              path="/admin/products"
+              element={<AdminRoute><AdminProducts /></AdminRoute>}
+            />
+            <Route
+              path="/admin/users"
+              element={<AdminRoute><AdminUsers /></AdminRoute>}
+            />
+            <Route
+              path="/admin/orders"
+              element={<AdminRoute><AdminOrders /></AdminRoute>}
+            />
+            <Route
+              path="/admin/loyalty"
+              element={<AdminRoute><AdminLoyalty /></AdminRoute>}
+            />
+            <Route
+              path="/admin/config"
+              element={<AdminRoute><AdminConfig /></AdminRoute>}
+            />
           </Routes>
         </Content>
       </Layout>

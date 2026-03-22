@@ -7,7 +7,8 @@ import {
   ShoppingCartOutlined,
   UserOutlined,
   GiftOutlined,
-  ShopOutlined
+  ShopOutlined,
+  SettingOutlined,
 } from '@ant-design/icons';
 import AppHeader from '../components/AppHeader';
 
@@ -17,6 +18,7 @@ const { Title, Text } = Typography;
 export default function Home() {
   const navigate = useNavigate();
   const { items } = useSelector((state) => state.cart);
+  const { user } = useSelector((state) => state.auth);
 
   const cardMenuItems = [
     {
@@ -69,6 +71,15 @@ export default function Home() {
     },
   ];
 
+  const adminCard = {
+    title: 'Admin Panel',
+    description: 'Manage system & users',
+    icon: <SettingOutlined style={{ fontSize: 32 }} />,
+    color: '#ef4444',
+    bg: '#ef444415',
+    path: '/admin',
+  };
+
   return (
     <Layout style={{ minHeight: '100vh', background: 'var(--background)' }}>
       <AppHeader title="SkinCare AI" />
@@ -85,7 +96,7 @@ export default function Home() {
           </div>
 
           <Row gutter={[12, 12]}>
-            {cardMenuItems.map((item, index) => (
+            {[...cardMenuItems, ...(user?.role === 'admin' ? [adminCard] : [])].map((item, index) => (
               <Col xs={12} sm={12} md={8} key={index}>
                 <Card
                   hoverable
