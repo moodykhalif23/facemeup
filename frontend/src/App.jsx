@@ -15,12 +15,25 @@ import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
 import Orders from './pages/Orders';
 import Loyalty from './pages/Loyalty';
+import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminProducts from './pages/admin/AdminProducts';
+import AdminUsers from './pages/admin/AdminUsers';
+import AdminOrders from './pages/admin/AdminOrders';
+import AdminLoyalty from './pages/admin/AdminLoyalty';
+import AdminConfig from './pages/admin/AdminConfig';
 
 const { Content } = Layout;
 
 function PrivateRoute({ children }) {
   const { token } = useSelector((state) => state.auth);
   return token ? children : <Navigate to="/login" />;
+}
+
+function AdminRoute({ children }) {
+  const { token, user } = useSelector((state) => state.auth);
+  if (!token) return <Navigate to="/login" />;
+  if (user?.role !== 'admin') return <Navigate to="/" />;
+  return children;
 }
 
 function App() {
