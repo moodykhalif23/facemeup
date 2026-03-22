@@ -103,7 +103,6 @@ export default function AdminProducts() {
       dataIndex: 'image_url',
       key: 'image_url',
       width: 60,
-      responsive: ['md'],
       render: (url) =>
         url ? (
           <Image src={url} width={44} height={44} style={{ objectFit: 'cover', borderRadius: 6 }} preview={false} />
@@ -183,17 +182,19 @@ export default function AdminProducts() {
         </Space>
       </div>
 
-      <Table
-        dataSource={products}
-        columns={columns}
-        rowKey="sku"
-        loading={loading}
-        size="small"
-        pagination={{ pageSize: 20 }}
-        tableLayout="fixed"
-        scroll={{ x: 'max-content' }}
-        style={{ background: 'var(--card)', borderRadius: 10, border: '1px solid var(--border)' }}
-      />
+      <div style={{ background: 'var(--card)', borderRadius: 10, border: '1px solid var(--border)' }}>
+        <Table
+          dataSource={products}
+          columns={columns}
+          rowKey="sku"
+          loading={loading}
+          size="small"
+          pagination={{ pageSize: 20 }}
+          tableLayout="fixed"
+          scroll={{ x: 'max-content' }}
+          style={{ background: 'transparent' }}
+        />
+      </div>
 
       <Modal
         title={editing ? 'Edit Product' : 'Add Product'}
