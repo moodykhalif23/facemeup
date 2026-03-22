@@ -20,7 +20,11 @@ export default function Login() {
       const response = await login(values.email, values.password);
       dispatch(setCredentials(response.data));
       message.success('Login successful!');
-      navigate('/');
+      if (response.data?.role === 'admin') {
+        navigate('/admin');
+      } else {
+        navigate('/');
+      }
     } catch (error) {
       message.error(error.response?.data?.error?.message || 'Login failed');
     } finally {

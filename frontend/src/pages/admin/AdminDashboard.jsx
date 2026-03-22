@@ -53,7 +53,7 @@ export default function AdminDashboard() {
 
   const recentColumns = [
     { title: 'Order ID', dataIndex: 'id', key: 'id', render: (v) => `#${v}` },
-    { title: 'User', dataIndex: 'user_id', key: 'user_id', ellipsis: true, render: (v) => v.slice(0, 8) + '…' },
+    { title: 'User', dataIndex: 'user_id', key: 'user_id', ellipsis: true, render: (v) => v.slice(0, 8) + '…', responsive: ['sm'] },
     {
       title: 'Status',
       dataIndex: 'status',
@@ -65,6 +65,7 @@ export default function AdminDashboard() {
       dataIndex: 'created_at',
       key: 'created_at',
       render: (v) => new Date(v).toLocaleDateString(),
+      responsive: ['sm'],
     },
   ];
 
@@ -164,6 +165,7 @@ export default function AdminDashboard() {
                   rowKey="id"
                   pagination={false}
                   size="small"
+                  scroll={{ x: true }}
                 />
               </Card>
             </Col>

@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { Layout, Menu, Typography, Avatar, Dropdown, Button, theme } from 'antd';
+import { Layout, Menu, Typography, Avatar, Dropdown, Button, Grid } from 'antd';
 import {
   DashboardOutlined,
   ShoppingOutlined,
@@ -34,7 +34,13 @@ export default function AdminLayout({ children }) {
   const location = useLocation();
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
-  const { token: antToken } = theme.useToken();
+  const screens = Grid.useBreakpoint();
+  const isMobile = !screens.lg;
+
+  // Auto-collapse the sidebar on smaller screens for a responsive layout
+  useEffect(() => {
+    if (isMobile) setCollapsed(true);
+  }, [isMobile]);
 
   const userMenuItems = [
     {
@@ -54,24 +60,25 @@ export default function AdminLayout({ children }) {
   ];
 
   return (
-    <Layout style={{ minHeight: '100vh' }}>
-      <Sider
-        collapsible
-        collapsed={collapsed}
-        onCollapse={setCollapsed}
-        trigger={null}
-        width={220}
-        style={{
-          background: 'var(--card)',
-          borderRight: '1px solid var(--border)',
-          position: 'fixed',
-          insetInlineStart: 0,
-          top: 0,
-          bottom: 0,
-          zIndex: 100,
-          overflow: 'auto',
-        }}
-      >
+      <Layout style={{ minHeight: '100vh' }}>
+        <Sider
+          collapsible
+          collapsed={collapsed}
+          onCollapse={setCollapsed}
+          trigger={null}
+          width={220}
+          collapsedWidth={isMobile ? 0 : 80}
+          style={{
+            background: 'var(--card)',
+            borderRight: '1px solid var(--border)',
+            position: 'fixed',
+            insetInlineStart: 0,
+            top: 0,
+            bottom: 0,
+            zIndex: 100,
+            overflow: 'auto',
+          }}
+        >
         {/* Logo */}
         <div style={{
           height: 56,
@@ -103,7 +110,7 @@ export default function AdminLayout({ children }) {
         />
       </Sider>
 
-      <Layout style={{ marginInlineStart: collapsed ? 80 : 220, transition: 'margin 0.2s' }}>
+      <Layout style={{ marginInlineStart: collapsed ? (isMobile ? 0 : 80) : 220, transition: 'margin 0.2s' }}>
         <Header style={{
           background: 'var(--card)',
           borderBottom: '1px solid var(--border)',
