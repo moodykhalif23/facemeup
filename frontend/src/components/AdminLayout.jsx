@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { Layout, Menu, Typography, Avatar, Dropdown, Button, Grid } from 'antd';
+import { Layout, Menu, Typography, Avatar, Dropdown, Button, Grid, Drawer } from 'antd';
 import {
   DashboardOutlined,
   ShoppingOutlined,
@@ -30,6 +30,7 @@ const NAV_ITEMS = [
 
 export default function AdminLayout({ children }) {
   const [collapsed, setCollapsed] = useState(false);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
@@ -60,57 +61,60 @@ export default function AdminLayout({ children }) {
   ];
 
   return (
+    <>
       <Layout style={{ minHeight: '100vh' }}>
-        <Sider
-          collapsible
-          collapsed={collapsed}
-          onCollapse={setCollapsed}
-          trigger={null}
-          width={220}
-          collapsedWidth={isMobile ? 0 : 80}
-          style={{
-            background: 'var(--card)',
-            borderRight: '1px solid var(--border)',
-            position: 'fixed',
-            insetInlineStart: 0,
-            top: 0,
-            bottom: 0,
-            zIndex: 100,
-            overflow: 'auto',
-          }}
-        >
-        {/* Logo */}
-        <div style={{
-          height: 56,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: collapsed ? 'center' : 'flex-start',
-          padding: collapsed ? '0' : '0 20px',
-          borderBottom: '1px solid var(--border)',
-          gap: 10,
-        }}>
-          <SkinOutlined style={{ fontSize: 20, color: 'var(--primary)', flexShrink: 0 }} />
-          {!collapsed && (
-            <Text strong style={{ color: 'var(--foreground)', fontSize: 15, whiteSpace: 'nowrap' }}>
-              Admin Panel
-            </Text>
-          )}
-        </div>
+        {!isMobile && (
+          <Sider
+            collapsible
+            collapsed={collapsed}
+            onCollapse={setCollapsed}
+            trigger={null}
+            width={220}
+            collapsedWidth={80}
+            style={{
+              background: 'var(--card)',
+              borderRight: '1px solid var(--border)',
+              position: 'fixed',
+              insetInlineStart: 0,
+              top: 0,
+              bottom: 0,
+              zIndex: 100,
+              overflow: 'auto',
+            }}
+          >
+            {/* Logo */}
+            <div style={{
+              height: 56,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: collapsed ? 'center' : 'flex-start',
+              padding: collapsed ? '0' : '0 20px',
+              borderBottom: '1px solid var(--border)',
+              gap: 10,
+            }}>
+              <SkinOutlined style={{ fontSize: 20, color: 'var(--primary)', flexShrink: 0 }} />
+              {!collapsed && (
+                <Text strong style={{ color: 'var(--foreground)', fontSize: 15, whiteSpace: 'nowrap' }}>
+                  Admin Panel
+                </Text>
+              )}
+            </div>
 
-        <Menu
-          mode="inline"
-          selectedKeys={[location.pathname]}
-          items={NAV_ITEMS}
-          onClick={({ key }) => navigate(key)}
-          style={{
-            background: 'transparent',
-            border: 'none',
-            marginTop: 8,
-          }}
-        />
-      </Sider>
+            <Menu
+              mode="inline"
+              selectedKeys={[location.pathname]}
+              items={NAV_ITEMS}
+              onClick={({ key }) => navigate(key)}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                marginTop: 8,
+              }}
+            />
+          </Sider>
+        )}
 
-      <Layout style={{ marginInlineStart: collapsed ? (isMobile ? 0 : 80) : 220, transition: 'margin 0.2s' }}>
+      <Layout style={{ marginInlineStart: isMobile ? 0 : (collapsed ? 80 : 220), transition: 'margin 0.2s' }}>
         <Header style={{
           background: 'var(--card)',
           borderBottom: '1px solid var(--border)',
@@ -126,7 +130,13 @@ export default function AdminLayout({ children }) {
           <Button
             type="text"
             icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-            onClick={() => setCollapsed(!collapsed)}
+            onClick={() => {
+              if (isMobile) {
+                setMobileNavOpen(true);
+              } else {
+                setCollapsed(!collapsed);
+              }
+            }}
             style={{ color: 'var(--foreground)' }}
           />
 
@@ -155,6 +165,37 @@ export default function AdminLayout({ children }) {
           {children}
         </Content>
       </Layout>
-    </Layout>
+      </Layout>
+      <Drawer
+      placement="left"
+      open={mobileNavOpen}
+      onClose={() => setMobileNavOpen(false)}
+      width={220}
+      styles={{
+        body: { padding: 0, background: 'var(--card)' },
+        header: { background: 'var(--card)', borderBottom: '1px solid var(--border)' },
+      }}
+      title={(
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <SkinOutlined style={{ fontSize: 20, color: 'var(--primary)' }} />
+          <Text strong style={{ color: 'var(--foreground)', fontSize: 15 }}>
+            Admin Panel
+          </Text>
+        </div>
+      )}
+      >
+        <Menu
+          mode="inline"
+          selectedKeys={[location.pathname]}
+          items={NAV_ITEMS}
+          onClick={({ key }) => { setMobileNavOpen(false); navigate(key); }}
+          style={{
+            background: 'transparent',
+            border: 'none',
+            marginTop: 8,
+          }}
+        />
+      </Drawer>
+    </>
   );
 }
