@@ -157,7 +157,7 @@ export default function AdminDashboard() {
             <Col xs={24} md={14}>
               <Card
                 title={<span style={{ color: 'var(--foreground)' }}>Recent Orders</span>}
-                style={{ border: '1px solid var(--border)', background: 'var(--card)', borderRadius: 10 }}
+                style={{ border: '1px solid var(--border)', background: 'var(--card)', borderRadius: 10, overflow: 'hidden' }}
               >
                 <Table
                   dataSource={stats?.recent_orders ?? []}
@@ -166,6 +166,7 @@ export default function AdminDashboard() {
                   pagination={false}
                   size="small"
                   scroll={{ x: true }}
+                  style={{ background: 'transparent' }}
                 />
               </Card>
             </Col>

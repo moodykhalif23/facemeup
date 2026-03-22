@@ -145,24 +145,26 @@ export default function AdminUsers() {
         </Space>
       </div>
 
-      <Table
-        dataSource={filtered}
-        columns={columns}
-        rowKey="id"
-        loading={loading}
-        size="small"
-        pagination={{ pageSize: 20 }}
-        style={{ background: 'var(--card)', borderRadius: 10, border: '1px solid var(--border)' }}
-        summary={() => (
-          <Table.Summary.Row>
-            <Table.Summary.Cell colSpan={4}>
-              <Text style={{ color: 'var(--muted-foreground)', fontSize: 12 }}>
-                {filtered.length} user{filtered.length !== 1 ? 's' : ''}
-              </Text>
-            </Table.Summary.Cell>
-          </Table.Summary.Row>
-        )}
-      />
+      <div style={{ background: 'var(--card)', borderRadius: 10, border: '1px solid var(--border)', overflow: 'hidden' }}>
+        <Table
+          dataSource={filtered}
+          columns={columns}
+          rowKey="id"
+          loading={loading}
+          size="small"
+          pagination={{ pageSize: 20 }}
+          style={{ background: 'transparent' }}
+          summary={() => (
+            <Table.Summary.Row>
+              <Table.Summary.Cell colSpan={4}>
+                <Text style={{ color: 'var(--muted-foreground)', fontSize: 12 }}>
+                  {filtered.length} user{filtered.length !== 1 ? 's' : ''}
+                </Text>
+              </Table.Summary.Cell>
+            </Table.Summary.Row>
+          )}
+        />
+      </div>
     </AdminLayout>
   );
 }

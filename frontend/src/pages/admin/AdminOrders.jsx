@@ -152,16 +152,18 @@ export default function AdminOrders() {
         </Space>
       </div>
 
-      <Table
-        dataSource={filtered}
-        columns={columns}
-        rowKey="id"
-        loading={loading}
-        size="small"
-        pagination={{ pageSize: 20 }}
-        scroll={{ x: 780 }}
-        style={{ background: 'var(--card)', borderRadius: 10, border: '1px solid var(--border)' }}
-      />
+      <div style={{ background: 'var(--card)', borderRadius: 10, border: '1px solid var(--border)', overflow: 'hidden' }}>
+        <Table
+          dataSource={filtered}
+          columns={columns}
+          rowKey="id"
+          loading={loading}
+          size="small"
+          pagination={{ pageSize: 20 }}
+          scroll={{ x: 780 }}
+          style={{ background: 'transparent' }}
+        />
+      </div>
 
       {/* Order detail modal */}
       <Modal
