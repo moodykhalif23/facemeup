@@ -68,6 +68,7 @@ export default function AdminOrders() {
       dataIndex: 'user_email',
       key: 'user_email',
       ellipsis: true,
+      responsive: ['sm'],
     },
     {
       title: 'Channel',
@@ -75,6 +76,7 @@ export default function AdminOrders() {
       key: 'channel',
       width: 90,
       render: (v) => <Tag>{v ?? 'web'}</Tag>,
+      responsive: ['md'],
     },
     {
       title: 'Items',
@@ -82,6 +84,7 @@ export default function AdminOrders() {
       key: 'items_count',
       width: 70,
       render: (v) => v ?? '—',
+      responsive: ['md'],
     },
     {
       title: 'Total',
@@ -110,6 +113,7 @@ export default function AdminOrders() {
           }))}
         />
       ),
+      responsive: ['sm'],
     },
     {
       title: 'Date',
@@ -119,6 +123,7 @@ export default function AdminOrders() {
       render: (v) => new Date(v).toLocaleDateString(),
       sorter: (a, b) => new Date(a.created_at) - new Date(b.created_at),
       defaultSortOrder: 'descend',
+      responsive: ['sm'],
     },
     {
       title: '',
@@ -137,15 +142,22 @@ export default function AdminOrders() {
 
   return (
     <AdminLayout>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 20,
+        gap: 12,
+        flexWrap: 'wrap',
+      }}>
         <Title level={4} style={{ margin: 0, color: 'var(--foreground)' }}>Orders</Title>
-        <Space>
+        <Space style={{ width: '100%', maxWidth: 420 }}>
           <Input
             prefix={<SearchOutlined />}
             placeholder="Search by customer or order #"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            style={{ width: 260 }}
+            style={{ width: '100%' }}
             allowClear
           />
           <Button icon={<ReloadOutlined />} onClick={load}>Refresh</Button>
