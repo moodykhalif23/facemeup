@@ -182,7 +182,7 @@ export default function AdminProducts() {
         </Space>
       </div>
 
-      <div style={{ background: 'var(--card)', borderRadius: 10, border: '1px solid var(--border)' }}>
+      <div style={{ background: 'var(--card)', borderRadius: 10, border: '1px solid var(--border)', overflow: 'hidden' }}>
         <Table
           dataSource={products}
           columns={columns}
