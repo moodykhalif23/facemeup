@@ -90,8 +90,9 @@ export default function AdminOrders() {
       title: 'Total',
       dataIndex: 'total',
       key: 'total',
-      width: 120,
-      render: (v) => `KES ${(v ?? 0).toLocaleString()}`,
+      width: 110,
+      align: 'right',
+      render: (v) => <Text style={{ whiteSpace: 'nowrap' }}>{`KES ${(v ?? 0).toLocaleString()}`}</Text>,
       sorter: (a, b) => a.total - b.total,
     },
     {
@@ -128,7 +129,8 @@ export default function AdminOrders() {
     {
       title: '',
       key: 'view',
-      width: 50,
+      width: 44,
+      align: 'center',
       render: (_, record) => (
         <Button
           type="text"
@@ -172,6 +174,7 @@ export default function AdminOrders() {
           loading={loading}
           size="small"
           pagination={{ pageSize: 20 }}
+          tableLayout="fixed"
           scroll={{ x: 780 }}
           style={{ background: 'transparent' }}
         />
