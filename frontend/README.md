@@ -9,7 +9,7 @@ Modern, cross-platform frontend built with React, Ant Design, and Capacitor.
 - **Vite** - Build tool and dev server
 - **React Router** - Routing
 - **Redux Toolkit** - State management
-- **Capacitor** - Native mobile capabilities
+- **Capacitor** - Native mobile(IOS && Android)
 - **Axios** - HTTP client
 
 ## Features
@@ -59,23 +59,15 @@ npm run preview
 #### First Time Setup
 
 ```bash
-# Add iOS platform (Mac only)
 npx cap add ios
-
-# Add Android platform
 npx cap add android
 ```
 
 #### Running on Mobile
 
 ```bash
-# Sync web assets to native projects
 npm run sync
-
-# Open in Android Studio
 npm run android
-
-# Open in Xcode (Mac only)
 npm run ios
 ```
 ## Building for Production
@@ -84,7 +76,6 @@ npm run ios
 
 ```bash
 npm run build
-# Output in dist/
 ```
 
 ### Android
@@ -101,19 +92,6 @@ npm run build
 3. Open Xcode: `npm run ios`
 4. Build from Xcode
 
-## Capacitor Plugins Used
-
-- `@capacitor/camera` - Camera and photo library access
-- `@capacitor/preferences` - Local storage
-- `@capacitor/network` - Network status
-- `@capacitor/app` - App lifecycle
-
-## State Management
-
-Redux Toolkit with persistence:
-- `auth` - Authentication state
-- `analysis` - Skin analysis data
-- `cart` - Shopping cart items
 
 ## API Integration
 
@@ -133,4 +111,5 @@ npm install
 ### Capacitor sync issues
 ```bash
 npx cap sync
+npx cap doctor
 ```
