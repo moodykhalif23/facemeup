@@ -203,7 +203,7 @@ export default function AdminProducts() {
         okText={editing ? 'Update' : 'Create'}
         confirmLoading={saving}
         width={560}
-        destroyOnClose
+        destroyOnHidden
       >
         <Form form={form} layout="vertical" onFinish={handleSave} style={{ marginTop: 16 }}>
           <Form.Item label="SKU" name="sku" rules={[{ required: true, message: 'SKU required' }]}>

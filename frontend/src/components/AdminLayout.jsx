@@ -61,7 +61,7 @@ export default function AdminLayout({ children }) {
   ];
 
   return (
-    <>
+    <div style={{ minHeight: '100vh' }}>
       <Layout style={{ minHeight: '100vh' }}>
         {!isMobile && (
           <Sider
@@ -167,35 +167,35 @@ export default function AdminLayout({ children }) {
       </Layout>
       </Layout>
       <Drawer
-      placement="left"
-      open={mobileNavOpen}
-      onClose={() => setMobileNavOpen(false)}
-      width={220}
-      styles={{
-        body: { padding: 0, background: 'var(--card)' },
-        header: { background: 'var(--card)', borderBottom: '1px solid var(--border)' },
-      }}
-      title={(
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <SkinOutlined style={{ fontSize: 20, color: 'var(--primary)' }} />
-          <Text strong style={{ color: 'var(--foreground)', fontSize: 15 }}>
-            Admin Panel
-          </Text>
-        </div>
-      )}
+        placement="left"
+        open={mobileNavOpen}
+        onClose={() => setMobileNavOpen(false)}
+        width={220}
+        styles={{
+          body: { padding: 0, background: 'var(--card)' },
+          header: { background: 'var(--card)', borderBottom: '1px solid var(--border)' },
+        }}
+        title={(
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <SkinOutlined style={{ fontSize: 20, color: 'var(--primary)' }} />
+            <Text strong style={{ color: 'var(--foreground)', fontSize: 15 }}>
+              Admin Panel
+            </Text>
+          </div>
+        )}
       >
-        <Menu
-          mode="inline"
-          selectedKeys={[location.pathname]}
-          items={NAV_ITEMS}
-          onClick={({ key }) => { setMobileNavOpen(false); navigate(key); }}
-          style={{
-            background: 'transparent',
-            border: 'none',
-            marginTop: 8,
-          }}
-        />
-      </Drawer>
-    </>
+          <Menu
+            mode="inline"
+            selectedKeys={[location.pathname]}
+            items={NAV_ITEMS}
+            onClick={({ key }) => { setMobileNavOpen(false); navigate(key); }}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              marginTop: 8,
+            }}
+          />
+        </Drawer>
+    </div>
   );
 }
