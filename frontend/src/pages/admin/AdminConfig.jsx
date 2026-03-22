@@ -148,9 +148,6 @@ export default function AdminConfig() {
       </Title>
 
       {/* System actions */}
-      <Title level={5} style={{ color: 'var(--muted-foreground)', marginBottom: 14, fontWeight: 500 }}>
-        System Actions
-      </Title>
       <Row gutter={[16, 16]} style={{ marginBottom: 32 }}>
         {actions.map((a) => (
           <Col xs={24} md={12} xl={8} key={a.title}>
