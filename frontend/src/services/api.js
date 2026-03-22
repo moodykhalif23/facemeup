@@ -5,17 +5,15 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/
 
 const api = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 60000, // Increased to 60 seconds for ML inference
+  timeout: 60000,
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// Request interceptor to add auth token
 api.interceptors.request.use(
   (config) => {
     try {
-      // Get token from Redux store
       const state = store.getState();
       const token = state.auth?.token;
       

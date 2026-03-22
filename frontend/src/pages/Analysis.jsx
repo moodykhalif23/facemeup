@@ -24,17 +24,12 @@ export default function Analysis() {
   const [form] = Form.useForm();
   const [loading, setLoading]           = useState(false);
   const [capturedImage, setCapturedImage] = useState(null);
-  const [allCaptures, setAllCaptures]   = useState([]);   // all phase blobs
+  const [allCaptures, setAllCaptures]   = useState([]);
   const [landmarks, setLandmarks]       = useState(null);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { message } = App.useApp();
 
-  /**
-   * Called by FaceMeshCapture when the capture flow completes.
-   * mainBlob  – the front-facing image used for analysis
-   * captures  – array of { phase, blob, landmarks } for all captured poses
-   */
   const handleCapture = (mainBlob, captures = []) => {
     setCapturedImage(mainBlob);
     setAllCaptures(captures);
@@ -55,7 +50,6 @@ export default function Analysis() {
 
     setLoading(true);
     try {
-      // ── 1. Run analysis with the front-facing image ──────────────────────
       const base64Image = await blobToBase64(capturedImage);
 
       const questionnaire = {
@@ -73,8 +67,6 @@ export default function Analysis() {
       dispatch(setCurrentAnalysis(response.data));
       dispatch(addToHistory(response.data));
 
-      // ── 2. Submit ALL captured poses to training (background learning) ───
-      // Use all phase captures if available, otherwise fall back to just the main image
       const captures = allCaptures.length > 0 ? allCaptures : [{ blob: capturedImage }];
 
       const trainingPayload = {
