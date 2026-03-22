@@ -48,14 +48,18 @@ async def lifespan(_: FastAPI):
 
 app = FastAPI(title=settings.app_name, lifespan=lifespan)
 
-# Configure CORS - Allow all origins for development
+# CORS — origins are read from CORS_ORIGINS in .env
+# Development default: * (all origins)
+# Production: set CORS_ORIGINS=https://yourapp.com,https://www.yourapp.com
+_origins = [o.strip() for o in settings.cors_origins.split(",") if o.strip()]
+_wildcard = _origins == ["*"]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allow all origins for development
-    allow_credentials=False,  # Must be False when allow_origins is ["*"]
+    allow_origins=_origins,
+    allow_credentials=not _wildcard,  # credentials require explicit origins
     allow_methods=["*"],
     allow_headers=["*"],
-    expose_headers=["*"],
 )
 
 register_exception_handlers(app)

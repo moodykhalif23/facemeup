@@ -37,8 +37,4 @@ def seed_admin(db: Session) -> None:
     )
     db.add(admin)
     db.commit()
-    logger.info(
-        "Default admin created — email: %s  password: %s",
-        settings.admin_email,
-        settings.admin_password,
-    )
+    logger.info("Default admin created — email: %s", settings.admin_email)

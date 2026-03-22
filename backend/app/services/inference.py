@@ -1,5 +1,6 @@
 import base64
 import io
+import logging
 from functools import lru_cache
 from typing import Optional, List, Dict
 
@@ -8,6 +9,8 @@ from PIL import Image, ImageEnhance
 import cv2
 
 from app.core.config import settings
+
+logger = logging.getLogger(__name__)
 from app.schemas.analyze import SkinProfile
 from app.services.face_processor import face_processor
 
@@ -206,5 +209,5 @@ def run_skin_inference(
             "server_savedmodel",
         )
     except Exception as e:
-        print(f"Inference error: {e}")
+        logger.warning("Inference error, falling back to questionnaire: %s", e)
         return _questionnaire_profile(questionnaire), "questionnaire_fallback"

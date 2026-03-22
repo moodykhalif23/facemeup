@@ -14,6 +14,8 @@ class Settings(BaseSettings):
     api_v1_prefix: str = "/api/v1"
     database_url: str
 
+    cors_origins: str = "*"
+
     # Redis
     redis_url: str = "redis://redis:6379/0"
     redis_cache_ttl_seconds: int = 300
