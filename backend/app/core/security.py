@@ -46,13 +46,11 @@ def decode_token(token: str) -> dict:
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    # Bcrypt has a 72-byte limit
     password_bytes = plain_password.encode('utf-8')[:72]
     return bcrypt.checkpw(password_bytes, hashed_password.encode('utf-8'))
 
 
 def hash_password(password: str) -> str:
-    # Bcrypt has a 72-byte limit
     password_bytes = password.encode('utf-8')[:72]
     salt = bcrypt.gensalt()
     hashed = bcrypt.hashpw(password_bytes, salt)

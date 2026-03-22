@@ -12,15 +12,11 @@ class Settings(BaseSettings):
     app_name: str = "SkinCare AI API"
     env: str = "dev"
     api_v1_prefix: str = "/api/v1"
-
-    # Database — must be set in .env
     database_url: str
 
     # Redis
     redis_url: str = "redis://redis:6379/0"
     redis_cache_ttl_seconds: int = 300
-
-    # JWT — must be set in .env
     jwt_secret: str
     jwt_algorithm: str = "HS256"
     access_token_expire_minutes: int = 30
@@ -31,11 +27,11 @@ class Settings(BaseSettings):
     model_input_size: int = 224
     model_skin_types: str = "Oily,Dry,Combination,Normal,Sensitive"
     model_conditions: str = "Acne,Hyperpigmentation,Uneven tone,Dehydration,None detected"
-
-    # WooCommerce — must be set in .env
     woocommerce_url: str
     woocommerce_consumer_key: str
     woocommerce_consumer_secret: str
+    admin_email: str
+    admin_password: str
 
 
 settings = Settings()

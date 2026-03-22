@@ -9,6 +9,7 @@ from app.core.config import settings
 from app.core.database import SessionLocal
 from app.core.errors import register_exception_handlers
 from app.services.bootstrap import seed_products
+from app.services.seed_admin import seed_admin
 from app.services.training_scheduler import process_user_captured_images
 
 
@@ -20,6 +21,7 @@ async def lifespan(_: FastAPI):
     db = SessionLocal()
     try:
         seed_products(db)
+        seed_admin(db)
     except Exception:
         logger.exception("Startup seed skipped because database is unavailable")
     finally:
