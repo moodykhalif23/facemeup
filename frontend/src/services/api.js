@@ -62,5 +62,24 @@ export const getOrder = (id) => api.get(`/orders/${id}`);
 
 // Loyalty
 export const getLoyalty = (userId) => api.get(`/loyalty/${userId}`);
+export const getLoyaltyBalance = () => api.get('/loyalty');
+export const awardPoints = (userId, points, reason) =>
+  api.post('/loyalty/earn', { user_id: userId, points, reason });
+
+// Admin 
+export const adminGetStats = () => api.get('/admin/stats');
+export const adminGetUsers = () => api.get('/admin/users');
+export const adminUpdateUserRole = (userId, role) =>
+  api.put(`/admin/users/${userId}/role`, { role });
+export const adminDeleteUser = (userId) => api.delete(`/admin/users/${userId}`);
+export const adminGetOrders = () => api.get('/admin/orders');
+export const adminUpdateOrderStatus = (orderId, status) =>
+  api.put(`/admin/orders/${orderId}/status`, { status });
+export const adminCreateProduct = (data) => api.post('/products/admin/create', data);
+export const adminUpdateProduct = (sku, data) => api.put(`/products/admin/${sku}`, data);
+export const adminDeleteProduct = (sku) => api.delete(`/products/admin/${sku}`);
+export const adminSeedProducts = () => api.post('/products/admin/seed');
+export const adminSyncWooCommerce = () => api.post('/sync/woocommerce');
+export const adminClearCache = () => api.post('/admin/cache/clear');
 
 export default api;

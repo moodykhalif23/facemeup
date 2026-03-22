@@ -1,13 +1,26 @@
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import select
+from pydantic import BaseModel
+from sqlalchemy import select, delete as sql_delete
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.core.deps import require_roles
-from app.core.redis_client import cache_get_json, cache_set_json
+from app.core.errors import AppError
+from app.core.redis_client import cache_get_json, cache_set_json, get_redis_client
 from app.models.product import ProductCatalog
 from app.models.user import User
 from app.schemas.products import Product, ProductDetail
+
+
+class ProductUpsert(BaseModel):
+    sku: str
+    name: str
+    price: float = 0.0
+    stock: int = 0
+    category: str | None = None
+    description: str | None = None
+    ingredients: list[str] = []
+    image_url: str | None = None
 
 
 router = APIRouter()
@@ -92,6 +105,110 @@ def get_product(product_id: str, db: Session = Depends(get_db)) -> ProductDetail
     
     cache_set_json(cache_key, product.model_dump())
     return product
+
+
+def _invalidate_product_cache(sku: str | None = None) -> None:
+    try:
+        r = get_redis_client()
+        r.delete("products:catalog")
+        if sku:
+            r.delete(f"products:detail:{sku}")
+    except Exception:
+        pass
+
+
+@router.post("/admin/create", response_model=Product)
+def create_product(
+    payload: ProductUpsert,
+    db: Session = Depends(get_db),
+    _: User = Depends(require_roles("admin")),
+) -> Product:
+    """Create a new product in the catalog."""
+    existing = db.execute(
+        select(ProductCatalog).where(ProductCatalog.sku == payload.sku)
+    ).scalar_one_or_none()
+    if existing:
+        raise AppError(409, "sku_exists", f"Product with SKU '{payload.sku}' already exists")
+
+    row = ProductCatalog(
+        sku=payload.sku,
+        name=payload.name,
+        price=payload.price,
+        stock=payload.stock,
+        category=payload.category,
+        description=payload.description,
+        ingredients_csv=",".join(payload.ingredients),
+        image_url=payload.image_url,
+    )
+    db.add(row)
+    db.commit()
+    db.refresh(row)
+    _invalidate_product_cache()
+    return Product(
+        id=row.sku,
+        sku=row.sku,
+        name=row.name,
+        price=row.price,
+        ingredients=payload.ingredients,
+        stock=row.stock,
+        image_url=row.image_url,
+        category=row.category,
+    )
+
+
+@router.put("/admin/{sku}", response_model=Product)
+def update_product(
+    sku: str,
+    payload: ProductUpsert,
+    db: Session = Depends(get_db),
+    _: User = Depends(require_roles("admin")),
+) -> Product:
+    """Update an existing product."""
+    row = db.execute(
+        select(ProductCatalog).where(ProductCatalog.sku == sku)
+    ).scalar_one_or_none()
+    if not row:
+        raise AppError(404, "not_found", "Product not found")
+
+    row.name = payload.name
+    row.price = payload.price
+    row.stock = payload.stock
+    row.category = payload.category
+    row.description = payload.description
+    row.ingredients_csv = ",".join(payload.ingredients)
+    row.image_url = payload.image_url
+    db.commit()
+    db.refresh(row)
+    _invalidate_product_cache(sku)
+    return Product(
+        id=row.sku,
+        sku=row.sku,
+        name=row.name,
+        price=row.price,
+        ingredients=payload.ingredients,
+        stock=row.stock,
+        image_url=row.image_url,
+        category=row.category,
+    )
+
+
+@router.delete("/admin/{sku}")
+def delete_product(
+    sku: str,
+    db: Session = Depends(get_db),
+    _: User = Depends(require_roles("admin")),
+) -> dict:
+    """Delete a product from the catalog."""
+    row = db.execute(
+        select(ProductCatalog).where(ProductCatalog.sku == sku)
+    ).scalar_one_or_none()
+    if not row:
+        raise AppError(404, "not_found", "Product not found")
+
+    db.delete(row)
+    db.commit()
+    _invalidate_product_cache(sku)
+    return {"deleted": sku}
 
 
 @router.post("/admin/seed", response_model=dict[str, int])

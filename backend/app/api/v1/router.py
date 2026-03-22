@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 
 from app.api.v1.endpoints import (
+    admin,
     analyze,
     auth,
     loyalty,
@@ -25,3 +26,4 @@ api_router.include_router(loyalty.router, prefix="/loyalty", tags=["loyalty"])
 api_router.include_router(products.router, prefix="/products", tags=["products"])
 api_router.include_router(proxy.router, prefix="/proxy", tags=["proxy"])
 api_router.include_router(training.router, prefix="/training", tags=["training"])
+api_router.include_router(admin.router, prefix="/admin", tags=["admin"])

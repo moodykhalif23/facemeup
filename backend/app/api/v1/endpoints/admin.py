@@ -1,0 +1,222 @@
+import json
+from datetime import datetime, timezone
+
+from fastapi import APIRouter, Depends
+from sqlalchemy import select, func
+from sqlalchemy.orm import Session
+
+from app.core.database import get_db
+from app.core.deps import get_current_user, require_roles
+from app.core.errors import AppError
+from app.core.redis_client import get_redis_client
+from app.models.order import LoyaltyLedger, Order
+from app.models.product import ProductCatalog
+from app.models.profile import SkinProfileHistory
+from app.models.user import User
+
+router = APIRouter()
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Dashboard stats
+# ──────────────────────────────────────────────────────────────────────────────
+
+@router.get("/stats")
+def get_stats(
+    db: Session = Depends(get_db),
+    _: User = Depends(require_roles("admin")),
+) -> dict:
+    """Aggregate numbers for the admin dashboard."""
+    total_users = db.execute(select(func.count()).select_from(User)).scalar_one()
+    total_orders = db.execute(select(func.count()).select_from(Order)).scalar_one()
+    total_products = db.execute(select(func.count()).select_from(ProductCatalog)).scalar_one()
+    total_analyses = db.execute(select(func.count()).select_from(SkinProfileHistory)).scalar_one()
+
+    # Revenue = sum of all order items
+    orders = db.execute(select(Order)).scalars().all()
+    total_revenue = 0.0
+    for order in orders:
+        try:
+            items = json.loads(order.items_json or "[]")
+            for item in items:
+                total_revenue += float(item.get("price", 0)) * int(item.get("quantity", 1))
+        except Exception:
+            pass
+
+    # Skin-type distribution from latest profile per user
+    skin_dist_rows = db.execute(
+        select(SkinProfileHistory.skin_type, func.count().label("cnt"))
+        .group_by(SkinProfileHistory.skin_type)
+    ).all()
+    skin_distribution = {row.skin_type: row.cnt for row in skin_dist_rows}
+
+    # Recent 5 orders
+    recent_orders = db.execute(
+        select(Order).order_by(Order.created_at.desc()).limit(5)
+    ).scalars().all()
+    recent_order_list = [
+        {
+            "id": o.id,
+            "user_id": o.user_id,
+            "status": o.status,
+            "created_at": o.created_at.isoformat(),
+        }
+        for o in recent_orders
+    ]
+
+    return {
+        "total_users": total_users,
+        "total_orders": total_orders,
+        "total_products": total_products,
+        "total_analyses": total_analyses,
+        "total_revenue": round(total_revenue, 2),
+        "skin_distribution": skin_distribution,
+        "recent_orders": recent_order_list,
+    }
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# User management
+# ──────────────────────────────────────────────────────────────────────────────
+
+@router.get("/users")
+def list_users(
+    db: Session = Depends(get_db),
+    _: User = Depends(require_roles("admin")),
+) -> dict:
+    """Return all users."""
+    rows = db.execute(select(User).order_by(User.created_at.desc())).scalars().all()
+    return {
+        "users": [
+            {
+                "id": u.id,
+                "email": u.email,
+                "full_name": u.full_name,
+                "role": u.role,
+                "created_at": u.created_at.isoformat(),
+            }
+            for u in rows
+        ]
+    }
+
+
+@router.put("/users/{user_id}/role")
+def update_user_role(
+    user_id: str,
+    payload: dict,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_roles("admin")),
+) -> dict:
+    """Change a user's role. Payload: { role: 'customer' | 'advisor' | 'admin' }"""
+    new_role = payload.get("role", "").strip()
+    if new_role not in ("customer", "advisor", "admin"):
+        raise AppError(400, "invalid_role", "Role must be customer, advisor, or admin")
+
+    user = db.execute(select(User).where(User.id == user_id)).scalar_one_or_none()
+    if not user:
+        raise AppError(404, "not_found", "User not found")
+    if user.id == current_user.id:
+        raise AppError(400, "self_role_change", "Cannot change your own role")
+
+    user.role = new_role
+    db.commit()
+    return {"id": user.id, "role": user.role}
+
+
+@router.delete("/users/{user_id}")
+def delete_user(
+    user_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_roles("admin")),
+) -> dict:
+    """Delete a user and their associated data."""
+    if user_id == current_user.id:
+        raise AppError(400, "self_delete", "Cannot delete your own account")
+
+    user = db.execute(select(User).where(User.id == user_id)).scalar_one_or_none()
+    if not user:
+        raise AppError(404, "not_found", "User not found")
+
+    db.delete(user)
+    db.commit()
+    return {"deleted": user_id}
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Order management
+# ──────────────────────────────────────────────────────────────────────────────
+
+@router.get("/orders")
+def list_all_orders(
+    db: Session = Depends(get_db),
+    _: User = Depends(require_roles("admin")),
+) -> dict:
+    """Return every order with user email and computed total."""
+    rows = db.execute(
+        select(Order, User.email)
+        .join(User, User.id == Order.user_id)
+        .order_by(Order.created_at.desc())
+    ).all()
+
+    orders = []
+    for order, email in rows:
+        try:
+            items = json.loads(order.items_json or "[]")
+        except Exception:
+            items = []
+        total = sum(
+            float(i.get("price", 0)) * int(i.get("quantity", 1)) for i in items
+        )
+        orders.append({
+            "id": order.id,
+            "order_number": f"ORD-{order.created_at.year}-{str(order.id).zfill(3)}",
+            "user_email": email,
+            "user_id": order.user_id,
+            "channel": order.channel,
+            "status": order.status,
+            "total": round(total, 2),
+            "items_count": len(items),
+            "created_at": order.created_at.isoformat(),
+        })
+
+    return {"orders": orders}
+
+
+@router.put("/orders/{order_id}/status")
+def update_order_status(
+    order_id: int,
+    payload: dict,
+    db: Session = Depends(get_db),
+    _: User = Depends(require_roles("admin")),
+) -> dict:
+    """Update an order's status. Payload: { status: 'created' | 'paid' | 'shipped' | 'delivered' | 'cancelled' }"""
+    valid = {"created", "paid", "shipped", "delivered", "cancelled"}
+    new_status = payload.get("status", "").strip()
+    if new_status not in valid:
+        raise AppError(400, "invalid_status", f"Status must be one of: {', '.join(sorted(valid))}")
+
+    order = db.execute(select(Order).where(Order.id == order_id)).scalar_one_or_none()
+    if not order:
+        raise AppError(404, "not_found", "Order not found")
+
+    order.status = new_status
+    db.commit()
+    return {"id": order.id, "status": order.status}
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Cache management
+# ──────────────────────────────────────────────────────────────────────────────
+
+@router.post("/cache/clear")
+def clear_cache(
+    _: User = Depends(require_roles("admin")),
+) -> dict:
+    """Flush all cached keys (products, recommendations)."""
+    try:
+        redis = get_redis_client()
+        keys = redis.keys("products:*") + redis.keys("recommend:*")
+        if keys:
+            redis.delete(*keys)
+        return {"cleared": len(keys), "keys": [k.decode() if isinstance(k, bytes) else k for k in keys]}
+    except Exception as exc:
+        raise AppError(500, "cache_error", str(exc))
