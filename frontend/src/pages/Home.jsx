@@ -90,9 +90,6 @@ export default function Home() {
             <Title level={3} style={{ marginBottom: 8, color: 'var(--foreground)' }}>
               Welcome to Your Skincare Journey
             </Title>
-            <Text style={{ fontSize: 15, color: 'var(--muted-foreground)' }}>
-              AI-powered skin analysis and personalized recommendations
-            </Text>
           </div>
 
           <Row gutter={[12, 12]}>
