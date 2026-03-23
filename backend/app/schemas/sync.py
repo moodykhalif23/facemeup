@@ -18,3 +18,11 @@ class WooCommerceSyncResponse(BaseModel):
     products_updated: int
     products_failed: int
     message: str
+
+
+class WooCommerceWcIdSyncResponse(BaseModel):
+    success: bool
+    total_missing: int
+    updated: int
+    still_missing: int
+    message: str

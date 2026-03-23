@@ -1,9 +1,11 @@
 import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Layout, Card, Button, Typography, List, InputNumber, Space, Empty, App } from 'antd';
 import { DeleteOutlined, ShoppingOutlined } from '@ant-design/icons';
-import { removeFromCart, updateQuantity } from '../store/slices/cartSlice';
+import { removeFromCart, updateQuantity, updateItemMeta } from '../store/slices/cartSlice';
 import AppHeader from '../components/AppHeader';
+import { getProducts, syncWooCommerceWcIds } from '../services/api';
 
 const { Content } = Layout;
 const { Title, Text } = Typography;
@@ -13,19 +15,48 @@ export default function Cart() {
   const dispatch = useDispatch();
   const { items } = useSelector((state) => state.cart);
   const { message } = App.useApp();
+  const [syncing, setSyncing] = useState(false);
 
   const total = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   const missingWc = items.filter((item) => !item.wc_id);
 
-  const buildCheckoutUrl = () => {
+  const buildCheckoutUrl = (wcMap = new Map()) => {
     const base = 'https://drrashel.co.ke/checkout/';
     const params = [];
     items.forEach((item) => {
-      if (!item.wc_id) return;
-      params.push(`add-to-cart=${encodeURIComponent(item.wc_id)}`);
+      const wcId = item.wc_id || wcMap.get(item.id);
+      if (!wcId) return;
+      params.push(`add-to-cart=${encodeURIComponent(wcId)}`);
       params.push(`quantity=${encodeURIComponent(item.quantity)}`);
     });
     return `${base}?${params.join('&')}`;
+  };
+
+  const ensureWcIds = async () => {
+    if (missingWc.length === 0) {
+      return new Map();
+    }
+
+    setSyncing(true);
+    try {
+      await syncWooCommerceWcIds();
+      const response = await getProducts();
+      const wcMap = new Map(response.data.map((p) => [p.sku, p.wc_id]));
+
+      missingWc.forEach((item) => {
+        const wcId = wcMap.get(item.id);
+        if (wcId) {
+          dispatch(updateItemMeta({ id: item.id, data: { wc_id: wcId } }));
+        }
+      });
+
+      return wcMap;
+    } catch (err) {
+      message.error('Failed to sync products with website');
+      return null;
+    } finally {
+      setSyncing(false);
+    }
   };
 
   const handleQuantityChange = (id, quantity) => {
@@ -105,12 +136,20 @@ export default function Cart() {
                     size="large"
                     block
                     onClick={() => {
-                      if (missingWc.length > 0) {
-                        message.error('Some items are not synced to the website yet.');
-                        return;
-                      }
-                      window.location.href = buildCheckoutUrl();
+                      (async () => {
+                        const wcMap = await ensureWcIds();
+                        if (wcMap === null) return;
+
+                        const stillMissing = items.filter((item) => !item.wc_id && !wcMap.get(item.id));
+                        if (stillMissing.length > 0) {
+                          message.error('Some items are not synced to the website yet.');
+                          return;
+                        }
+
+                        window.location.href = buildCheckoutUrl(wcMap);
+                      })();
                     }}
+                    loading={syncing}
                     style={{ height: 52, fontSize: 16, fontWeight: 600 }}
                   >
                     Checkout on Website

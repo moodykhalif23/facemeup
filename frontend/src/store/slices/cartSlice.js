@@ -25,11 +25,17 @@ const cartSlice = createSlice({
         item.quantity = action.payload.quantity;
       }
     },
+    updateItemMeta: (state, action) => {
+      const item = state.items.find(item => item.id === action.payload.id);
+      if (item) {
+        Object.assign(item, action.payload.data);
+      }
+    },
     clearCart: (state) => {
       state.items = [];
     },
   },
 });
 
-export const { addToCart, removeFromCart, updateQuantity, clearCart } = cartSlice.actions;
+export const { addToCart, removeFromCart, updateQuantity, updateItemMeta, clearCart } = cartSlice.actions;
 export default cartSlice.reducer;
