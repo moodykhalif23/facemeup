@@ -178,6 +178,7 @@ def list_reports(
             "skin_type_scores": json.loads(record.skin_type_scores_json) if record.skin_type_scores_json else None,
             "condition_scores": json.loads(record.condition_scores_json) if record.condition_scores_json else None,
             "inference_mode": record.inference_mode,
+            "report_image_base64": record.report_image_base64,
         })
 
     return {"reports": reports}

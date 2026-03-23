@@ -1,12 +1,15 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
-  Table, Card, Typography, Space, Input, Tag, Avatar, Button, Drawer, Divider, Progress, App,
+  Table, Card, Typography, Space, Input, Tag, Avatar, Button, Drawer, Divider, Progress, App, DatePicker,
 } from 'antd';
 import { SearchOutlined, EyeOutlined, UserOutlined } from '@ant-design/icons';
 import AdminLayout from '../../components/AdminLayout';
 import { adminGetReports } from '../../services/api';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 const { Text } = Typography;
+const { RangePicker } = DatePicker;
 
 const formatDateTime = (value) => {
   if (!value) return '—';
@@ -26,6 +29,8 @@ export default function AdminReports() {
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [dateRange, setDateRange] = useState(null);
+  const reportRef = useRef(null);
 
   const load = () => {
     setLoading(true);
@@ -39,8 +44,17 @@ export default function AdminReports() {
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return reports;
-    return reports.filter((r) => {
+    let data = reports;
+    if (dateRange?.[0] && dateRange?.[1]) {
+      const start = dateRange[0].startOf('day').toDate();
+      const end = dateRange[1].endOf('day').toDate();
+      data = data.filter((r) => {
+        const t = new Date(r.created_at);
+        return t >= start && t <= end;
+      });
+    }
+    if (!q) return data;
+    return data.filter((r) => {
       const target = [
         r.email,
         r.full_name,
@@ -50,9 +64,22 @@ export default function AdminReports() {
       ].filter(Boolean).join(' ').toLowerCase();
       return target.includes(q);
     });
-  }, [reports, search]);
+  }, [reports, search, dateRange]);
 
   const columns = [
+    {
+      title: 'Photo',
+      key: 'photo',
+      width: 70,
+      render: (_, r) => (
+        <Avatar
+          size={40}
+          src={r.report_image_base64 || undefined}
+          icon={<UserOutlined />}
+          style={{ background: 'var(--muted)' }}
+        />
+      ),
+    },
     {
       title: 'Customer',
       key: 'customer',
@@ -137,14 +164,20 @@ export default function AdminReports() {
   return (
     <AdminLayout>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, gap: 12, flexWrap: 'wrap' }}>
-        <Input
-          prefix={<SearchOutlined />}
-          placeholder="Search by name, email, skin type, condition..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          allowClear
-          style={{ width: '100%', maxWidth: 420 }}
-        />
+        <Space wrap>
+          <Input
+            prefix={<SearchOutlined />}
+            placeholder="Search by name, email, skin type, condition..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            allowClear
+            style={{ width: 320 }}
+          />
+          <RangePicker
+            onChange={(val) => setDateRange(val)}
+            style={{ minWidth: 260 }}
+          />
+        </Space>
       </div>
 
       <div style={{ background: 'var(--card)', borderRadius: 10, border: '1px solid var(--border)', overflow: 'hidden' }}>
@@ -170,10 +203,15 @@ export default function AdminReports() {
         }}
       >
         {selected && (
-          <div>
+          <div ref={reportRef}>
             <Card style={{ border: '1px solid var(--border)', background: 'var(--card)', borderRadius: 10 }}>
               <Space align="start">
-                <Avatar size={48} icon={<UserOutlined />} style={{ background: 'var(--primary)' }} />
+                <Avatar
+                  size={64}
+                  src={selected.report_image_base64 || undefined}
+                  icon={<UserOutlined />}
+                  style={{ background: 'var(--primary)' }}
+                />
                 <div>
                   <Text style={{ display: 'block', color: 'var(--foreground)', fontSize: 16 }} strong>
                     {selected.full_name || 'Unknown'}
@@ -245,6 +283,25 @@ export default function AdminReports() {
                 </Card>
               </>
             )}
+          </div>
+        )}
+        {selected && (
+          <div style={{ marginTop: 16 }}>
+            <Button
+              type="primary"
+              onClick={async () => {
+                if (!reportRef.current) return;
+                const canvas = await html2canvas(reportRef.current, { backgroundColor: '#0b0b0b' });
+                const imgData = canvas.toDataURL('image/png');
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+                pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+                pdf.save(`report-${selected.id}.pdf`);
+              }}
+            >
+              Export PDF
+            </Button>
           </div>
         )}
       </Drawer>

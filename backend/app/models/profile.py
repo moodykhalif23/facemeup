@@ -18,4 +18,5 @@ class SkinProfileHistory(Base):
     skin_type_scores_json: Mapped[str | None] = mapped_column(Text, nullable=True)
     condition_scores_json: Mapped[str | None] = mapped_column(Text, nullable=True)
     inference_mode: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    report_image_base64: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)

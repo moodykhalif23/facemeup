@@ -1,14 +1,17 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import {
-  Layout, Card, Typography, Space, Tag, List, Divider, Progress, Drawer, Button, App,
+  Layout, Card, Typography, Space, Tag, List, Divider, Progress, Drawer, Button, App, DatePicker, Avatar,
 } from 'antd';
 import { EyeOutlined } from '@ant-design/icons';
 import AppHeader from '../components/AppHeader';
 import { getProfile } from '../services/api';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 const { Content } = Layout;
 const { Text, Title } = Typography;
+const { RangePicker } = DatePicker;
 
 const formatDateTime = (value) => {
   if (!value) return '—';
@@ -23,6 +26,8 @@ export default function Reports() {
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [dateRange, setDateRange] = useState(null);
+  const reportRef = useRef(null);
 
   useEffect(() => {
     if (!user?.id) return;
@@ -33,7 +38,18 @@ export default function Reports() {
       .finally(() => setLoading(false));
   }, [user?.id]);
 
-  const listItems = useMemo(() => history.map((h, idx) => ({ ...h, key: idx })), [history]);
+  const listItems = useMemo(() => {
+    let data = history;
+    if (dateRange?.[0] && dateRange?.[1]) {
+      const start = dateRange[0].startOf('day').toDate();
+      const end = dateRange[1].endOf('day').toDate();
+      data = data.filter((r) => {
+        const t = new Date(r.timestamp);
+        return t >= start && t <= end;
+      });
+    }
+    return data.map((h, idx) => ({ ...h, key: idx }));
+  }, [history, dateRange]);
 
   return (
     <Layout style={{ minHeight: '100vh', background: 'var(--background)' }}>
@@ -54,6 +70,9 @@ export default function Reports() {
             style={{ marginTop: 16, borderRadius: 12, border: '1px solid var(--border)', background: 'var(--card)' }}
             loading={loading}
           >
+            <div style={{ marginBottom: 12 }}>
+              <RangePicker onChange={(val) => setDateRange(val)} />
+            </div>
             {listItems.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '40px 0' }}>
                 <Text style={{ color: 'var(--muted-foreground)' }}>No reports yet</Text>
@@ -106,13 +125,28 @@ export default function Reports() {
         }}
       >
         {selected && (
-          <div>
+          <div ref={reportRef}>
             <Card style={{ border: '1px solid var(--border)', background: 'var(--card)', borderRadius: 10 }}>
-              <Text strong style={{ fontSize: 16, color: 'var(--foreground)' }}>
-                {selected.skin_type}
-              </Text>
+              <Space align="start">
+                <Avatar
+                  size={72}
+                  src={selected.report_image_base64 || undefined}
+                  style={{ background: 'var(--muted)' }}
+                />
+                <div>
+                  <Text strong style={{ fontSize: 16, color: 'var(--foreground)' }}>
+                    {selected.skin_type}
+                  </Text>
+                  <div style={{ marginTop: 8 }}>
+                    <Text style={{ color: 'var(--muted-foreground)' }}>Tested at {formatDateTime(selected.timestamp)}</Text>
+                  </div>
+                </div>
+              </Space>
               <div style={{ marginTop: 8 }}>
-                <Text style={{ color: 'var(--muted-foreground)' }}>Tested at {formatDateTime(selected.timestamp)}</Text>
+                <Text style={{ color: 'var(--muted-foreground)' }}>
+                  {selected.questionnaire?.gender ? `Gender: ${selected.questionnaire.gender}` : ''}{' '}
+                  {selected.questionnaire?.age ? `Age: ${selected.questionnaire.age}` : ''}
+                </Text>
               </div>
               <Divider style={{ borderColor: 'var(--border)' }} />
               <Text strong style={{ color: 'var(--foreground)' }}>Conditions</Text>
@@ -163,6 +197,25 @@ export default function Reports() {
                 </Card>
               </>
             )}
+          </div>
+        )}
+        {selected && (
+          <div style={{ marginTop: 16 }}>
+            <Button
+              type="primary"
+              onClick={async () => {
+                if (!reportRef.current) return;
+                const canvas = await html2canvas(reportRef.current, { backgroundColor: '#0b0b0b' });
+                const imgData = canvas.toDataURL('image/png');
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+                pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+                pdf.save('my-report.pdf');
+              }}
+            >
+              Export PDF
+            </Button>
           </div>
         )}
       </Drawer>
