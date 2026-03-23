@@ -60,8 +60,9 @@ export default function AdminOrders() {
       title: 'Order #',
       dataIndex: 'order_number',
       key: 'order_number',
-      width: 140,
-      render: (v) => <Text code style={{ fontSize: 12 }}>{v}</Text>,
+      width: 120,
+      ellipsis: true,
+      render: (v) => <Text code style={{ fontSize: 12, whiteSpace: 'nowrap' }}>{v}</Text>,
     },
     {
       title: 'Customer',
@@ -90,7 +91,7 @@ export default function AdminOrders() {
       title: 'Total',
       dataIndex: 'total',
       key: 'total',
-      width: 110,
+      width: 96,
       align: 'right',
       render: (v) => <Text style={{ whiteSpace: 'nowrap' }}>{`KES ${(v ?? 0).toLocaleString()}`}</Text>,
       sorter: (a, b) => a.total - b.total,
@@ -175,7 +176,7 @@ export default function AdminOrders() {
           size="small"
           pagination={{ pageSize: 20 }}
           tableLayout="fixed"
-          scroll={{ x: 780 }}
+          scroll={{ x: 'max-content' }}
           style={{ background: 'transparent' }}
         />
       </div>
