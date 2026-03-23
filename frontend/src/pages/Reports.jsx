@@ -58,7 +58,7 @@ export default function Reports() {
       <Content style={{ padding: '16px' }}>
         <div style={{ maxWidth: 960, margin: '0 auto' }}>
           <div>
-            <div style={{ marginBottom: 12, display: 'flex', justifyContent: 'center' }}>
+            <div style={{ marginBottom: 12 }}>
               <RangePicker onChange={(val) => setDateRange(val)} />
             </div>
             {loading ? (
@@ -70,37 +70,45 @@ export default function Reports() {
                 <Text style={{ color: 'var(--muted-foreground)' }}>No reports yet</Text>
               </div>
             ) : (
-              <List
-                dataSource={listItems}
-                renderItem={(item) => (
-                  <List.Item
-                    actions={[
-                      <Button
-                        key="view"
-                        type="link"
-                        icon={<EyeOutlined />}
-                        onClick={() => { setSelected(item); setDrawerOpen(true); }}
-                      >
-                        View
-                      </Button>,
-                    ]}
-                  >
-                    <List.Item.Meta
-                      title={(
-                        <Space size={8} wrap>
-                          <Text strong style={{ color: 'var(--card-foreground)' }}>{item.skin_type}</Text>
-                          {(item.conditions || []).map((c) => <Tag key={c}>{c}</Tag>)}
-                        </Space>
-                      )}
-                      description={(
-                        <Text style={{ color: 'var(--muted-foreground)' }}>
-                          {formatDateTime(item.timestamp)}
-                        </Text>
-                      )}
-                    />
-                  </List.Item>
-                )}
-              />
+              <div
+                style={{
+                  maxHeight: 'calc(100vh - 220px)',
+                  overflowY: 'auto',
+                  paddingRight: 4,
+                }}
+              >
+                <List
+                  dataSource={listItems}
+                  renderItem={(item) => (
+                    <List.Item
+                      actions={[
+                        <Button
+                          key="view"
+                          type="link"
+                          icon={<EyeOutlined />}
+                          onClick={() => { setSelected(item); setDrawerOpen(true); }}
+                        >
+                          View
+                        </Button>,
+                      ]}
+                    >
+                      <List.Item.Meta
+                        title={(
+                          <Space size={8} wrap>
+                            <Text strong style={{ color: 'var(--card-foreground)' }}>{item.skin_type}</Text>
+                            {(item.conditions || []).map((c) => <Tag key={c}>{c}</Tag>)}
+                          </Space>
+                        )}
+                        description={(
+                          <Text style={{ color: 'var(--muted-foreground)' }}>
+                            {formatDateTime(item.timestamp)}
+                          </Text>
+                        )}
+                      />
+                    </List.Item>
+                  )}
+                />
+              </div>
             )}
           </div>
         </div>
