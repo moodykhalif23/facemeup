@@ -11,7 +11,7 @@ import ReactECharts from 'echarts-for-react';
 import AdminLayout from '../../components/AdminLayout';
 import { adminGetStats } from '../../services/api';
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 const STATUS_COLOR = {
   created: 'blue',
@@ -72,10 +72,6 @@ export default function AdminDashboard() {
 
   return (
     <AdminLayout>
-      <Title level={4} style={{ marginBottom: 24, color: 'var(--foreground)' }}>
-        Dashboard
-      </Title>
-
       {loading ? (
         <div style={{ textAlign: 'center', paddingTop: 60 }}><Spin size="large" /></div>
       ) : (

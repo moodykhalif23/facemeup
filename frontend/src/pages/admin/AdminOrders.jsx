@@ -6,7 +6,7 @@ import { ReloadOutlined, SearchOutlined, EyeOutlined } from '@ant-design/icons';
 import AdminLayout from '../../components/AdminLayout';
 import { adminGetOrders, adminUpdateOrderStatus } from '../../services/api';
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 const STATUS_OPTIONS = ['created', 'paid', 'shipped', 'delivered', 'cancelled'];
 const STATUS_COLOR = {
@@ -147,13 +147,12 @@ export default function AdminOrders() {
     <AdminLayout>
       <div style={{
         display: 'flex',
-        justifyContent: 'space-between',
+        justifyContent: 'flex-end',
         alignItems: 'center',
         marginBottom: 20,
         gap: 12,
         flexWrap: 'wrap',
       }}>
-        <Title level={4} style={{ margin: 0, color: 'var(--foreground)' }}>Orders</Title>
         <Space style={{ width: '100%', maxWidth: 420 }}>
           <Input
             prefix={<SearchOutlined />}

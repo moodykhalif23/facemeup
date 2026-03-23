@@ -7,7 +7,7 @@ import { DeleteOutlined, ReloadOutlined, SearchOutlined, UserOutlined } from '@a
 import AdminLayout from '../../components/AdminLayout';
 import { adminGetUsers, adminDeleteUser } from '../../services/api';
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 export default function AdminUsers() {
   const { message } = App.useApp();
@@ -102,13 +102,12 @@ export default function AdminUsers() {
     <AdminLayout>
       <div style={{
         display: 'flex',
-        justifyContent: 'space-between',
+        justifyContent: 'flex-end',
         alignItems: 'center',
         marginBottom: 20,
         gap: 12,
         flexWrap: 'wrap',
       }}>
-        <Title level={4} style={{ margin: 0, color: 'var(--foreground)' }}>Clients</Title>
         <Space style={{ width: '100%', maxWidth: 420 }}>
           <Input
             prefix={<SearchOutlined />}

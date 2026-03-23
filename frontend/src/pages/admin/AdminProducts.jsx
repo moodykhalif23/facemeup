@@ -12,7 +12,7 @@ import {
   adminDeleteProduct,
 } from '../../services/api';
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 const CATEGORIES = [
   'Cleanser', 'Moisturizer', 'Serum', 'Toner', 'Sunscreen',
@@ -174,8 +174,7 @@ export default function AdminProducts() {
 
   return (
     <AdminLayout>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-        <Title level={4} style={{ margin: 0, color: 'var(--foreground)' }}>Products</Title>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginBottom: 20 }}>
         <Space>
           <Button icon={<ReloadOutlined />} onClick={load}>Refresh</Button>
           <Button type="primary" icon={<PlusOutlined />} onClick={openCreate}>Add Product</Button>

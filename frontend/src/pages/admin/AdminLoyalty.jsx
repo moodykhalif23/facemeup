@@ -7,7 +7,7 @@ import { PlusOutlined, MinusOutlined, ReloadOutlined, SearchOutlined } from '@an
 import AdminLayout from '../../components/AdminLayout';
 import { adminGetUsers, awardPoints } from '../../services/api';
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 const TIER = (pts) => {
   if (pts >= 2000) return { label: 'Platinum', color: '#7c3aed' };
@@ -132,13 +132,12 @@ export default function AdminLoyalty() {
     <AdminLayout>
       <div style={{
         display: 'flex',
-        justifyContent: 'space-between',
+        justifyContent: 'flex-end',
         alignItems: 'center',
         marginBottom: 20,
         gap: 12,
         flexWrap: 'wrap',
       }}>
-        <Title level={4} style={{ margin: 0, color: 'var(--foreground)' }}>Loyalty Points</Title>
         <Space style={{ width: '100%', maxWidth: 420 }}>
           <Input
             prefix={<SearchOutlined />}

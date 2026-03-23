@@ -13,7 +13,7 @@ import {
 import AdminLayout from '../../components/AdminLayout';
 import { adminClearCache, adminSeedProducts, adminSyncWooCommerce } from '../../services/api';
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 function ActionCard({ icon, title, description, buttonLabel, buttonProps, onAction, result, danger }) {
   const [loading, setLoading] = useState(false);
@@ -143,10 +143,6 @@ export default function AdminConfig() {
 
   return (
     <AdminLayout>
-      <Title level={4} style={{ marginBottom: 24, color: 'var(--foreground)' }}>
-        System Configuration
-      </Title>
-
       {/* System actions */}
       <Row gutter={[16, 16]} style={{ marginBottom: 32 }}>
         {actions.map((a) => (
@@ -159,9 +155,6 @@ export default function AdminConfig() {
       <Divider style={{ borderColor: 'var(--border)' }} />
 
       {/* API reference */}
-      <Title level={5} style={{ color: 'var(--muted-foreground)', marginBottom: 14, fontWeight: 500 }}>
-        Admin API Endpoints
-      </Title>
       <Card
         style={{ border: '1px solid var(--border)', background: 'var(--card)', borderRadius: 10 }}
         styles={{ body: { padding: 0 } }}
