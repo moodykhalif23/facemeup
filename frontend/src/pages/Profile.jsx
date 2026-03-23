@@ -35,6 +35,37 @@ export default function Profile() {
     }
   };
 
+  const historyItems = (profileData?.history || history || []).slice().sort((a, b) => {
+    const aTime = new Date(a.timestamp || a.created_at || 0).getTime();
+    const bTime = new Date(b.timestamp || b.created_at || 0).getTime();
+    return bTime - aTime;
+  });
+
+  const timelineItems = historyItems.map((item, index) => ({
+    key: index,
+    dot: <ClockCircleOutlined style={{ color: 'var(--primary)' }} />,
+    children: (
+      <Card size="small" style={{
+        marginBottom: 16,
+        border: '1px solid var(--border)',
+        background: 'var(--muted)',
+        borderRadius: 8,
+      }}>
+        <Text strong style={{ color: 'var(--card-foreground)' }}>Skin Type: </Text>
+        <Tag color="orange">{item.skin_type ?? item.profile?.skin_type}</Tag>
+        <br />
+        <Text strong style={{ color: 'var(--card-foreground)' }}>Conditions: </Text>
+        {(item.conditions ?? item.profile?.conditions ?? []).map((c, i) => (
+          <Tag key={i} color="orange">{c}</Tag>
+        ))}
+        <br />
+        <Text style={{ color: 'var(--muted-foreground)', fontSize: 13 }}>
+          {new Date(item.timestamp || item.created_at || Date.now()).toLocaleString()}
+        </Text>
+      </Card>
+    ),
+  }));
+
   return (
     <Layout style={{ minHeight: '100vh', background: 'var(--background)' }}>
       <AppHeader title="Profile History" showBack />
@@ -55,34 +86,8 @@ export default function Profile() {
               <Title level={4} style={{ color: 'var(--card-foreground)', marginBottom: 16 }}>
                 Analysis History
               </Title>
-              {(profileData?.history?.length || history.length) > 0 ? (
-                <Timeline>
-                  {(profileData?.history || history).map((item, index) => (
-                    <Timeline.Item
-                      key={index}
-                      dot={<ClockCircleOutlined style={{ color: 'var(--primary)' }} />}
-                    >
-                      <Card size="small" style={{
-                        marginBottom: 16,
-                        border: '1px solid var(--border)',
-                        background: 'var(--muted)',
-                        borderRadius: 8,
-                      }}>
-                        <Text strong style={{ color: 'var(--card-foreground)' }}>Skin Type: </Text>
-                        <Tag color="orange">{item.skin_type ?? item.profile?.skin_type}</Tag>
-                        <br />
-                        <Text strong style={{ color: 'var(--card-foreground)' }}>Conditions: </Text>
-                        {(item.conditions ?? item.profile?.conditions ?? []).map((c, i) => (
-                          <Tag key={i} color="orange">{c}</Tag>
-                        ))}
-                        <br />
-                        <Text style={{ color: 'var(--muted-foreground)', fontSize: 13 }}>
-                          {new Date(item.timestamp || item.created_at || Date.now()).toLocaleDateString()}
-                        </Text>
-                      </Card>
-                    </Timeline.Item>
-                  ))}
-                </Timeline>
+              {historyItems.length > 0 ? (
+                <Timeline items={timelineItems} />
               ) : (
                 <div style={{ textAlign: 'center', padding: '50px' }}>
                   <Text style={{ color: 'var(--muted-foreground)' }}>No analysis history yet</Text>
