@@ -2,7 +2,7 @@ import json
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends
-from sqlalchemy import select, func
+from sqlalchemy import select, func, delete
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -12,7 +12,7 @@ from app.core.redis_client import get_redis_client
 from app.models.order import LoyaltyLedger, Order
 from app.models.product import ProductCatalog
 from app.models.profile import SkinProfileHistory
-from app.models.user import User
+from app.models.user import User, RefreshToken
 
 router = APIRouter()
 
@@ -135,6 +135,12 @@ def delete_user(
     user = db.execute(select(User).where(User.id == user_id)).scalar_one_or_none()
     if not user:
         raise AppError(404, "not_found", "User not found")
+
+    # Remove dependent rows first to avoid FK constraint violations
+    db.execute(delete(RefreshToken).where(RefreshToken.user_id == user_id))
+    db.execute(delete(SkinProfileHistory).where(SkinProfileHistory.user_id == user_id))
+    db.execute(delete(LoyaltyLedger).where(LoyaltyLedger.user_id == user_id))
+    db.execute(delete(Order).where(Order.user_id == user_id))
 
     db.delete(user)
     db.commit()

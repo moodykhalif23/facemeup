@@ -201,25 +201,23 @@ export default function AdminLoyalty() {
         okText="Confirm"
         confirmLoading={saving}
       >
-        {modalOpen && (
-          <Form form={form} layout="vertical" onFinish={handleSubmit} style={{ marginTop: 16 }}>
-            <Form.Item
-              label="Points (use negative to deduct)"
-              name="points"
-              rules={[{ required: true }, { type: 'number', message: 'Enter a number' }]}
-            >
-              <InputNumber style={{ width: '100%' }} />
-            </Form.Item>
-            <Form.Item label="Reason" name="reason" rules={[{ required: true }]}>
-              <Select
-                options={PRESET_REASONS.map((r) => ({ label: r, value: r }))}
-                allowClear
-                showSearch
-                placeholder="Select or type a reason"
-              />
-            </Form.Item>
-          </Form>
-        )}
+        <Form form={form} layout="vertical" onFinish={handleSubmit} style={{ marginTop: 16 }}>
+          <Form.Item
+            label="Points (use negative to deduct)"
+            name="points"
+            rules={[{ required: true }, { type: 'number', message: 'Enter a number' }]}
+          >
+            <InputNumber style={{ width: '100%' }} />
+          </Form.Item>
+          <Form.Item label="Reason" name="reason" rules={[{ required: true }]}>
+            <Select
+              options={PRESET_REASONS.map((r) => ({ label: r, value: r }))}
+              allowClear
+              showSearch
+              placeholder="Select or type a reason"
+            />
+          </Form.Item>
+        </Form>
       </Modal>
     </AdminLayout>
   );

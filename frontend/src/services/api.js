@@ -64,7 +64,7 @@ export const getOrder = (id) => api.get(`/orders/${id}`);
 export const getLoyalty = (userId) => api.get(`/loyalty/${userId}`);
 export const getLoyaltyBalance = () => api.get('/loyalty');
 export const awardPoints = (userId, points, reason) =>
-  api.post('/loyalty/earn', { user_id: userId, points, reason });
+  api.post('/loyalty/earn', null, { params: { user_id: userId, points, reason } });
 
 // Admin 
 export const adminGetStats = () => api.get('/admin/stats');
