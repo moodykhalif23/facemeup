@@ -72,13 +72,65 @@ _CONCERN_MAP = {
     "redness": "Sensitive",
     "dryness": "Dehydration",
     "oiliness": "Acne",
+    "sensitivity": "Sensitive",
+    "dark_circles": "Hyperpigmentation",
+    "blackheads": "Acne",
+    "pigmentation": "Hyperpigmentation",
+    "pores": "Acne",
 }
+
+
+def _derive_skin_type_from_new_fields(q: Dict) -> str:
+    scores = {
+        "Oily": 0,
+        "Dry": 0,
+        "Combination": 0,
+        "Normal": 0,
+        "Sensitive": 0,
+    }
+
+    oil = (q.get("oil_levels") or "").lower()
+    moisture = (q.get("moisture_level") or "").lower()
+    texture = (q.get("skin_texture") or "").lower()
+
+    if oil == "very_oily":
+        scores["Oily"] += 2
+    elif oil == "slightly_oily":
+        scores["Oily"] += 1
+        scores["Combination"] += 1
+    elif oil == "mixed":
+        scores["Combination"] += 2
+
+    if moisture == "dry":
+        scores["Dry"] += 2
+    elif moisture == "hydrated":
+        scores["Normal"] += 1
+    elif moisture == "balanced":
+        scores["Normal"] += 1
+        scores["Combination"] += 1
+
+    if texture == "rough":
+        scores["Dry"] += 1
+        scores["Sensitive"] += 1
+    elif texture == "smooth":
+        scores["Normal"] += 1
+    elif texture == "mixed":
+        scores["Combination"] += 1
+
+    raw_concerns = set((q.get("concerns") or []))
+    if "sensitivity" in raw_concerns or "redness" in raw_concerns:
+        scores["Sensitive"] += 1
+
+    best = max(scores, key=lambda k: scores[k])
+    return best if scores[best] > 0 else "Combination"
 
 
 def _questionnaire_profile(questionnaire: Optional[Dict]) -> SkinProfile:
     """Derive skin profile from questionnaire when model is unavailable"""
     q = questionnaire or {}
-    skin_type = _SKIN_FEEL_MAP.get((q.get("skin_feel") or "").lower(), "Combination")
+    skin_feel = (q.get("skin_feel") or "").lower()
+    skin_type = _SKIN_FEEL_MAP.get(skin_feel) if skin_feel else _derive_skin_type_from_new_fields(q)
+    skin_type = skin_type or "Combination"
     raw_concerns = q.get("concerns") or []
     conditions = list({_CONCERN_MAP[c] for c in raw_concerns if c in _CONCERN_MAP})
     if not conditions:

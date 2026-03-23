@@ -3,7 +3,11 @@ from pydantic import BaseModel, Field
 
 class Questionnaire(BaseModel):
     skin_feel: str | None = None
+    skin_texture: str | None = None
+    moisture_level: str | None = None
+    oil_levels: str | None = None
     routine: str | None = None
+    routine_other: str | None = None
     concerns: list[str] = Field(default_factory=list)
     gender: str | None = None
     age: int | None = None

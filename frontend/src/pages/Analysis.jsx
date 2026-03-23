@@ -53,9 +53,12 @@ export default function Analysis() {
       const base64Image = await blobToBase64(capturedImage);
 
       const questionnaire = {
-        skin_feel: values.skinFeel,
-        routine:   values.routine,
-        concerns:  values.concerns || [],
+        skin_texture: values.skinTexture,
+        moisture_level: values.moistureLevel,
+        oil_levels: values.oilLevels,
+        routine: values.routine,
+        routine_other: values.routineOther?.trim() || undefined,
+        concerns: values.concerns || [],
         gender: values.gender,
         age: values.age,
       };
@@ -204,15 +207,38 @@ export default function Analysis() {
                     </Form.Item>
 
                     <Form.Item
-                      label={<Text strong style={{ color: 'var(--card-foreground)' }}>How does your skin feel?</Text>}
-                      name="skinFeel"
+                      label={<Text strong style={{ color: 'var(--card-foreground)' }}>How does your skin feel (Texture)?</Text>}
+                      name="skinTexture"
                       rules={[{ required: true, message: 'Please select an option' }]}
                     >
                       <Select size="large" placeholder="Select…">
-                        <Select.Option value="oily">Oily</Select.Option>
+                        <Select.Option value="smooth">Smooth</Select.Option>
+                        <Select.Option value="rough">Rough</Select.Option>
+                        <Select.Option value="mixed">Mixed</Select.Option>
+                      </Select>
+                    </Form.Item>
+
+                    <Form.Item
+                      label={<Text strong style={{ color: 'var(--card-foreground)' }}>How is the skin surface moisture level?</Text>}
+                      name="moistureLevel"
+                      rules={[{ required: true, message: 'Please select an option' }]}
+                    >
+                      <Select size="large" placeholder="Select…">
+                        <Select.Option value="hydrated">Hydrated</Select.Option>
                         <Select.Option value="dry">Dry</Select.Option>
-                        <Select.Option value="combination">Combination</Select.Option>
-                        <Select.Option value="normal">Normal</Select.Option>
+                        <Select.Option value="balanced">Balanced</Select.Option>
+                      </Select>
+                    </Form.Item>
+
+                    <Form.Item
+                      label={<Text strong style={{ color: 'var(--card-foreground)' }}>How are the oil levels?</Text>}
+                      name="oilLevels"
+                      rules={[{ required: true, message: 'Please select an option' }]}
+                    >
+                      <Select size="large" placeholder="Select…">
+                        <Select.Option value="very_oily">Very oily</Select.Option>
+                        <Select.Option value="slightly_oily">Slightly oily</Select.Option>
+                        <Select.Option value="mixed">Mixed</Select.Option>
                       </Select>
                     </Form.Item>
 
@@ -222,11 +248,26 @@ export default function Analysis() {
                       rules={[{ required: true, message: 'Please select an option' }]}
                     >
                       <Select size="large" placeholder="Select…">
-                        <Select.Option value="none">None</Select.Option>
-                        <Select.Option value="basic">Basic (cleanser + moisturiser)</Select.Option>
-                        <Select.Option value="moderate">Moderate (3–5 products)</Select.Option>
-                        <Select.Option value="extensive">Extensive (6+ products)</Select.Option>
+                        <Select.Option value="basic">Basic (cleanser, moisturiser, sunscreen)</Select.Option>
+                        <Select.Option value="other">Other (describe)</Select.Option>
                       </Select>
+                    </Form.Item>
+
+                    <Form.Item shouldUpdate>
+                      {({ getFieldValue }) =>
+                        getFieldValue('routine') === 'other' ? (
+                          <Form.Item
+                            label={<Text strong style={{ color: 'var(--card-foreground)' }}>Describe your routine</Text>}
+                            name="routineOther"
+                            rules={[{ required: true, message: 'Please describe your routine' }]}
+                          >
+                            <Input.TextArea
+                              rows={3}
+                              placeholder="e.g., cleanser + toner + retinol at night"
+                            />
+                          </Form.Item>
+                        ) : null
+                      }
                     </Form.Item>
 
                     <Form.Item
@@ -236,6 +277,11 @@ export default function Analysis() {
                       <Checkbox.Group style={{ width: '100%' }}>
                         <Space direction="vertical" style={{ width: '100%' }}>
                           <Checkbox value="acne"       style={{ fontSize: 15 }}>Acne</Checkbox>
+                          <Checkbox value="sensitivity" style={{ fontSize: 15 }}>Sensitivity</Checkbox>
+                          <Checkbox value="dark_circles" style={{ fontSize: 15 }}>Dark Circles</Checkbox>
+                          <Checkbox value="blackheads" style={{ fontSize: 15 }}>Blackheads</Checkbox>
+                          <Checkbox value="pigmentation" style={{ fontSize: 15 }}>Pigmentation</Checkbox>
+                          <Checkbox value="pores" style={{ fontSize: 15 }}>Pores</Checkbox>
                           <Checkbox value="wrinkles"   style={{ fontSize: 15 }}>Wrinkles</Checkbox>
                           <Checkbox value="dark_spots" style={{ fontSize: 15 }}>Dark Spots</Checkbox>
                           <Checkbox value="redness"    style={{ fontSize: 15 }}>Redness</Checkbox>
