@@ -84,15 +84,12 @@ export default function AdminReports() {
       title: 'Customer',
       key: 'customer',
       render: (_, r) => (
-        <Space>
-          <Avatar size={32} icon={<UserOutlined />} style={{ background: 'var(--primary)' }} />
-          <div>
-            <Text style={{ display: 'block', color: 'var(--foreground)', fontSize: 13 }}>
-              {r.full_name || 'Unknown'}
-            </Text>
-            <Text style={{ fontSize: 12, color: 'var(--muted-foreground)' }}>{r.email}</Text>
-          </div>
-        </Space>
+        <div>
+          <Text style={{ display: 'block', color: 'var(--foreground)', fontSize: 13 }}>
+            {r.full_name || 'Unknown'}
+          </Text>
+          <Text style={{ fontSize: 12, color: 'var(--muted-foreground)' }}>{r.email}</Text>
+        </div>
       ),
     },
     {
@@ -126,15 +123,6 @@ export default function AdminReports() {
         <Space size={[4, 4]} wrap>
           {(list || []).length > 0 ? list.map((c) => <Tag key={c}>{c}</Tag>) : <Text type="secondary">—</Text>}
         </Space>
-      ),
-    },
-    {
-      title: 'Confidence',
-      dataIndex: 'confidence',
-      key: 'confidence',
-      width: 120,
-      render: (v) => (
-        <Progress percent={Math.round((v ?? 0) * 100)} size="small" strokeColor="var(--primary)" />
       ),
     },
     {
@@ -241,9 +229,6 @@ export default function AdminReports() {
                   ? selected.conditions.map((c) => <Tag key={c}>{c}</Tag>)
                   : <Text type="secondary">None detected</Text>}
               </div>
-              <Divider style={{ borderColor: 'var(--border)' }} />
-              <Text strong style={{ color: 'var(--foreground)' }}>Confidence</Text>
-              <Progress percent={Math.round((selected.confidence ?? 0) * 100)} strokeColor="var(--primary)" />
             </Card>
 
             {(selected.skin_type_scores || selected.condition_scores) && (
