@@ -77,12 +77,7 @@ export default function Profile() {
               <Spin size="large" />
             </div>
           ) : (
-            <Card style={{
-              borderRadius: 12,
-              border: '1px solid var(--border)',
-              background: 'var(--card)',
-              boxShadow: 'var(--card-shadow)',
-            }}>
+            <div>
               <Title level={4} style={{ color: 'var(--card-foreground)', marginBottom: 16 }}>
                 Analysis History
               </Title>
@@ -97,7 +92,7 @@ export default function Profile() {
                   </Button>
                 </div>
               )}
-            </Card>
+            </div>
           )}
         </div>
       </Content>
