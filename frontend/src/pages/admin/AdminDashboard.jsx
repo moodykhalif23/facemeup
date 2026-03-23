@@ -112,8 +112,9 @@ export default function AdminDashboard() {
                   border: '1px solid var(--border)',
                   background: 'var(--card)',
                   borderRadius: 10,
+                  minHeight: 132,
                 }}
-                styles={{ body: { padding: '16px 20px' } }}
+                styles={{ body: { padding: '16px 20px', height: '100%', display: 'flex', alignItems: 'center' } }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                   <div style={{
