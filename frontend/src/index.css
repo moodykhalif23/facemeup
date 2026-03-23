@@ -110,3 +110,58 @@ body {
 button, a, input, select, textarea {
   transition: none;
 }
+
+/* Ant Design inputs - align with theme colors */
+.ant-input,
+.ant-input-affix-wrapper,
+.ant-input-password,
+.ant-input-number,
+.ant-input-number-input,
+.ant-select-selector,
+.ant-picker {
+  background-color: var(--input) !important;
+  color: var(--foreground);
+  border-color: var(--border) !important;
+}
+
+.ant-input::placeholder,
+.ant-input-affix-wrapper input::placeholder,
+.ant-input-number-input::placeholder {
+  color: var(--muted-foreground);
+}
+
+.ant-input-affix-wrapper-focused,
+.ant-input:focus,
+.ant-input-number:focus,
+.ant-input-number-focused,
+.ant-select-focused .ant-select-selector,
+.ant-picker-focused {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 25%, transparent);
+  border-color: var(--primary) !important;
+}
+
+.ant-input-affix-wrapper:hover,
+.ant-input:hover,
+.ant-input-number:hover,
+.ant-select-selector:hover,
+.ant-picker:hover {
+  border-color: var(--primary) !important;
+}
+
+/* Inputs inside affix wrappers (e.g., password/email) */
+.ant-input-affix-wrapper > input.ant-input,
+.ant-input-affix-wrapper input {
+  background-color: transparent !important;
+  color: var(--foreground);
+}
+
+/* Make autofill match theme */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+  -webkit-text-fill-color: var(--foreground);
+  box-shadow: 0 0 0 1000px var(--input) inset !important;
+  transition: background-color 9999s ease-in-out 0s;
+}
