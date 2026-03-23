@@ -95,6 +95,7 @@ export default function AdminLoyalty() {
       dataIndex: 'role',
       key: 'role',
       width: 90,
+      responsive: ['sm'],
       render: (v) => <Tag color={v === 'admin' ? 'red' : v === 'advisor' ? 'orange' : 'blue'}>{v}</Tag>,
     },
     {
@@ -102,7 +103,7 @@ export default function AdminLoyalty() {
       key: 'actions',
       width: 180,
       render: (_, record) => (
-        <Space>
+        <Space wrap>
           <Button
             size="small"
             type="primary"
@@ -126,15 +127,22 @@ export default function AdminLoyalty() {
 
   return (
     <AdminLayout>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 20,
+        gap: 12,
+        flexWrap: 'wrap',
+      }}>
         <Title level={4} style={{ margin: 0, color: 'var(--foreground)' }}>Loyalty Points</Title>
-        <Space>
+        <Space style={{ width: '100%', maxWidth: 420 }}>
           <Input
             prefix={<SearchOutlined />}
             placeholder="Search users"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            style={{ width: 220 }}
+            style={{ width: '100%' }}
             allowClear
           />
           <Button icon={<ReloadOutlined />} onClick={load}>Refresh</Button>
@@ -159,6 +167,8 @@ export default function AdminLoyalty() {
             display: 'flex',
             alignItems: 'center',
             gap: 8,
+            flex: '1 1 180px',
+            minWidth: 160,
           }}>
             <div style={{ width: 10, height: 10, borderRadius: '50%', background: t.color }} />
             <Text strong style={{ color: t.color, fontSize: 13 }}>{t.label}</Text>
@@ -176,6 +186,8 @@ export default function AdminLoyalty() {
           size="small"
           pagination={{ pageSize: 20 }}
           style={{ background: 'transparent' }}
+          tableLayout="fixed"
+          scroll={{ x: 'max-content' }}
         />
       </div>
 
