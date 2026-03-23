@@ -131,16 +131,20 @@ export default function AdminLayout({ children }) {
           zIndex: 99,
           height: 56,
         }}>
-          <Button
-            type="text"
-            icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-            onClick={() => {
-              if (isMobile) {
-                setMobileNavOpen(true);
-              }
-            }}
-            style={{ color: 'var(--foreground)' }}
-          />
+          <div style={{ minWidth: 40, display: 'flex', alignItems: 'center' }}>
+            {!screens.lg && (
+              <Button
+                type="text"
+                icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+                onClick={() => {
+                  if (isMobile) {
+                    setMobileNavOpen(true);
+                  }
+                }}
+                style={{ color: 'var(--foreground)' }}
+              />
+            )}
+          </div>
 
           <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
