@@ -120,7 +120,7 @@ export default function Home() {
                       justifyContent: 'center',
                       width: 64,
                       height: 64,
-                      borderRadius: 16,
+                      borderRadius: 6,
                       background: item.bg,
                       color: item.color,
                       marginBottom: 12,
@@ -145,3 +145,4 @@ export default function Home() {
     </Layout>
   );
 }
+

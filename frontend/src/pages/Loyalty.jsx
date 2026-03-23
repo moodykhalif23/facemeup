@@ -91,7 +91,7 @@ export default function Loyalty() {
           {/* Points & Tier Card */}
           <Card
             style={{
-              borderRadius: 16,
+              borderRadius: 6,
               boxShadow: 'var(--card-shadow)',
               border: '1px solid var(--border)',
               marginBottom: 16,
@@ -140,7 +140,7 @@ export default function Loyalty() {
           <Card
             title={<Text strong style={{ fontSize: 16, color: 'var(--card-foreground)' }}>How to Earn Points</Text>}
             style={{
-              borderRadius: 12,
+              borderRadius: 6,
               boxShadow: 'var(--card-shadow)',
               border: '1px solid var(--border)',
               background: 'var(--card)',
@@ -175,7 +175,7 @@ export default function Loyalty() {
                 <Card
                   hoverable={reward.available}
                   style={{
-                    borderRadius: 12,
+                    borderRadius: 6,
                     boxShadow: 'var(--card-shadow)',
                     border: '1px solid var(--border)',
                     background: 'var(--card)',
@@ -225,3 +225,4 @@ export default function Loyalty() {
     </Layout>
   );
 }
+

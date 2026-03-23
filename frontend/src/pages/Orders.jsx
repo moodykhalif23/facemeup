@@ -68,7 +68,7 @@ export default function Orders() {
                 <Card
                   key={order.id}
                   style={{
-                    borderRadius: 12,
+                    borderRadius: 6,
                     boxShadow: 'var(--card-shadow)',
                     border: '1px solid var(--border)',
                     background: 'var(--card)',
@@ -137,7 +137,7 @@ export default function Orders() {
             </Space>
           ) : (
             <Card style={{
-              borderRadius: 12,
+              borderRadius: 6,
               boxShadow: 'var(--card-shadow)',
               border: '1px solid var(--border)',
               background: 'var(--card)',
@@ -158,3 +158,4 @@ export default function Orders() {
     </Layout>
   );
 }
+

@@ -23,7 +23,7 @@ export default function Results() {
           justifyContent: 'center'
         }}>
           <Card style={{
-            borderRadius: 12,
+            borderRadius: 6,
             textAlign: 'center',
             border: '1px solid var(--border)',
             background: 'var(--card)',
@@ -59,7 +59,7 @@ export default function Results() {
               </Title>
               <div style={{
                 background: 'var(--card)',
-                borderRadius: 12,
+                borderRadius: 6,
                 overflow: 'hidden',
                 boxShadow: 'var(--card-shadow)',
                 border: '1px solid var(--border)',
@@ -121,7 +121,7 @@ export default function Results() {
 
             {profile.recommendations && (
               <Card style={{
-                borderRadius: 12,
+                borderRadius: 6,
                 boxShadow: 'var(--card-shadow)',
                 border: '1px solid var(--border)',
                 background: 'var(--card)',
@@ -135,7 +135,7 @@ export default function Results() {
                       key={index}
                       type="inner"
                       size="small"
-                      style={{ borderRadius: 8, border: '1px solid var(--border)' }}
+                      style={{ borderRadius: 6, border: '1px solid var(--border)' }}
                     >
                       <Text strong style={{ fontSize: 15, color: 'var(--card-foreground)' }}>
                         {rec.category || 'General'}
@@ -179,3 +179,4 @@ export default function Results() {
     </Layout>
   );
 }
+

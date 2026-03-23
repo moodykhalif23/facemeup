@@ -190,7 +190,7 @@ export default function WebCamera({ visible, onCapture, onCancel }) {
           <div style={{
             background: 'rgba(0,0,0,0.6)',
             padding: '12px 20px',
-            borderRadius: 8,
+            borderRadius: 6,
             display: 'inline-block'
           }}>
             <p style={{ color: '#fff', margin: 0, fontSize: 14 }}>
@@ -202,3 +202,4 @@ export default function WebCamera({ visible, onCapture, onCancel }) {
     </Modal>
   );
 }
+

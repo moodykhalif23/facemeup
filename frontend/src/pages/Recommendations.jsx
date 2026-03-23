@@ -77,7 +77,7 @@ export default function Recommendations() {
                       hoverable
                       onClick={() => navigate(`/product/${product.id}`)}
                       style={{
-                        borderRadius: 10,
+                        borderRadius: 6,
                         boxShadow: 'var(--card-shadow)',
                         border: '1px solid var(--border)',
                         background: 'var(--card)',
@@ -211,7 +211,7 @@ export default function Recommendations() {
             </Row>
           ) : (
             <Card style={{
-              borderRadius: 10,
+              borderRadius: 6,
               boxShadow: 'var(--card-shadow)',
               border: '1px solid var(--border)',
               background: 'var(--card)',
@@ -238,3 +238,4 @@ export default function Recommendations() {
     </Layout>
   );
 }
+

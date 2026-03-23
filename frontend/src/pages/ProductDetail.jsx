@@ -94,7 +94,7 @@ export default function ProductDetail() {
             {/* Product Image */}
             <Card
               style={{
-                borderRadius: 10,
+                borderRadius: 6,
                 overflow: 'hidden',
                 boxShadow: 'var(--card-shadow)',
                 border: '1px solid var(--border)',
@@ -154,7 +154,7 @@ export default function ProductDetail() {
 
             {/* Product Info */}
             <Card style={{
-              borderRadius: 10,
+              borderRadius: 6,
               boxShadow: 'var(--card-shadow)',
               border: '1px solid var(--border)',
               background: 'var(--card)',
@@ -307,7 +307,7 @@ export default function ProductDetail() {
       {isDesktop && (
         <div style={{ maxWidth: 1200, margin: '16px auto 0', padding: '0 16px' }}>
           <Card style={{
-            borderRadius: 10,
+            borderRadius: 6,
             boxShadow: 'var(--card-shadow)',
             border: '1px solid var(--border)',
             background: 'var(--card)',
@@ -344,3 +344,4 @@ export default function ProductDetail() {
     </Layout>
   );
 }
+

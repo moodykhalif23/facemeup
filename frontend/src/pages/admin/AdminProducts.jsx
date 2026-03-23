@@ -250,7 +250,7 @@ export default function AdminProducts() {
         </Space>
       </div>
 
-      <div style={{ background: 'var(--card)', borderRadius: 10, border: '1px solid var(--border)', overflow: 'hidden' }}>
+      <div style={{ background: 'var(--card)', borderRadius: 6, border: '1px solid var(--border)', overflow: 'hidden' }}>
         <Table
           dataSource={filtered}
           columns={columns}
@@ -335,3 +335,4 @@ export default function AdminProducts() {
     </AdminLayout>
   );
 }
+

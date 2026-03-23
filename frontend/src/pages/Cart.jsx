@@ -78,7 +78,7 @@ export default function Cart() {
           {items.length > 0 ? (
             <>
               <Card style={{
-                borderRadius: 12,
+                borderRadius: 6,
                 boxShadow: 'var(--card-shadow)',
                 border: '1px solid var(--border)',
                 background: 'var(--card)',
@@ -119,7 +119,7 @@ export default function Cart() {
               </Card>
 
               <Card style={{
-                borderRadius: 12,
+                borderRadius: 6,
                 boxShadow: 'var(--card-shadow)',
                 border: '1px solid var(--border)',
                 background: 'var(--card)',
@@ -161,7 +161,7 @@ export default function Cart() {
             </>
           ) : (
             <Card style={{
-              borderRadius: 12,
+              borderRadius: 6,
               boxShadow: 'var(--card-shadow)',
               border: '1px solid var(--border)',
               background: 'var(--card)',
@@ -194,3 +194,4 @@ export default function Cart() {
     </Layout>
   );
 }
+

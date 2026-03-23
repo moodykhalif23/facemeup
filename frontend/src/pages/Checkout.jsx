@@ -72,7 +72,7 @@ export default function Checkout() {
           <Card
             title={<Text strong style={{ fontSize: 16, color: 'var(--card-foreground)' }}>Order Summary</Text>}
             style={{
-              borderRadius: 12,
+              borderRadius: 6,
               boxShadow: 'var(--card-shadow)',
               border: '1px solid var(--border)',
               background: 'var(--card)',
@@ -98,7 +98,7 @@ export default function Checkout() {
           <Card
             title={<Text strong style={{ fontSize: 16, color: 'var(--card-foreground)' }}>Shipping & Payment</Text>}
             style={{
-              borderRadius: 12,
+              borderRadius: 6,
               boxShadow: 'var(--card-shadow)',
               border: '1px solid var(--border)',
               background: 'var(--card)',
@@ -182,3 +182,4 @@ export default function Checkout() {
     </Layout>
   );
 }
+

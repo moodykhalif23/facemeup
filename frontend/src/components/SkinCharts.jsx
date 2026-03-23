@@ -121,7 +121,7 @@ function makeNightingaleOption({ condData, selectedKeys }) {
         radius:    ['20%', '72%'],
         center:    ['50%', '46%'],
         roseType:  'area',
-        itemStyle: { borderRadius: 8, borderColor: 'var(--card)', borderWidth: 2 },
+        itemStyle: { borderRadius: 6, borderColor: 'var(--card)', borderWidth: 2 },
         label:     { show: false },
         labelLine: { show: false },
         emphasis: {
@@ -273,7 +273,7 @@ export default function SkinCharts({ profile }) {
 
   const card = {
     background: 'var(--card)',
-    borderRadius: 12,
+    borderRadius: 6,
     border: '1px solid var(--border)',
     padding: '16px',
   };
@@ -326,3 +326,4 @@ export default function SkinCharts({ profile }) {
     </div>
   );
 }
+

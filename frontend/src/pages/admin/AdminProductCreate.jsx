@@ -100,7 +100,7 @@ export default function AdminProductCreate() {
           }}
         >
           <Card
-            style={{ border: '1px solid var(--border)', background: 'var(--card)', borderRadius: 10 }}
+            style={{ border: '1px solid var(--border)', background: 'var(--card)', borderRadius: 6 }}
             styles={{ body: { padding: 20 } }}
           >
             <Title level={5} style={{ marginTop: 0, color: 'var(--foreground)' }}>Product Info</Title>
@@ -160,7 +160,7 @@ export default function AdminProductCreate() {
           </Card>
 
           <Card
-            style={{ border: '1px solid var(--border)', background: 'var(--card)', borderRadius: 10 }}
+            style={{ border: '1px solid var(--border)', background: 'var(--card)', borderRadius: 6 }}
             styles={{ body: { padding: 20 } }}
           >
             <Title level={5} style={{ marginTop: 0, color: 'var(--foreground)' }}>Product Image</Title>
@@ -172,7 +172,7 @@ export default function AdminProductCreate() {
             <div
               style={{
                 border: '1px dashed var(--border)',
-                borderRadius: 12,
+                borderRadius: 6,
                 padding: 16,
                 background: 'var(--muted)',
                 minHeight: 220,
@@ -186,7 +186,7 @@ export default function AdminProductCreate() {
                 <img
                   src={imageUrl}
                   alt="Preview"
-                  style={{ maxWidth: '100%', maxHeight: 220, borderRadius: 10, objectFit: 'contain' }}
+                  style={{ maxWidth: '100%', maxHeight: 220, borderRadius: 6, objectFit: 'contain' }}
                 />
               ) : (
                 <Text style={{ color: 'var(--muted-foreground)' }}>Image preview</Text>
@@ -198,3 +198,4 @@ export default function AdminProductCreate() {
     </AdminLayout>
   );
 }
+

@@ -130,7 +130,7 @@ export default function Reports() {
       >
         {selected && (
           <div ref={reportRef}>
-            <Card style={{ border: '1px solid var(--border)', background: 'var(--card)', borderRadius: 10 }}>
+            <Card style={{ border: '1px solid var(--border)', background: 'var(--card)', borderRadius: 6 }}>
               <Space align="start">
                 <Avatar
                   size={72}
@@ -195,7 +195,7 @@ export default function Reports() {
             {(selected.skin_type_scores || selected.condition_scores) && (
               <>
                 <Divider style={{ borderColor: 'var(--border)' }} />
-                <Card style={{ border: '1px solid var(--border)', background: 'var(--card)', borderRadius: 10 }}>
+                <Card style={{ border: '1px solid var(--border)', background: 'var(--card)', borderRadius: 6 }}>
                   <Text strong style={{ color: 'var(--foreground)' }}>Score Breakdown</Text>
                   <div style={{ marginTop: 10 }}>
                     {selected.skin_type_scores && (
@@ -254,3 +254,4 @@ export default function Reports() {
     </Layout>
   );
 }
+

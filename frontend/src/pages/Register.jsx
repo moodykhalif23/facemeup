@@ -46,7 +46,7 @@ export default function Register() {
       <Card style={{
         width: '100%',
         maxWidth: 400,
-        borderRadius: 12,
+        borderRadius: 6,
         border: '1px solid var(--border)',
         background: 'var(--card)',
         boxShadow: 'var(--card-shadow)',
@@ -168,3 +168,4 @@ export default function Register() {
     </div>
   );
 }
+

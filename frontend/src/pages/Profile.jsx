@@ -49,7 +49,7 @@ export default function Profile() {
         marginBottom: 16,
         border: '1px solid var(--border)',
         background: 'var(--muted)',
-        borderRadius: 8,
+        borderRadius: 6,
       }}>
         <Text strong style={{ color: 'var(--card-foreground)' }}>Skin Type: </Text>
         <Tag color="orange">{item.skin_type ?? item.profile?.skin_type}</Tag>
@@ -96,3 +96,4 @@ export default function Profile() {
     </Layout>
   );
 }
+

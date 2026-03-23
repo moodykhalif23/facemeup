@@ -110,7 +110,7 @@ export default function Analysis() {
         <div style={{ maxWidth: 600, margin: '0 auto' }}>
           <Card
             style={{
-              borderRadius: 12,
+              borderRadius: 6,
               boxShadow: 'var(--card-shadow)',
               border: '1px solid var(--border)',
               background: 'var(--card)',
@@ -145,7 +145,7 @@ export default function Analysis() {
                       style={{
                         maxWidth: '100%',
                         maxHeight: 260,
-                        borderRadius: 12,
+                        borderRadius: 6,
                         border: '2px solid #10B981',
                         objectFit: 'contain',
                         background: 'var(--muted)',
@@ -164,7 +164,7 @@ export default function Analysis() {
                             style={{
                               fontSize: 11,
                               padding: '2px 8px',
-                              borderRadius: 10,
+                              borderRadius: 6,
                               background: 'var(--muted)',
                               border: '1px solid var(--border)',
                               color: 'var(--muted-foreground)',
@@ -334,7 +334,7 @@ export default function Analysis() {
               {!capturedImage && (
                 <div style={{
                   padding: '16px',
-                  borderRadius: 8,
+                  borderRadius: 6,
                   background: 'var(--muted)',
                   border: '1px solid var(--border)',
                 }}>
@@ -357,3 +357,4 @@ export default function Analysis() {
     </Layout>
   );
 }
+

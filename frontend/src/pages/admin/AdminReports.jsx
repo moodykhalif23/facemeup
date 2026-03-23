@@ -179,7 +179,7 @@ export default function AdminReports() {
         </Space>
       </div>
 
-      <div style={{ background: 'var(--card)', borderRadius: 10, border: '1px solid var(--border)', overflow: 'hidden' }}>
+      <div style={{ background: 'var(--card)', borderRadius: 6, border: '1px solid var(--border)', overflow: 'hidden' }}>
         <Table
           dataSource={filtered}
           columns={columns}
@@ -203,7 +203,7 @@ export default function AdminReports() {
       >
         {selected && (
           <div ref={reportRef}>
-            <Card style={{ border: '1px solid var(--border)', background: 'var(--card)', borderRadius: 10 }}>
+            <Card style={{ border: '1px solid var(--border)', background: 'var(--card)', borderRadius: 6 }}>
               <Space align="start">
                 <Avatar
                   size={64}
@@ -261,7 +261,7 @@ export default function AdminReports() {
 
             <Divider style={{ borderColor: 'var(--border)' }} />
 
-            <Card style={{ border: '1px solid var(--border)', background: 'var(--card)', borderRadius: 10 }}>
+            <Card style={{ border: '1px solid var(--border)', background: 'var(--card)', borderRadius: 6 }}>
               <Text strong style={{ color: 'var(--foreground)' }}>Conditions</Text>
               <div style={{ marginTop: 8, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                 {(selected.conditions || []).length > 0
@@ -273,7 +273,7 @@ export default function AdminReports() {
             {(selected.skin_type_scores || selected.condition_scores) && (
               <>
                 <Divider style={{ borderColor: 'var(--border)' }} />
-                <Card style={{ border: '1px solid var(--border)', background: 'var(--card)', borderRadius: 10 }}>
+                <Card style={{ border: '1px solid var(--border)', background: 'var(--card)', borderRadius: 6 }}>
                   <Text strong style={{ color: 'var(--foreground)' }}>Score Breakdown</Text>
                   <div style={{ marginTop: 10 }}>
                     {selected.skin_type_scores && (
@@ -332,3 +332,4 @@ export default function AdminReports() {
     </AdminLayout>
   );
 }
+

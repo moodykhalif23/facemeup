@@ -471,7 +471,7 @@ const FaceMeshCapture = ({ onCapture, onFaceDetected }) => {
             width: '100%',
             maxWidth: 640,
             display: 'block',
-            borderRadius: 12,
+            borderRadius: 6,
             border: `3px solid ${borderColor}`,
             background: '#000',
             transition: 'border-color 0.3s',
@@ -543,7 +543,7 @@ const FaceMeshCapture = ({ onCapture, onFaceDetected }) => {
             alignItems: 'center',
             justifyContent: 'center',
             background: 'rgba(0,0,0,0.5)',
-            borderRadius: 12,
+            borderRadius: 6,
             color: '#fff',
             fontSize: 15,
           }}>
@@ -587,7 +587,7 @@ const FaceMeshCapture = ({ onCapture, onFaceDetected }) => {
                 background: faceDetected ? 'var(--primary)' : 'var(--border)',
                 color: faceDetected ? 'var(--primary-foreground)' : 'var(--muted-foreground)',
                 border: 'none',
-                borderRadius: 8,
+                borderRadius: 6,
                 cursor: faceDetected ? 'pointer' : 'not-allowed',
               }}
             >
@@ -602,7 +602,7 @@ const FaceMeshCapture = ({ onCapture, onFaceDetected }) => {
                   background: 'transparent',
                   color: 'var(--muted-foreground)',
                   border: '1px solid var(--border)',
-                  borderRadius: 8,
+                  borderRadius: 6,
                   cursor: 'pointer',
                 }}
               >
@@ -624,3 +624,4 @@ const FaceMeshCapture = ({ onCapture, onFaceDetected }) => {
 };
 
 export default FaceMeshCapture;
+

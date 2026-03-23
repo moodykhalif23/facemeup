@@ -166,7 +166,7 @@ export default function AdminLoyalty() {
           <div key={t.label} style={{
             background: 'var(--card)',
             border: `1px solid ${t.color}44`,
-            borderRadius: 8,
+            borderRadius: 6,
             padding: '6px 12px',
             display: 'inline-flex',
             alignItems: 'center',
@@ -180,7 +180,7 @@ export default function AdminLoyalty() {
         ))}
       </div>
 
-      <div style={{ background: 'var(--card)', borderRadius: 10, border: '1px solid var(--border)', overflow: 'hidden' }}>
+      <div style={{ background: 'var(--card)', borderRadius: 6, border: '1px solid var(--border)', overflow: 'hidden' }}>
         <Table
           dataSource={filtered}
           columns={columns}
@@ -223,3 +223,4 @@ export default function AdminLoyalty() {
     </AdminLayout>
   );
 }
+
