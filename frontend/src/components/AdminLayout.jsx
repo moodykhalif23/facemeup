@@ -37,6 +37,7 @@ export default function AdminLayout({ children }) {
   const { user } = useSelector((state) => state.auth);
   const screens = Grid.useBreakpoint();
   const isMobile = !screens.lg;
+  const currentNav = NAV_ITEMS.find((item) => item.key === location.pathname);
 
   // Auto-collapse the sidebar on smaller screens for a responsive layout
   useEffect(() => {
@@ -131,7 +132,7 @@ export default function AdminLayout({ children }) {
           zIndex: 99,
           height: 56,
         }}>
-          <div style={{ minWidth: 40, display: 'flex', alignItems: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 40 }}>
             {!screens.lg && (
               <Button
                 type="text"
@@ -143,6 +144,11 @@ export default function AdminLayout({ children }) {
                 }}
                 style={{ color: 'var(--foreground)' }}
               />
+            )}
+            {screens.lg && currentNav && (
+              <Text strong style={{ color: 'var(--foreground)', fontSize: 16 }}>
+                {currentNav.label}
+              </Text>
             )}
           </div>
 
