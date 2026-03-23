@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { Layout, Card, Button, Form, Select, Checkbox, Typography, Space, App, Spin, InputNumber, Input } from 'antd';
+import { Layout, Card, Button, Form, Select, Checkbox, Typography, Space, App, Spin, InputNumber, Input, Grid } from 'antd';
 import { ScanOutlined } from '@ant-design/icons';
 import { setCurrentAnalysis, addToHistory } from '../store/slices/analysisSlice';
 import AppHeader from '../components/AppHeader';
@@ -26,6 +26,7 @@ export default function Analysis() {
   const [capturedImage, setCapturedImage] = useState(null);
   const [allCaptures, setAllCaptures]   = useState([]);
   const [landmarks, setLandmarks]       = useState(null);
+  const screens = Grid.useBreakpoint();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { message } = App.useApp();
@@ -276,7 +277,15 @@ export default function Analysis() {
                       name="concerns"
                     >
                       <Checkbox.Group style={{ width: '100%' }}>
-                        <Space direction="vertical" style={{ width: '100%' }}>
+                        <div
+                          style={{
+                            display: 'grid',
+                            gridTemplateColumns: screens.sm ? '1fr' : 'repeat(2, minmax(0, 1fr))',
+                            columnGap: 16,
+                            rowGap: 8,
+                            width: '100%',
+                          }}
+                        >
                           <Checkbox value="acne"       style={{ fontSize: 15 }}>Acne</Checkbox>
                           <Checkbox value="sensitivity" style={{ fontSize: 15 }}>Sensitivity</Checkbox>
                           <Checkbox value="dark_circles" style={{ fontSize: 15 }}>Dark Circles</Checkbox>
@@ -288,7 +297,7 @@ export default function Analysis() {
                           <Checkbox value="redness"    style={{ fontSize: 15 }}>Redness</Checkbox>
                           <Checkbox value="dryness"    style={{ fontSize: 15 }}>Dryness</Checkbox>
                           <Checkbox value="oiliness"   style={{ fontSize: 15 }}>Oiliness</Checkbox>
-                        </Space>
+                        </div>
                       </Checkbox.Group>
                     </Form.Item>
 
