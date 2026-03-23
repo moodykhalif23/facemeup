@@ -14,12 +14,12 @@ from app.models.product import ProductCatalog
 from app.models.profile import SkinProfileHistory
 from app.models.user import User, RefreshToken
 from app.services.profile_service import get_profile_history
+from app.services.training_scheduler import process_user_captured_images
+from app.services.training_manifest import refresh_training_manifest
 
 router = APIRouter()
 
-# ──────────────────────────────────────────────────────────────────────────────
 # Dashboard stats
-# ──────────────────────────────────────────────────────────────────────────────
 
 @router.get("/stats")
 def get_stats(
@@ -74,10 +74,8 @@ def get_stats(
         "recent_orders": recent_order_list,
     }
 
-
-# ──────────────────────────────────────────────────────────────────────────────
 # User management
-# ──────────────────────────────────────────────────────────────────────────────
+
 
 @router.get("/users")
 def list_users(
@@ -148,9 +146,7 @@ def delete_user(
     return {"deleted": user_id}
 
 
-# ──────────────────────────────────────────────────────────────────────────────
 # Reports
-# ──────────────────────────────────────────────────────────────────────────────
 
 @router.get("/reports")
 def list_reports(
@@ -204,10 +200,8 @@ def get_user_reports(
         "history": history,
     }
 
-
-# ──────────────────────────────────────────────────────────────────────────────
 # Order management
-# ──────────────────────────────────────────────────────────────────────────────
+
 
 @router.get("/orders")
 def list_all_orders(
@@ -258,6 +252,24 @@ def update_order_status(
     if new_status not in valid:
         raise AppError(400, "invalid_status", f"Status must be one of: {', '.join(sorted(valid))}")
 
+
+@router.post("/training/sync")
+def sync_training_assets(
+    _: User = Depends(require_roles("admin")),
+) -> dict:
+    """
+    Move user-captured images into training data and refresh the manifest CSV.
+    """
+    try:
+        sync_result = process_user_captured_images()
+        manifest = refresh_training_manifest()
+        return {
+            "sync": sync_result,
+            "manifest": manifest,
+        }
+    except Exception as exc:
+        raise AppError(500, "training_sync_failed", f"Training sync failed: {exc}")
+
     order = db.execute(select(Order).where(Order.id == order_id)).scalar_one_or_none()
     if not order:
         raise AppError(404, "not_found", "Order not found")
@@ -266,10 +278,7 @@ def update_order_status(
     db.commit()
     return {"id": order.id, "status": order.status}
 
-
-# ──────────────────────────────────────────────────────────────────────────────
 # Cache management
-# ──────────────────────────────────────────────────────────────────────────────
 
 @router.post("/cache/clear")
 def clear_cache(
