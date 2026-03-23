@@ -55,6 +55,7 @@ export default function ProductDetail() {
     if (product) {
       dispatch(addToCart({
         id: product.id,
+        sku: product.sku,
         name: product.name,
         price: product.price,
         quantity: quantity,

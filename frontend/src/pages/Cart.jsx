@@ -24,7 +24,7 @@ export default function Cart() {
     const base = 'https://drrashel.co.ke/checkout/';
     const params = [];
     items.forEach((item) => {
-      const wcId = item.wc_id || wcMap.get(item.id);
+      const wcId = item.wc_id || wcMap.get(item.sku) || wcMap.get(item.id);
       if (!wcId) return;
       params.push(`add-to-cart=${encodeURIComponent(wcId)}`);
       params.push(`quantity=${encodeURIComponent(item.quantity)}`);
@@ -44,7 +44,7 @@ export default function Cart() {
       const wcMap = new Map(response.data.map((p) => [p.sku, p.wc_id]));
 
       missingWc.forEach((item) => {
-        const wcId = wcMap.get(item.id);
+        const wcId = wcMap.get(item.sku) || wcMap.get(item.id);
         if (wcId) {
           dispatch(updateItemMeta({ id: item.id, data: { wc_id: wcId } }));
         }
@@ -140,7 +140,9 @@ export default function Cart() {
                         const wcMap = await ensureWcIds();
                         if (wcMap === null) return;
 
-                        const stillMissing = items.filter((item) => !item.wc_id && !wcMap.get(item.id));
+                        const stillMissing = items.filter(
+                          (item) => !item.wc_id && !wcMap.get(item.sku) && !wcMap.get(item.id)
+                        );
                         if (stillMissing.length > 0) {
                           message.error('Some items are not synced to the website yet.');
                           return;
