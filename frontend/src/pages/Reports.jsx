@@ -57,17 +57,8 @@ export default function Reports() {
 
       <Content style={{ padding: '16px' }}>
         <div style={{ maxWidth: 960, margin: '0 auto' }}>
-          <Card style={{ borderRadius: 12, border: '1px solid var(--border)', background: 'var(--card)' }}>
-            <Title level={4} style={{ color: 'var(--card-foreground)', marginTop: 0 }}>
-              My Analysis Reports
-            </Title>
-            <Text style={{ color: 'var(--muted-foreground)' }}>
-              View your skin analysis history and detailed reports.
-            </Text>
-          </Card>
-
           <Card
-            style={{ marginTop: 16, borderRadius: 12, border: '1px solid var(--border)', background: 'var(--card)' }}
+            style={{ borderRadius: 12, border: '1px solid var(--border)', background: 'var(--card)' }}
             loading={loading}
           >
             <div style={{ marginBottom: 12 }}>
