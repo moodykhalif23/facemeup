@@ -16,6 +16,7 @@ import os
 import sys
 import csv
 import time
+import json
 import zipfile
 import argparse
 from pathlib import Path
@@ -282,6 +283,11 @@ def build_label_index(meta_path: Path, all_imgs: list) -> dict:
                 "cond_idx":  cond_idx,
             }
 
+    user_labels = _load_user_captured_labels(DATA_DIR)
+    if user_labels:
+        label_index.update(user_labels)
+        print(f"\n  ✓ Added user-captured images: {len(user_labels)}")
+
     # Distribution
     from collections import Counter
     skin_dist = Counter(v["skin_type"] for v in label_index.values())
@@ -298,6 +304,62 @@ def build_label_index(meta_path: Path, all_imgs: list) -> dict:
         bar = "█" * (v // 50)
         print(f"    {k:<20} {v:>5}  {bar}")
 
+    return label_index
+
+
+def _resolve_condition(conditions: list[str]) -> str:
+    for c in conditions or []:
+        if c in CONDITIONS and c != "None detected":
+            return c
+    for c in conditions or []:
+        if c in CONDITIONS:
+            return c
+    return "None detected"
+
+
+def _load_user_captured_labels(data_dir: Path) -> dict:
+    """
+    Load user-captured images (moved into DATA_DIR/user_*) and attach labels
+    from their adjacent metadata JSON files.
+    """
+    label_index: dict[str, dict] = {}
+    for user_dir in data_dir.glob("user_*"):
+        if not user_dir.is_dir():
+            continue
+        for img_path in user_dir.glob("*.*"):
+            if img_path.suffix.lower() not in [".jpg", ".jpeg", ".png"]:
+                continue
+
+            meta_path = Path(str(img_path) + ".json")
+            metadata = {}
+            if meta_path.exists():
+                try:
+                    metadata = json.loads(meta_path.read_text(encoding="utf-8"))
+                except Exception:
+                    metadata = {}
+
+            skin_type = metadata.get("skin_type") or user_dir.name.replace("user_", "")
+            if skin_type not in SKIN_TYPES:
+                continue
+
+            conditions = metadata.get("conditions") or []
+            condition = _resolve_condition(conditions)
+            if condition not in CONDITIONS:
+                condition = "None detected"
+
+            skin_idx = SKIN_TYPES.index(skin_type)
+            cond_idx = CONDITIONS.index(condition)
+
+            key = f"user_{img_path.stem}"
+            label_index[key] = {
+                "path": img_path,
+                "skin_type": skin_type,
+                "condition": condition,
+                "skin_idx": skin_idx,
+                "cond_idx": cond_idx,
+                "questionnaire": metadata.get("questionnaire"),
+                "source": "user_captured",
+            }
     return label_index
 
 

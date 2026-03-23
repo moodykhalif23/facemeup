@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.deps import get_current_user
 from app.models.user import User
+from app.services.training_metadata import export_training_metadata_csv
 
 router = APIRouter()
 
@@ -74,6 +75,7 @@ def submit_training_image(
     def _save_all() -> None:
         filepath = _save_training_image(payload.image_base64, payload.skin_type)
         _save_training_metadata(filepath, payload, current_user.id if current_user else None)
+        export_training_metadata_csv(TRAINING_DIR, os.path.join(TRAINING_DIR, "metadata.csv"))
 
     background_tasks.add_task(_save_all)
     return {"status": "queued", "message": "Image submitted for training"}

@@ -11,6 +11,7 @@ import shutil
 from datetime import datetime
 
 logger = logging.getLogger(__name__)
+from app.services.training_metadata import export_training_metadata_csv
 
 # Base paths (relative to the backend/ directory)
 USER_CAPTURED_DIR = os.path.join(
@@ -80,4 +81,11 @@ def process_user_captured_images() -> dict:
         "Training data sync complete — processed: %d, skipped: %d",
         processed, skipped
     )
+    try:
+        export_training_metadata_csv(
+            TRAINING_DATA_DIR,
+            os.path.join(TRAINING_DATA_DIR, "user_captured_metadata.csv"),
+        )
+    except Exception as exc:
+        logger.warning("Failed to export user metadata CSV: %s", exc)
     return {"processed": processed, "skipped": skipped}
