@@ -78,9 +78,6 @@ export default function Profile() {
             </div>
           ) : (
             <div>
-              <Title level={4} style={{ color: 'var(--card-foreground)', marginBottom: 16 }}>
-                Analysis History
-              </Title>
               {historyItems.length > 0 ? (
                 <Timeline items={timelineItems} />
               ) : (
