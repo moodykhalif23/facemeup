@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Table, Button, Modal, Form, Input, InputNumber, Select,
   Space, Popconfirm, Tag, Typography, App, Image, Tooltip,
@@ -7,7 +8,6 @@ import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined } from '@ant
 import AdminLayout from '../../components/AdminLayout';
 import {
   getProducts,
-  adminCreateProduct,
   adminUpdateProduct,
   adminDeleteProduct,
   adminBulkDeleteProducts,
@@ -30,10 +30,10 @@ const INGREDIENT_OPTIONS = [
 
 export default function AdminProducts() {
   const { message } = App.useApp();
+  const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [filtered, setFiltered] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState(null); // null = create, object = edit
   const [saving, setSaving] = useState(false);
   const [search, setSearch] = useState('');
@@ -67,12 +67,6 @@ export default function AdminProducts() {
     );
   }, [search, products]);
 
-  const openCreate = () => {
-    setEditing(null);
-    form.resetFields();
-    setModalOpen(true);
-  };
-
   const openEdit = (record) => {
     setEditing(record);
     form.setFieldsValue({
@@ -85,21 +79,15 @@ export default function AdminProducts() {
       image_url: record.image_url ?? '',
       description: '',
     });
-    setModalOpen(true);
   };
 
   const handleSave = async (values) => {
     setSaving(true);
     const payload = { ...values, ingredients: values.ingredients ?? [] };
     try {
-      if (editing) {
-        await adminUpdateProduct(editing.sku, payload);
-        message.success('Product updated');
-      } else {
-        await adminCreateProduct(payload);
-        message.success('Product created');
-      }
-      setModalOpen(false);
+      await adminUpdateProduct(editing.sku, payload);
+      message.success('Product updated');
+      setEditing(null);
       load();
     } catch (err) {
       message.error(err.response?.data?.error?.message ?? 'Save failed');
@@ -225,7 +213,7 @@ export default function AdminProducts() {
           >
             <Button danger>Bulk Delete</Button>
           </Popconfirm>
-          <Button type="primary" icon={<PlusOutlined />} onClick={openCreate}>Add Product</Button>
+          <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/admin/products/new')}>Add Product</Button>
         </Space>
       </div>
 
@@ -244,17 +232,17 @@ export default function AdminProducts() {
       </div>
 
       <Modal
-        title={editing ? 'Edit Product' : 'Add Product'}
-        open={modalOpen}
-        onCancel={() => setModalOpen(false)}
+        title="Edit Product"
+        open={!!editing}
+        onCancel={() => setEditing(null)}
         onOk={() => form.submit()}
-        okText={editing ? 'Update' : 'Create'}
+        okText="Update"
         confirmLoading={saving}
         width={560}
       >
         <Form form={form} layout="vertical" onFinish={handleSave} style={{ marginTop: 16 }}>
           <Form.Item label="SKU" name="sku" rules={[{ required: true, message: 'SKU required' }]}>
-            <Input placeholder="e.g. NIAC-001" disabled={!!editing} />
+            <Input placeholder="e.g. NIAC-001" disabled />
           </Form.Item>
 
           <Form.Item label="Product Name" name="name" rules={[{ required: true }]}>

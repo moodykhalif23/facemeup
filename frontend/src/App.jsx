@@ -17,6 +17,7 @@ import Orders from './pages/Orders';
 import Loyalty from './pages/Loyalty';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminProducts from './pages/admin/AdminProducts';
+import AdminProductCreate from './pages/admin/AdminProductCreate';
 import AdminUsers from './pages/admin/AdminUsers';
 import AdminOrders from './pages/admin/AdminOrders';
 import AdminLoyalty from './pages/admin/AdminLoyalty';
@@ -133,6 +134,10 @@ function App() {
             <Route
               path="/admin/products"
               element={<AdminRoute><AdminProducts /></AdminRoute>}
+            />
+            <Route
+              path="/admin/products/new"
+              element={<AdminRoute><AdminProductCreate /></AdminRoute>}
             />
             <Route
               path="/admin/users"

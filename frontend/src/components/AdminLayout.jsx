@@ -13,6 +13,7 @@ import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
   SkinOutlined,
+  PlusOutlined,
 } from '@ant-design/icons';
 import { logout } from '../store/slices/authSlice';
 
@@ -22,6 +23,7 @@ const { Text } = Typography;
 const NAV_ITEMS = [
   { key: '/admin', icon: <DashboardOutlined />, label: 'Dashboard' },
   { key: '/admin/products', icon: <ShoppingOutlined />, label: 'Products' },
+  { key: '/admin/products/new', icon: <PlusOutlined />, label: 'Add Product' },
   { key: '/admin/users', icon: <UserOutlined />, label: 'Clients' },
   { key: '/admin/orders', icon: <OrderedListOutlined />, label: 'Orders' },
   { key: '/admin/loyalty', icon: <GiftOutlined />, label: 'Loyalty' },
