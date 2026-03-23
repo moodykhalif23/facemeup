@@ -22,7 +22,7 @@ const { Text } = Typography;
 const NAV_ITEMS = [
   { key: '/admin', icon: <DashboardOutlined />, label: 'Dashboard' },
   { key: '/admin/products', icon: <ShoppingOutlined />, label: 'Products' },
-  { key: '/admin/users', icon: <UserOutlined />, label: 'Users' },
+  { key: '/admin/users', icon: <UserOutlined />, label: 'Clients' },
   { key: '/admin/orders', icon: <OrderedListOutlined />, label: 'Orders' },
   { key: '/admin/loyalty', icon: <GiftOutlined />, label: 'Loyalty' },
   { key: '/admin/config', icon: <SettingOutlined />, label: 'Config' },
