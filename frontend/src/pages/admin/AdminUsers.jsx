@@ -1,21 +1,16 @@
 import { useEffect, useState } from 'react';
 import {
-  Table, Button, Select, Space, Popconfirm, Tag,
+  Table, Button, Space, Popconfirm,
   Typography, App, Input, Avatar, Tooltip,
 } from 'antd';
 import { DeleteOutlined, ReloadOutlined, SearchOutlined, UserOutlined } from '@ant-design/icons';
 import AdminLayout from '../../components/AdminLayout';
-import { adminGetUsers, adminUpdateUserRole, adminDeleteUser } from '../../services/api';
-import { useSelector } from 'react-redux';
+import { adminGetUsers, adminDeleteUser } from '../../services/api';
 
 const { Title, Text } = Typography;
 
-const ROLE_COLOR = { admin: 'red', advisor: 'orange', customer: 'blue' };
-const ROLES = ['customer', 'advisor', 'admin'];
-
 export default function AdminUsers() {
   const { message } = App.useApp();
-  const { user: me } = useSelector((s) => s.auth);
   const [users, setUsers] = useState([]);
   const [filtered, setFiltered] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -24,7 +19,11 @@ export default function AdminUsers() {
   const load = () => {
     setLoading(true);
     adminGetUsers()
-      .then((r) => { setUsers(r.data.users); setFiltered(r.data.users); })
+      .then((r) => {
+        const nonAdmins = (r.data.users ?? []).filter((u) => u.role !== 'admin');
+        setUsers(nonAdmins);
+        setFiltered(nonAdmins);
+      })
       .catch(() => message.error('Failed to load users'))
       .finally(() => setLoading(false));
   };
@@ -38,16 +37,6 @@ export default function AdminUsers() {
     );
   }, [search, users]);
 
-  const changeRole = async (userId, role) => {
-    try {
-      await adminUpdateUserRole(userId, role);
-      message.success('Role updated');
-      load();
-    } catch (err) {
-      message.error(err.response?.data?.error?.message ?? 'Update failed');
-    }
-  };
-
   const deleteUser = async (userId) => {
     try {
       await adminDeleteUser(userId);
@@ -60,7 +49,7 @@ export default function AdminUsers() {
 
   const columns = [
     {
-      title: 'User',
+      title: 'Client',
       key: 'user',
       render: (_, r) => (
         <Space>
@@ -80,27 +69,6 @@ export default function AdminUsers() {
       ),
     },
     {
-      title: 'Role',
-      dataIndex: 'role',
-      key: 'role',
-      width: 160,
-      responsive: ['sm'],
-      filters: ROLES.map((r) => ({ text: r, value: r })),
-      onFilter: (value, record) => record.role === value,
-      render: (role, record) =>
-        record.id === me?.id ? (
-          <Tag color={ROLE_COLOR[role]}>{role}</Tag>
-        ) : (
-          <Select
-            value={role}
-            size="small"
-            style={{ width: 120 }}
-            onChange={(val) => changeRole(record.id, val)}
-            options={ROLES.map((r) => ({ label: r, value: r }))}
-          />
-        ),
-    },
-    {
       title: 'Joined',
       dataIndex: 'created_at',
       key: 'created_at',
@@ -110,11 +78,11 @@ export default function AdminUsers() {
       responsive: ['sm'],
     },
     {
-      title: '',
+      title: 'Actions',
       key: 'actions',
       width: 60,
       render: (_, record) =>
-        record.id === me?.id ? null : (
+        (
           <Popconfirm
             title="Delete this user?"
             description="All their data will be permanently removed."
