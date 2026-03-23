@@ -49,6 +49,7 @@ def list_products(db: Session = Depends(get_db)) -> list[Product]:
             category=row.category,
             suitable_for=row.suitable_for,
             effects=split_effects_csv(row.effects_csv),
+            wc_id=row.wc_id,
         )
         for row in rows
     ]
@@ -108,6 +109,7 @@ def get_product(product_id: str, db: Session = Depends(get_db)) -> ProductDetail
         image_url=row.image_url,
         suitable_for=row.suitable_for,
         effects=split_effects_csv(row.effects_csv),
+        wc_id=row.wc_id,
     )
     
     cache_set_json(cache_key, product.model_dump())
@@ -164,6 +166,7 @@ def create_product(
         category=row.category,
         suitable_for=row.suitable_for,
         effects=payload.effects or [],
+        wc_id=row.wc_id,
     )
 
 
@@ -204,6 +207,7 @@ def update_product(
         category=row.category,
         suitable_for=row.suitable_for,
         effects=payload.effects or [],
+        wc_id=row.wc_id,
     )
 
 

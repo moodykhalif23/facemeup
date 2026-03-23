@@ -5,7 +5,6 @@ import {
   CameraOutlined,
   HistoryOutlined,
   ShoppingCartOutlined,
-  UserOutlined,
   GiftOutlined,
   ShopOutlined,
   SettingOutlined,
@@ -52,14 +51,6 @@ export default function Home() {
       color: 'var(--chart-5)',
       bg: 'var(--accent)',
       path: '/cart',
-    },
-    {
-      title: 'My Orders',
-      description: 'Track your orders',
-      icon: <UserOutlined style={{ fontSize: 32 }} />,
-      color: 'var(--destructive)',
-      bg: '#99000015',
-      path: '/orders',
     },
     {
       title: 'Loyalty Rewards',

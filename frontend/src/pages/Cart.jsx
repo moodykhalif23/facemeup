@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import { Layout, Card, Button, Typography, List, InputNumber, Space, Empty } from 'antd';
+import { Layout, Card, Button, Typography, List, InputNumber, Space, Empty, App } from 'antd';
 import { DeleteOutlined, ShoppingOutlined } from '@ant-design/icons';
 import { removeFromCart, updateQuantity } from '../store/slices/cartSlice';
 import AppHeader from '../components/AppHeader';
@@ -12,8 +12,21 @@ export default function Cart() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { items } = useSelector((state) => state.cart);
+  const { message } = App.useApp();
 
   const total = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const missingWc = items.filter((item) => !item.wc_id);
+
+  const buildCheckoutUrl = () => {
+    const base = 'https://drrashel.co.ke/checkout/';
+    const params = [];
+    items.forEach((item) => {
+      if (!item.wc_id) return;
+      params.push(`add-to-cart=${encodeURIComponent(item.wc_id)}`);
+      params.push(`quantity=${encodeURIComponent(item.quantity)}`);
+    });
+    return `${base}?${params.join('&')}`;
+  };
 
   const handleQuantityChange = (id, quantity) => {
     if (quantity > 0) {
@@ -91,10 +104,16 @@ export default function Cart() {
                     type="primary"
                     size="large"
                     block
-                    onClick={() => navigate('/checkout')}
+                    onClick={() => {
+                      if (missingWc.length > 0) {
+                        message.error('Some items are not synced to the website yet.');
+                        return;
+                      }
+                      window.location.href = buildCheckoutUrl();
+                    }}
                     style={{ height: 52, fontSize: 16, fontWeight: 600 }}
                   >
-                    Proceed to Checkout
+                    Checkout on Website
                   </Button>
                 </Space>
               </Card>

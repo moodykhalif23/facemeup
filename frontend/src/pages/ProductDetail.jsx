@@ -57,7 +57,8 @@ export default function ProductDetail() {
         id: product.id,
         name: product.name,
         price: product.price,
-        quantity: quantity
+        quantity: quantity,
+        wc_id: product.wc_id,
       }));
       message.success('Added to cart!');
     }

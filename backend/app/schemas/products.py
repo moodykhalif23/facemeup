@@ -12,6 +12,7 @@ class Product(BaseModel):
     category: str | None = None
     suitable_for: str | None = None
     effects: list[str] = []
+    wc_id: int | None = None
 
 
 class ProductDetail(BaseModel):
@@ -28,3 +29,4 @@ class ProductDetail(BaseModel):
     image_url: str | None = None
     suitable_for: str | None = None
     effects: list[str] = []
+    wc_id: int | None = None

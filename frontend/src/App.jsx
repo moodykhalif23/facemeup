@@ -12,8 +12,6 @@ import Recommendations from './pages/Recommendations';
 import Profile from './pages/Profile';
 import ProductDetail from './pages/ProductDetail';
 import Cart from './pages/Cart';
-import Checkout from './pages/Checkout';
-import Orders from './pages/Orders';
 import Loyalty from './pages/Loyalty';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminProducts from './pages/admin/AdminProducts';
@@ -105,7 +103,7 @@ function App() {
               path="/checkout"
               element={
                 <PrivateRoute>
-                  <Checkout />
+                  <Navigate to="/cart" />
                 </PrivateRoute>
               }
             />
@@ -113,7 +111,7 @@ function App() {
               path="/orders"
               element={
                 <PrivateRoute>
-                  <Orders />
+                  <Navigate to="/cart" />
                 </PrivateRoute>
               }
             />

@@ -55,12 +55,6 @@ export default function AppHeader({ title, showBack = false }) {
       onClick: () => navigate('/cart'),
     },
     {
-      key: 'orders',
-      icon: <ShoppingCartOutlined />,
-      label: 'My Orders',
-      onClick: () => navigate('/orders'),
-    },
-    {
       key: 'loyalty',
       icon: <GiftOutlined />,
       label: 'Loyalty Rewards',
