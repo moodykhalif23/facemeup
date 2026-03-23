@@ -108,7 +108,7 @@ export default function AdminUsers() {
         gap: 12,
         flexWrap: 'wrap',
       }}>
-        <Title level={4} style={{ margin: 0, color: 'var(--foreground)' }}>Users</Title>
+        <Title level={4} style={{ margin: 0, color: 'var(--foreground)' }}>Clients</Title>
         <Space style={{ width: '100%', maxWidth: 420 }}>
           <Input
             prefix={<SearchOutlined />}
@@ -131,15 +131,6 @@ export default function AdminUsers() {
           size="small"
           pagination={{ pageSize: 20 }}
           style={{ background: 'transparent' }}
-          summary={() => (
-            <Table.Summary.Row>
-              <Table.Summary.Cell colSpan={4}>
-                <Text style={{ color: 'var(--muted-foreground)', fontSize: 12 }}>
-                  {filtered.length} user{filtered.length !== 1 ? 's' : ''}
-                </Text>
-              </Table.Summary.Cell>
-            </Table.Summary.Row>
-          )}
         />
       </div>
     </AdminLayout>
