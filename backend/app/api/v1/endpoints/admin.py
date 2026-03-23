@@ -253,6 +253,18 @@ def update_order_status(
         raise AppError(400, "invalid_status", f"Status must be one of: {', '.join(sorted(valid))}")
 
 
+    order = db.execute(select(Order).where(Order.id == order_id)).scalar_one_or_none()
+    if not order:
+        raise AppError(404, "not_found", "Order not found")
+
+    order.status = new_status
+    db.commit()
+    return {"id": order.id, "status": order.status}
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Training data sync + manifest refresh
+# ──────────────────────────────────────────────────────────────────────────────
+
 @router.post("/training/sync")
 def sync_training_assets(
     _: User = Depends(require_roles("admin")),
@@ -269,14 +281,6 @@ def sync_training_assets(
         }
     except Exception as exc:
         raise AppError(500, "training_sync_failed", f"Training sync failed: {exc}")
-
-    order = db.execute(select(Order).where(Order.id == order_id)).scalar_one_or_none()
-    if not order:
-        raise AppError(404, "not_found", "Order not found")
-
-    order.status = new_status
-    db.commit()
-    return {"id": order.id, "status": order.status}
 
 # Cache management
 
