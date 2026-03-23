@@ -15,4 +15,6 @@ class ProductCatalog(Base):
     description: Mapped[str] = mapped_column(Text, nullable=True)
     category: Mapped[str] = mapped_column(String(255), nullable=True)
     image_url: Mapped[str] = mapped_column(String(512), nullable=True)
+    suitable_for: Mapped[str] = mapped_column(String(16), default="all")
+    effects_csv: Mapped[str] = mapped_column(String(1024), default="")
     wc_id: Mapped[int] = mapped_column(Integer, nullable=True)

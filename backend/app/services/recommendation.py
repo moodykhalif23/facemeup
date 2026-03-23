@@ -45,8 +45,24 @@ KEYWORD_MAP: dict[str, list[str]] = {
     "Redness": ["soothing", "calm", "redness", "sensitive", "centella"],
 }
 
+EFFECT_MAP: dict[str, list[str]] = {
+    "Acne": ["acne", "oil control", "clean", "pore", "acne treatment"],
+    "Hyperpigmentation": ["bright", "whitening", "light spot", "dark spots", "fade acne print"],
+    "Uneven tone": ["bright", "whitening", "light spot", "tone", "brighten skin color"],
+    "Dehydration": ["moisture", "lock water", "hydration", "water oil balance"],
+    "Wrinkles": ["anti wrinkle", "antifading", "collagen", "eye lines"],
+    "Fine lines": ["anti wrinkle", "collagen", "eye lines"],
+    "Dark spots": ["dark spots", "light spot", "bright"],
+    "Redness": ["soothe", "repair"],
+}
 
-def recommend_products(skin_type: str, conditions: list[str], db: Session = None) -> list[ProductRecommendation]:
+def recommend_products(
+    skin_type: str,
+    conditions: list[str],
+    gender: str | None = None,
+    age: int | None = None,
+    db: Session = None,
+) -> list[ProductRecommendation]:
     """
     Recommend products from database based on skin type and conditions
     Uses both ingredient matching and keyword matching in product names/descriptions
@@ -68,6 +84,11 @@ def recommend_products(skin_type: str, conditions: list[str], db: Session = None
             desired_ingredients.update(INGREDIENT_MAP.get(condition, []))
             desired_keywords.update(KEYWORD_MAP.get(condition, []))
     
+    desired_effects: set[str] = set()
+    for condition in conditions:
+        if condition != "None detected":
+            desired_effects.update(EFFECT_MAP.get(condition, []))
+    
     # If no specific criteria, use general skincare
     if not desired_ingredients and not desired_keywords:
         desired_ingredients = {"Hyaluronic Acid", "Vitamin C", "Niacinamide", "Glycerin"}
@@ -86,8 +107,15 @@ def recommend_products(skin_type: str, conditions: list[str], db: Session = None
     scored: list[ProductRecommendation] = []
     
     for product in products:
+        # Filter by suitable_for if provided
+        if gender and gender.lower() in ("male", "female"):
+            product_gender = (product.suitable_for or "all").lower()
+            if product_gender not in ("all", gender.lower()):
+                continue
+
         # Parse ingredients from CSV
         product_ingredients = [ing.strip() for ing in product.ingredients_csv.split(",") if ing.strip()]
+        product_effects = [e.strip().lower() for e in (product.effects_csv or "").split(",") if e.strip()]
         
         # Combine product name, category, and description for keyword matching
         searchable_text = f"{product.name} {product.category or ''} {product.description or ''}".lower()
@@ -105,13 +133,29 @@ def recommend_products(skin_type: str, conditions: list[str], db: Session = None
         for keyword in desired_keywords:
             if keyword.lower() in searchable_text:
                 matched_keywords.append(keyword)
+
+        # Match effects to conditions
+        matched_effects = []
+        for desired_eff in desired_effects:
+            for eff in product_effects:
+                if desired_eff.lower() in eff:
+                    matched_effects.append(desired_eff)
+                    break
         
-        # Calculate score based on both ingredient and keyword matches
+        # Calculate score based on ingredient, keyword, and effects matches
         ingredient_score = len(matched_ingredients) / max(len(desired_ingredients), 1) if desired_ingredients else 0
         keyword_score = len(matched_keywords) / max(len(desired_keywords), 1) if desired_keywords else 0
+        effect_score = len(matched_effects) / max(len(desired_effects), 1) if desired_effects else 0
         
         # Weighted average: keywords are more reliable for our data
-        total_score = (keyword_score * 0.7) + (ingredient_score * 0.3)
+        total_score = (keyword_score * 0.6) + (ingredient_score * 0.25) + (effect_score * 0.15)
+
+        # Small age-based boost for anti-aging effects
+        if age is not None and product_effects:
+            if age >= 30 and any(eff in product_effects for eff in ["anti wrinkle", "antifading", "collagen", "eye lines"]):
+                total_score += 0.05
+            if age < 20 and any(eff in product_effects for eff in ["anti wrinkle", "antifading", "collagen"]):
+                total_score -= 0.03
         
         # Only include products with some relevance
         if total_score > 0.1:
@@ -122,7 +166,7 @@ def recommend_products(skin_type: str, conditions: list[str], db: Session = None
                     name=product.name,
                     price=product.price or 0,
                     score=round(total_score, 4),
-                    matched_ingredients=sorted(set(matched_ingredients + matched_keywords))[:5],  # Show top 5 matches
+                    matched_ingredients=sorted(set(matched_ingredients + matched_keywords + matched_effects))[:5],
                     image_url=product.image_url,
                     category=product.category,
                 )

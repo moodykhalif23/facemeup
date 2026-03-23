@@ -10,6 +10,8 @@ class Product(BaseModel):
     stock: int
     image_url: str | None = None
     category: str | None = None
+    suitable_for: str | None = None
+    effects: list[str] = []
 
 
 class ProductDetail(BaseModel):
@@ -24,3 +26,5 @@ class ProductDetail(BaseModel):
     usage: str
     stock: int
     image_url: str | None = None
+    suitable_for: str | None = None
+    effects: list[str] = []

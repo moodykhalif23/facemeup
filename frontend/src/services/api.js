@@ -42,8 +42,8 @@ export const analyzeImage = (imageBase64, questionnaire) =>
   api.post('/analyze', { image_base64: imageBase64, questionnaire });
 
 // Recommendations
-export const getRecommendations = (skinType, conditions) =>
-  api.post('/recommend', { skin_type: skinType, conditions });
+export const getRecommendations = (skinType, conditions, gender, age) =>
+  api.post('/recommend', { skin_type: skinType, conditions, gender, age });
 
 // Profile
 export const getProfile = (userId) => api.get(`/profile/${userId}`);

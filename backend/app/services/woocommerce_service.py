@@ -130,6 +130,8 @@ class WooCommerceService:
             'description': wc_product.get('short_description', ''),
             'category': ', '.join([cat['name'] for cat in wc_product.get('categories', [])]),
             'image_url': wc_product.get('images', [{}])[0].get('src', '') if wc_product.get('images') else '',
+            'suitable_for': 'all',
+            'effects_csv': '',
             'wc_id': wc_product['id']
         }
 

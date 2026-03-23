@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Table, Button, Modal, Form, Input, InputNumber, Select,
-  Space, Popconfirm, Tag, Typography, App, Image, Tooltip,
+  Space, Popconfirm, Tag, Typography, App, Image, Tooltip, Segmented,
 } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined } from '@ant-design/icons';
 import AdminLayout from '../../components/AdminLayout';
@@ -26,6 +26,15 @@ const INGREDIENT_OPTIONS = [
   'Alpha Arbutin', 'Kojic Acid', 'Centella', 'Shea Butter', 'Zinc',
   'Aloe Vera', 'Benzoyl Peroxide', 'Lactic Acid', 'Glycolic Acid',
   'Panthenol', 'Squalane', 'Jojoba Oil', 'Rosehip Oil',
+].map((v) => ({ label: v, value: v }));
+
+const EFFECT_OPTIONS = [
+  'clean', 'oil control', 'pore shrinkage', 'replenishment', 'moisture', 'lock water',
+  'skin whitening', 'light spot', 'sunscreen', 'rejuvenation', 'oxygen injection',
+  'compact', 'anti wrinkle', 'antifading', 'repair', 'soothe', 'acne treatment',
+  'detoxification', 'eye care', 'antioxidant', 'anti free radical', 'collagen',
+  'water oil balance', 'brighten skin color', 'fade acne print', 'pouch', 'eye lines',
+  'dark circles', 'lymphatic detoxification',
 ].map((v) => ({ label: v, value: v }));
 
 export default function AdminProducts() {
@@ -76,6 +85,8 @@ export default function AdminProducts() {
       stock: record.stock,
       category: record.category,
       ingredients: record.ingredients ?? [],
+      suitable_for: record.suitable_for ?? 'all',
+      effects: record.effects ?? [],
       image_url: record.image_url ?? '',
       description: '',
     });
@@ -267,6 +278,26 @@ export default function AdminProducts() {
               options={INGREDIENT_OPTIONS}
               placeholder="Select or type ingredients"
               tokenSeparators={[',']}
+            />
+          </Form.Item>
+
+          <Form.Item label="Suitable For" name="suitable_for" rules={[{ required: true }]}>
+            <Segmented
+              options={[
+                { label: 'Male', value: 'male' },
+                { label: 'Female', value: 'female' },
+                { label: 'All', value: 'all' },
+              ]}
+              block
+            />
+          </Form.Item>
+
+          <Form.Item label="Effects" name="effects">
+            <Select
+              mode="multiple"
+              options={EFFECT_OPTIONS}
+              placeholder="Select product effects"
+              maxTagCount="responsive"
             />
           </Form.Item>
 

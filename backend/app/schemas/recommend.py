@@ -4,6 +4,8 @@ from pydantic import BaseModel
 class RecommendRequest(BaseModel):
     skin_type: str
     conditions: list[str]
+    gender: str | None = None
+    age: int | None = None
 
 
 class ProductRecommendation(BaseModel):

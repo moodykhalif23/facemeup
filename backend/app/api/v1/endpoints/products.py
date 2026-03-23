@@ -21,6 +21,8 @@ class ProductUpsert(BaseModel):
     description: str | None = None
     ingredients: list[str] = []
     image_url: str | None = None
+    suitable_for: str | None = "all"
+    effects: list[str] = []
 
 
 router = APIRouter()
@@ -43,7 +45,9 @@ def list_products(db: Session = Depends(get_db)) -> list[Product]:
             ingredients=[v for v in row.ingredients_csv.split(",") if v],
             stock=row.stock,
             image_url=row.image_url,
-            category=row.category
+            category=row.category,
+            suitable_for=row.suitable_for,
+            effects=[v for v in (row.effects_csv or "").split(",") if v]
         )
         for row in rows
     ]
@@ -100,7 +104,9 @@ def get_product(product_id: str, db: Session = Depends(get_db)) -> ProductDetail
         ingredients=", ".join(ingredients_list),
         usage="Apply twice daily to clean, dry skin. Gently massage until fully absorbed.",
         stock=row.stock,
-        image_url=row.image_url
+        image_url=row.image_url,
+        suitable_for=row.suitable_for,
+        effects=[v for v in (row.effects_csv or "").split(",") if v]
     )
     
     cache_set_json(cache_key, product.model_dump())
@@ -139,6 +145,8 @@ def create_product(
         description=payload.description,
         ingredients_csv=",".join(payload.ingredients),
         image_url=payload.image_url,
+        suitable_for=(payload.suitable_for or "all").lower(),
+        effects_csv=",".join(payload.effects or []),
     )
     db.add(row)
     db.commit()
@@ -153,6 +161,8 @@ def create_product(
         stock=row.stock,
         image_url=row.image_url,
         category=row.category,
+        suitable_for=row.suitable_for,
+        effects=payload.effects or [],
     )
 
 
@@ -177,6 +187,8 @@ def update_product(
     row.description = payload.description
     row.ingredients_csv = ",".join(payload.ingredients)
     row.image_url = payload.image_url
+    row.suitable_for = (payload.suitable_for or "all").lower()
+    row.effects_csv = ",".join(payload.effects or [])
     db.commit()
     db.refresh(row)
     _invalidate_product_cache(sku)
@@ -189,6 +201,8 @@ def update_product(
         stock=row.stock,
         image_url=row.image_url,
         category=row.category,
+        suitable_for=row.suitable_for,
+        effects=payload.effects or [],
     )
 
 

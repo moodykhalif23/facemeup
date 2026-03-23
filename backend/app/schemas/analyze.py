@@ -5,6 +5,8 @@ class Questionnaire(BaseModel):
     skin_feel: str | None = None
     routine: str | None = None
     concerns: list[str] = Field(default_factory=list)
+    gender: str | None = None
+    age: int | None = None
 
 
 class FaceLandmark(BaseModel):

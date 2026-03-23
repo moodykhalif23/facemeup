@@ -42,7 +42,9 @@ export default function Recommendations() {
     try {
       const response = await getRecommendations(
         currentAnalysis.profile.skin_type,
-        currentAnalysis.profile.conditions || []
+        currentAnalysis.profile.conditions || [],
+        currentAnalysis.questionnaire?.gender,
+        currentAnalysis.questionnaire?.age
       );
       setProducts(response.data.products || []);
     } catch (error) {

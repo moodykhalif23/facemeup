@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { Layout, Card, Button, Form, Select, Checkbox, Typography, Space, App, Spin } from 'antd';
+import { Layout, Card, Button, Form, Select, Checkbox, Typography, Space, App, Spin, InputNumber } from 'antd';
 import { ScanOutlined } from '@ant-design/icons';
 import { setCurrentAnalysis, addToHistory } from '../store/slices/analysisSlice';
 import AppHeader from '../components/AppHeader';
@@ -56,6 +56,8 @@ export default function Analysis() {
         skin_feel: values.skinFeel,
         routine:   values.routine,
         concerns:  values.concerns || [],
+        gender: values.gender,
+        age: values.age,
       };
 
       const response = await api.post('/analyze', {
@@ -64,8 +66,9 @@ export default function Analysis() {
         landmarks: landmarks.map(({ x, y, z }) => ({ x, y, z })),
       });
 
-      dispatch(setCurrentAnalysis(response.data));
-      dispatch(addToHistory(response.data));
+      const analysisPayload = { ...response.data, questionnaire };
+      dispatch(setCurrentAnalysis(analysisPayload));
+      dispatch(addToHistory(analysisPayload));
 
       const captures = allCaptures.length > 0 ? allCaptures : [{ blob: capturedImage }];
 
@@ -176,6 +179,30 @@ export default function Analysis() {
                     onFinish={onFinish}
                     requiredMark="optional"
                   >
+                    <Form.Item
+                      label={<Text strong style={{ color: 'var(--card-foreground)' }}>Gender</Text>}
+                      name="gender"
+                    >
+                      <Select size="large" placeholder="Select…">
+                        <Select.Option value="female">Female</Select.Option>
+                        <Select.Option value="male">Male</Select.Option>
+                        <Select.Option value="other">Other</Select.Option>
+                      </Select>
+                    </Form.Item>
+
+                    <Form.Item
+                      label={<Text strong style={{ color: 'var(--card-foreground)' }}>Age</Text>}
+                      name="age"
+                    >
+                      <InputNumber
+                        min={10}
+                        max={90}
+                        style={{ width: '100%' }}
+                        placeholder="e.g. 26"
+                        size="large"
+                      />
+                    </Form.Item>
+
                     <Form.Item
                       label={<Text strong style={{ color: 'var(--card-foreground)' }}>How does your skin feel?</Text>}
                       name="skinFeel"

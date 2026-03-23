@@ -18,11 +18,11 @@ def recommend(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ) -> RecommendResponse:
-    key = f"recommend:{current_user.id}:{payload.skin_type}:{','.join(sorted(payload.conditions))}"
+    key = f"recommend:{current_user.id}:{payload.skin_type}:{','.join(sorted(payload.conditions))}:{payload.gender or 'any'}:{payload.age or 'na'}"
     cached = cache_get_json(key)
     if cached:
         return RecommendResponse(products=cached)
 
-    products = recommend_products(payload.skin_type, payload.conditions, db)
+    products = recommend_products(payload.skin_type, payload.conditions, payload.gender, payload.age, db)
     cache_set_json(key, [p.model_dump() for p in products])
     return RecommendResponse(products=products)
