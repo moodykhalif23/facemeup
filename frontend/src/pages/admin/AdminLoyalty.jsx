@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import {
   Table, Button, Modal, Form, InputNumber, Input, Select,
-  Tag, Typography, App, Space, Avatar,
+  Tag, Typography, App, Space, Avatar, Grid,
 } from 'antd';
 import { PlusOutlined, MinusOutlined, ReloadOutlined, SearchOutlined } from '@ant-design/icons';
 import AdminLayout from '../../components/AdminLayout';
@@ -35,6 +35,7 @@ export default function AdminLoyalty() {
   const [selectedUser, setSelectedUser] = useState(null);
   const [saving, setSaving] = useState(false);
   const [form] = Form.useForm();
+  const screens = Grid.useBreakpoint();
 
   // We fetch users and derive loyalty balances from them
   // In a full impl this would be a dedicated endpoint; here we use user list + note
@@ -97,10 +98,15 @@ export default function AdminLoyalty() {
     {
       title: 'Actions',
       key: 'actions',
-      width: 140,
+      width: 170,
       align: 'center',
       render: (_, record) => (
-        <Space direction="vertical" size={6} align="center" style={{ width: '100%' }}>
+        <Space
+          direction={screens.lg ? 'horizontal' : 'vertical'}
+          size={6}
+          align="center"
+          style={{ width: '100%', justifyContent: 'center' }}
+        >
           <Button
             size="small"
             type="primary"
