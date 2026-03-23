@@ -95,14 +95,6 @@ export default function AdminLoyalty() {
       ),
     },
     {
-      title: 'Role',
-      dataIndex: 'role',
-      key: 'role',
-      width: 90,
-      responsive: ['sm'],
-      render: (v) => <Tag color={v === 'admin' ? 'red' : v === 'advisor' ? 'orange' : 'blue'}>{v}</Tag>,
-    },
-    {
       title: 'Actions',
       key: 'actions',
       width: 140,
