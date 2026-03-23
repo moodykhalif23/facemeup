@@ -79,6 +79,7 @@ export const adminCreateProduct = (data) => api.post('/products/admin/create', d
 export const adminUpdateProduct = (sku, data) => api.put(`/products/admin/${sku}`, data);
 export const adminDeleteProduct = (sku) => api.delete(`/products/admin/${sku}`);
 export const adminSeedProducts = () => api.post('/products/admin/seed');
+export const adminBulkDeleteProducts = () => api.delete('/products/admin/bulk');
 export const adminSyncWooCommerce = () => api.post('/sync/woocommerce');
 export const adminClearCache = () => api.post('/admin/cache/clear');
 

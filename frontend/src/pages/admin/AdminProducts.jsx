@@ -3,13 +3,14 @@ import {
   Table, Button, Modal, Form, Input, InputNumber, Select,
   Space, Popconfirm, Tag, Typography, App, Image, Tooltip,
 } from 'antd';
-import { PlusOutlined, EditOutlined, DeleteOutlined, ReloadOutlined } from '@ant-design/icons';
+import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined } from '@ant-design/icons';
 import AdminLayout from '../../components/AdminLayout';
 import {
   getProducts,
   adminCreateProduct,
   adminUpdateProduct,
   adminDeleteProduct,
+  adminBulkDeleteProducts,
 } from '../../services/api';
 
 const { Text } = Typography;
@@ -30,21 +31,41 @@ const INGREDIENT_OPTIONS = [
 export default function AdminProducts() {
   const { message } = App.useApp();
   const [products, setProducts] = useState([]);
+  const [filtered, setFiltered] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState(null); // null = create, object = edit
   const [saving, setSaving] = useState(false);
+  const [search, setSearch] = useState('');
   const [form] = Form.useForm();
 
   const load = () => {
     setLoading(true);
     getProducts()
-      .then((r) => setProducts(r.data))
+      .then((r) => {
+        setProducts(r.data);
+        setFiltered(r.data);
+      })
       .catch(() => message.error('Failed to load products'))
       .finally(() => setLoading(false));
   };
 
   useEffect(() => { load(); }, []);
+
+  useEffect(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) {
+      setFiltered(products);
+      return;
+    }
+    setFiltered(
+      products.filter((p) =>
+        [p.name, p.sku, p.category]
+          .filter(Boolean)
+          .some((v) => String(v).toLowerCase().includes(q))
+      )
+    );
+  }, [search, products]);
 
   const openCreate = () => {
     setEditing(null);
@@ -94,6 +115,17 @@ export default function AdminProducts() {
       load();
     } catch (err) {
       message.error(err.response?.data?.error?.message ?? 'Delete failed');
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    try {
+      const r = await adminBulkDeleteProducts();
+      message.success(`Deleted ${r.data.deleted} product(s)`);
+      setSearch('');
+      load();
+    } catch (err) {
+      message.error(err.response?.data?.error?.message ?? 'Bulk delete failed');
     }
   };
 
@@ -174,16 +206,32 @@ export default function AdminProducts() {
 
   return (
     <AdminLayout>
-      <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginBottom: 20 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, gap: 12, flexWrap: 'wrap' }}>
+        <Input
+          prefix={<SearchOutlined />}
+          placeholder="Search products by name, SKU, or category"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          allowClear
+          style={{ width: '100%', maxWidth: 420 }}
+        />
         <Space>
-          <Button icon={<ReloadOutlined />} onClick={load}>Refresh</Button>
+          <Popconfirm
+            title="Delete all products from this system?"
+            description="This only clears the local catalog and does not affect WooCommerce."
+            onConfirm={handleBulkDelete}
+            okText="Delete All"
+            okButtonProps={{ danger: true }}
+          >
+            <Button danger>Bulk Delete</Button>
+          </Popconfirm>
           <Button type="primary" icon={<PlusOutlined />} onClick={openCreate}>Add Product</Button>
         </Space>
       </div>
 
       <div style={{ background: 'var(--card)', borderRadius: 10, border: '1px solid var(--border)', overflow: 'hidden' }}>
         <Table
-          dataSource={products}
+          dataSource={filtered}
           columns={columns}
           rowKey="sku"
           loading={loading}

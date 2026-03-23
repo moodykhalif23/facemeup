@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
-from sqlalchemy import select, delete as sql_delete
+from sqlalchemy import select, delete as sql_delete, func
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -232,3 +232,25 @@ def reseed_catalog(
 
     count = db.execute(select(ProductCatalog)).scalars().all()
     return {"products": len(count)}
+
+
+@router.delete("/admin/bulk", response_model=dict[str, int])
+def bulk_delete_catalog(
+    db: Session = Depends(get_db),
+    _: User = Depends(require_roles("admin")),
+) -> dict[str, int]:
+    """Delete all products from the local catalog only."""
+    total = db.execute(select(func.count()).select_from(ProductCatalog)).scalar_one()
+    db.execute(sql_delete(ProductCatalog))
+    db.commit()
+
+    try:
+        r = get_redis_client()
+        r.delete("products:catalog")
+        keys = r.keys("products:detail:*")
+        if keys:
+            r.delete(*keys)
+    except Exception:
+        pass
+
+    return {"deleted": total}

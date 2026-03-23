@@ -134,6 +134,7 @@ export default function AdminConfig() {
     { method: 'POST', path: '/products/admin/create', description: 'Create product' },
     { method: 'PUT', path: '/products/admin/{sku}', description: 'Update product' },
     { method: 'DELETE', path: '/products/admin/{sku}', description: 'Delete product' },
+    { method: 'DELETE', path: '/products/admin/bulk', description: 'Bulk delete all products (local only)' },
     { method: 'POST', path: '/products/admin/seed', description: 'Seed default products' },
     { method: 'POST', path: '/sync/woocommerce', description: 'Sync from WooCommerce' },
     { method: 'POST', path: '/loyalty/earn', description: 'Award / deduct points' },
