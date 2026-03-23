@@ -23,7 +23,7 @@ export default function Home() {
   const cardMenuItems = [
     {
       title: 'Skin Analysis',
-      description: 'Analyze your skin with AI',
+      description: '',
       icon: <CameraOutlined style={{ fontSize: 32 }} />,
       color: 'var(--primary)',
       bg: 'var(--muted)',
@@ -31,7 +31,7 @@ export default function Home() {
     },
     {
       title: 'Recommendations',
-      description: 'Get personalized products',
+      description: '',
       icon: <ShopOutlined style={{ fontSize: 32 }} />,
       color: '#10B981',
       bg: '#10B98115',
@@ -39,7 +39,7 @@ export default function Home() {
     },
     {
       title: 'Profile History',
-      description: 'View your analysis history',
+      description: '',
       icon: <HistoryOutlined style={{ fontSize: 32 }} />,
       color: '#7C3AED',
       bg: '#7C3AED15',
@@ -47,7 +47,7 @@ export default function Home() {
     },
     {
       title: 'My Reports',
-      description: 'Comprehensive analysis reports',
+      description: '',
       icon: <FileTextOutlined style={{ fontSize: 32 }} />,
       color: '#0EA5E9',
       bg: '#0EA5E915',
@@ -55,7 +55,7 @@ export default function Home() {
     },
     {
       title: 'Shopping Cart',
-      description: `${items.length} items in cart`,
+      description: '',
       icon: <ShoppingCartOutlined style={{ fontSize: 32 }} />,
       color: 'var(--chart-5)',
       bg: 'var(--accent)',
@@ -63,7 +63,7 @@ export default function Home() {
     },
     {
       title: 'Loyalty Rewards',
-      description: 'View your rewards',
+      description: '',
       icon: <GiftOutlined style={{ fontSize: 32 }} />,
       color: '#DB2777',
       bg: '#DB277715',
@@ -73,7 +73,7 @@ export default function Home() {
 
   const adminCard = {
     title: 'Admin Panel',
-    description: 'Manage system & users',
+    description: '',
     icon: <SettingOutlined style={{ fontSize: 32 }} />,
     color: '#ef4444',
     bg: '#ef444415',
@@ -130,9 +130,11 @@ export default function Home() {
                     <Title level={5} style={{ marginBottom: 4, fontSize: 15, color: 'var(--card-foreground)' }}>
                       {item.title}
                     </Title>
-                    <Text style={{ fontSize: 13, color: 'var(--muted-foreground)' }}>
-                      {item.description}
-                    </Text>
+                    {item.description ? (
+                      <Text style={{ fontSize: 13, color: 'var(--muted-foreground)' }}>
+                        {item.description}
+                      </Text>
+                    ) : null}
                   </div>
                 </Card>
               </Col>
