@@ -40,7 +40,11 @@ export default function AdminLayout({ children }) {
 
   // Auto-collapse the sidebar on smaller screens for a responsive layout
   useEffect(() => {
-    if (isMobile) setCollapsed(true);
+    if (isMobile) {
+      setCollapsed(true);
+    } else {
+      setCollapsed(false);
+    }
   }, [isMobile]);
 
   const userMenuItems = [
@@ -133,8 +137,6 @@ export default function AdminLayout({ children }) {
             onClick={() => {
               if (isMobile) {
                 setMobileNavOpen(true);
-              } else {
-                setCollapsed(!collapsed);
               }
             }}
             style={{ color: 'var(--foreground)' }}
