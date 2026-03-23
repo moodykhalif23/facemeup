@@ -1,4 +1,5 @@
 import base64
+import json
 import os
 import uuid
 from datetime import datetime
@@ -25,6 +26,7 @@ class TrainingSubmitRequest(BaseModel):
     image_base64: str
     skin_type: str
     conditions: list[str] = []
+    questionnaire: dict | None = None
 
 
 def _save_training_image(image_base64: str, skin_type: str) -> str:
@@ -45,6 +47,19 @@ def _save_training_image(image_base64: str, skin_type: str) -> str:
     return filepath
 
 
+def _save_training_metadata(filepath: str, payload: TrainingSubmitRequest, user_id: int | None) -> None:
+    metadata = {
+        "skin_type": payload.skin_type,
+        "conditions": payload.conditions,
+        "questionnaire": payload.questionnaire,
+        "user_id": user_id,
+        "captured_at": datetime.utcnow().isoformat() + "Z",
+    }
+    meta_path = f"{filepath}.json"
+    with open(meta_path, "w", encoding="utf-8") as f:
+        json.dump(metadata, f, ensure_ascii=False)
+
+
 @router.post("/submit")
 def submit_training_image(
     payload: TrainingSubmitRequest,
@@ -56,7 +71,9 @@ def submit_training_image(
     Accept a captured face image for model training.
     Image is saved to ml/data/user_captured/{skin_type}/ for inclusion in next training run.
     """
-    background_tasks.add_task(
-        _save_training_image, payload.image_base64, payload.skin_type
-    )
+    def _save_all() -> None:
+        filepath = _save_training_image(payload.image_base64, payload.skin_type)
+        _save_training_metadata(filepath, payload, current_user.id if current_user else None)
+
+    background_tasks.add_task(_save_all)
     return {"status": "queued", "message": "Image submitted for training"}

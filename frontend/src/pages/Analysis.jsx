@@ -78,6 +78,7 @@ export default function Analysis() {
       const trainingPayload = {
         skin_type:  response.data.profile.skin_type,
         conditions: response.data.profile.conditions || [],
+        questionnaire,
       };
 
       await Promise.allSettled(

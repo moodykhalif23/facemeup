@@ -55,12 +55,23 @@ export default function AdminReports() {
     }
     if (!q) return data;
     return data.filter((r) => {
+      const questionnaire = r.questionnaire || {};
+      const concerns = Array.isArray(questionnaire.concerns) ? questionnaire.concerns : [];
       const target = [
         r.email,
         r.full_name,
         r.skin_type,
         ...(r.conditions || []),
         r.inference_mode,
+        questionnaire.skin_texture,
+        questionnaire.moisture_level,
+        questionnaire.oil_levels,
+        questionnaire.routine,
+        questionnaire.routine_other,
+        questionnaire.skin_feel,
+        questionnaire.gender,
+        questionnaire.age,
+        ...concerns,
       ].filter(Boolean).join(' ').toLowerCase();
       return target.includes(q);
     });
@@ -214,6 +225,34 @@ export default function AdminReports() {
                       <Tag>Age {selected.questionnaire.age}</Tag>
                     )}
                   </div>
+                  {selected.questionnaire && (
+                    <div style={{ marginTop: 8 }}>
+                      <Text strong style={{ color: 'var(--foreground)', fontSize: 13 }}>Questionnaire</Text>
+                      <div style={{ marginTop: 6, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                        {selected.questionnaire.skin_texture && (
+                          <Tag>Texture: {selected.questionnaire.skin_texture}</Tag>
+                        )}
+                        {selected.questionnaire.moisture_level && (
+                          <Tag>Moisture: {selected.questionnaire.moisture_level}</Tag>
+                        )}
+                        {selected.questionnaire.oil_levels && (
+                          <Tag>Oil: {selected.questionnaire.oil_levels}</Tag>
+                        )}
+                        {selected.questionnaire.routine && (
+                          <Tag>Routine: {selected.questionnaire.routine}</Tag>
+                        )}
+                        {selected.questionnaire.routine_other && (
+                          <Tag>Routine notes: {selected.questionnaire.routine_other}</Tag>
+                        )}
+                        {selected.questionnaire.skin_feel && (
+                          <Tag>Feel: {selected.questionnaire.skin_feel}</Tag>
+                        )}
+                        {(selected.questionnaire.concerns || []).map((c) => (
+                          <Tag key={`q-${c}`}>{c}</Tag>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </Space>
               <Divider style={{ borderColor: 'var(--border)' }} />

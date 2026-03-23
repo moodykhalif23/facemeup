@@ -65,6 +65,13 @@ def process_user_captured_images() -> dict:
             try:
                 shutil.move(src_path, dest_path)
                 processed += 1
+                meta_src = f"{src_path}.json"
+                if os.path.exists(meta_src):
+                    meta_dest = f"{dest_path}.json"
+                    try:
+                        shutil.move(meta_src, meta_dest)
+                    except Exception as exc:
+                        logger.warning("Failed to move %s: %s", meta_src, exc)
             except Exception as exc:
                 logger.warning("Failed to move %s: %s", src_path, exc)
                 skipped += 1
