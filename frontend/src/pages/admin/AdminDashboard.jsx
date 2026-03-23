@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Row, Col, Card, Statistic, Typography, Table, Tag, Spin, App } from 'antd';
+import { Row, Col, Card, Statistic, Typography, Table, Tag, Spin, App, Grid } from 'antd';
 import {
   UserOutlined,
   ShoppingOutlined,
@@ -25,6 +25,7 @@ export default function AdminDashboard() {
   const { message } = App.useApp();
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const screens = Grid.useBreakpoint();
 
   useEffect(() => {
     adminGetStats()
@@ -80,7 +81,22 @@ export default function AdminDashboard() {
       ) : (
         <>
           {/* Stat cards */}
-          <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
+          <div
+            style={{
+              display: 'grid',
+              gap: 16,
+              marginBottom: 24,
+              gridTemplateColumns: screens.xl
+                ? 'repeat(5, minmax(0, 1fr))'
+                : screens.lg
+                  ? 'repeat(3, minmax(0, 1fr))'
+                  : screens.md
+                    ? 'repeat(3, minmax(0, 1fr))'
+                    : screens.sm
+                      ? 'repeat(2, minmax(0, 1fr))'
+                      : 'repeat(1, minmax(0, 1fr))',
+            }}
+          >
             {[
               { title: 'Total Users', value: stats?.total_users, icon: <UserOutlined />, color: '#B45309' },
               { title: 'Products', value: stats?.total_products, icon: <ShoppingOutlined />, color: '#0891b2' },
@@ -94,48 +110,47 @@ export default function AdminDashboard() {
               },
               { title: 'Skin Analyses', value: stats?.total_analyses, icon: <ExperimentOutlined />, color: '#db2777' },
             ].map((s) => (
-              <Col xs={12} sm={12} md={8} lg={6} xl={4} key={s.title}>
-                <Card
-                  style={{
-                    border: '1px solid var(--border)',
-                    background: 'var(--card)',
+              <Card
+                key={s.title}
+                style={{
+                  border: '1px solid var(--border)',
+                  background: 'var(--card)',
+                  borderRadius: 10,
+                }}
+                styles={{ body: { padding: '16px 20px' } }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div style={{
+                    width: 40,
+                    height: 40,
                     borderRadius: 10,
-                  }}
-                  styles={{ body: { padding: '16px 20px' } }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                    <div style={{
-                      width: 40,
-                      height: 40,
-                      borderRadius: 10,
-                      background: s.color + '22',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      color: s.color,
-                      fontSize: 18,
-                      flexShrink: 0,
-                    }}>
-                      {s.icon}
-                    </div>
-                    <div>
-                      <Text style={{ fontSize: 12, color: 'var(--muted-foreground)', display: 'block' }}>
-                        {s.title}
-                      </Text>
-                      {s.isString ? (
-                        <Text strong style={{ fontSize: 18, color: 'var(--foreground)' }}>{s.value}</Text>
-                      ) : (
-                        <Statistic
-                          value={s.value ?? 0}
-                          valueStyle={{ fontSize: 20, color: 'var(--foreground)' }}
-                        />
-                      )}
-                    </div>
+                    background: s.color + '22',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: s.color,
+                    fontSize: 18,
+                    flexShrink: 0,
+                  }}>
+                    {s.icon}
                   </div>
-                </Card>
-              </Col>
+                  <div>
+                    <Text style={{ fontSize: 12, color: 'var(--muted-foreground)', display: 'block' }}>
+                      {s.title}
+                    </Text>
+                    {s.isString ? (
+                      <Text strong style={{ fontSize: 18, color: 'var(--foreground)' }}>{s.value}</Text>
+                    ) : (
+                      <Statistic
+                        value={s.value ?? 0}
+                        valueStyle={{ fontSize: 20, color: 'var(--foreground)' }}
+                      />
+                    )}
+                  </div>
+                </div>
+              </Card>
             ))}
-          </Row>
+          </div>
 
           {/* Charts + recent orders */}
           <Row gutter={[16, 16]}>
