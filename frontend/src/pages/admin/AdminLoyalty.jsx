@@ -41,7 +41,11 @@ export default function AdminLoyalty() {
   const load = () => {
     setLoading(true);
     adminGetUsers()
-      .then((r) => { setUsers(r.data.users); setFiltered(r.data.users); })
+      .then((r) => {
+        const nonAdmins = (r.data.users ?? []).filter((u) => u.role !== 'admin');
+        setUsers(nonAdmins);
+        setFiltered(nonAdmins);
+      })
       .catch(() => message.error('Failed to load users'))
       .finally(() => setLoading(false));
   };
