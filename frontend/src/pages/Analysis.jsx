@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { Layout, Card, Button, Form, Select, Checkbox, Typography, Space, App, Spin, InputNumber } from 'antd';
+import { Layout, Card, Button, Form, Select, Checkbox, Typography, Space, App, Spin, InputNumber, Input } from 'antd';
 import { ScanOutlined } from '@ant-design/icons';
 import { setCurrentAnalysis, addToHistory } from '../store/slices/analysisSlice';
 import AppHeader from '../components/AppHeader';
