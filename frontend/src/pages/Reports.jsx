@@ -57,14 +57,15 @@ export default function Reports() {
 
       <Content style={{ padding: '16px' }}>
         <div style={{ maxWidth: 960, margin: '0 auto' }}>
-          <Card
-            style={{ borderRadius: 12, border: '1px solid var(--border)', background: 'var(--card)' }}
-            loading={loading}
-          >
-            <div style={{ marginBottom: 12 }}>
+          <div>
+            <div style={{ marginBottom: 12, display: 'flex', justifyContent: 'center' }}>
               <RangePicker onChange={(val) => setDateRange(val)} />
             </div>
-            {listItems.length === 0 ? (
+            {loading ? (
+              <div style={{ textAlign: 'center', padding: '40px 0' }}>
+                <Text style={{ color: 'var(--muted-foreground)' }}>Loading…</Text>
+              </div>
+            ) : listItems.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '40px 0' }}>
                 <Text style={{ color: 'var(--muted-foreground)' }}>No reports yet</Text>
               </div>
@@ -101,7 +102,7 @@ export default function Reports() {
                 )}
               />
             )}
-          </Card>
+          </div>
         </div>
       </Content>
 
