@@ -166,6 +166,25 @@ export default function Recommendations() {
                         >
                           {product.name}
                         </Text>
+                        {product.effects && product.effects.length > 0 && (
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
+                            {product.effects.slice(0, 4).map((eff) => (
+                              <span
+                                key={eff}
+                                style={{
+                                  fontSize: 11,
+                                  padding: '2px 8px',
+                                  borderRadius: 999,
+                                  background: 'var(--muted)',
+                                  border: '1px solid var(--border)',
+                                  color: 'var(--muted-foreground)',
+                                }}
+                              >
+                                {eff}
+                              </span>
+                            ))}
+                          </div>
+                        )}
                         <Text strong style={{ fontSize: isMobile ? 15 : 17, color: 'var(--primary)', fontWeight: 700 }}>
                           KSh {product.price ? product.price.toLocaleString() : '—'}
                         </Text>

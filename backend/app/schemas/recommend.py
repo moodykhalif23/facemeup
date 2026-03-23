@@ -17,6 +17,7 @@ class ProductRecommendation(BaseModel):
     matched_ingredients: list[str]
     image_url: str | None = None
     category: str | None = None
+    effects: list[str] = []
 
 
 class RecommendResponse(BaseModel):

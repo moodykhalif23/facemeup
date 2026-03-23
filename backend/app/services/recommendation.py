@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.models.product import ProductCatalog
 from app.schemas.recommend import ProductRecommendation
+from app.services.effects import CONDITION_EFFECT_MAP, split_effects_csv
 
 # Ingredient mapping for skin types and conditions
 INGREDIENT_MAP: dict[str, list[str]] = {
@@ -45,17 +46,6 @@ KEYWORD_MAP: dict[str, list[str]] = {
     "Redness": ["soothing", "calm", "redness", "sensitive", "centella"],
 }
 
-EFFECT_MAP: dict[str, list[str]] = {
-    "Acne": ["acne", "oil control", "clean", "pore", "acne treatment"],
-    "Hyperpigmentation": ["bright", "whitening", "light spot", "dark spots", "fade acne print"],
-    "Uneven tone": ["bright", "whitening", "light spot", "tone", "brighten skin color"],
-    "Dehydration": ["moisture", "lock water", "hydration", "water oil balance"],
-    "Wrinkles": ["anti wrinkle", "antifading", "collagen", "eye lines"],
-    "Fine lines": ["anti wrinkle", "collagen", "eye lines"],
-    "Dark spots": ["dark spots", "light spot", "bright"],
-    "Redness": ["soothe", "repair"],
-}
-
 def recommend_products(
     skin_type: str,
     conditions: list[str],
@@ -87,7 +77,7 @@ def recommend_products(
     desired_effects: set[str] = set()
     for condition in conditions:
         if condition != "None detected":
-            desired_effects.update(EFFECT_MAP.get(condition, []))
+            desired_effects.update(CONDITION_EFFECT_MAP.get(condition, []))
     
     # If no specific criteria, use general skincare
     if not desired_ingredients and not desired_keywords:
@@ -115,7 +105,7 @@ def recommend_products(
 
         # Parse ingredients from CSV
         product_ingredients = [ing.strip() for ing in product.ingredients_csv.split(",") if ing.strip()]
-        product_effects = [e.strip().lower() for e in (product.effects_csv or "").split(",") if e.strip()]
+        product_effects = split_effects_csv(product.effects_csv)
         
         # Combine product name, category, and description for keyword matching
         searchable_text = f"{product.name} {product.category or ''} {product.description or ''}".lower()
@@ -137,10 +127,8 @@ def recommend_products(
         # Match effects to conditions
         matched_effects = []
         for desired_eff in desired_effects:
-            for eff in product_effects:
-                if desired_eff.lower() in eff:
-                    matched_effects.append(desired_eff)
-                    break
+            if desired_eff in product_effects:
+                matched_effects.append(desired_eff)
         
         # Calculate score based on ingredient, keyword, and effects matches
         ingredient_score = len(matched_ingredients) / max(len(desired_ingredients), 1) if desired_ingredients else 0
@@ -169,6 +157,7 @@ def recommend_products(
                     matched_ingredients=sorted(set(matched_ingredients + matched_keywords + matched_effects))[:5],
                     image_url=product.image_url,
                     category=product.category,
+                    effects=product_effects,
                 )
             )
     

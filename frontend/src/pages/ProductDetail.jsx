@@ -167,6 +167,11 @@ export default function ProductDetail() {
                       {cat.trim()}
                     </Tag>
                   ))}
+                  {product.suitable_for && (
+                    <Tag color="blue" style={{ margin: 0 }}>
+                      Suitable for: {product.suitable_for}
+                    </Tag>
+                  )}
                 </div>
                 <Title level={3} style={{ margin: '8px 0', wordBreak: 'break-word', color: 'var(--card-foreground)' }}>
                   {product.name}
@@ -203,6 +208,22 @@ export default function ProductDetail() {
                           </li>
                         ))}
                       </ul>
+                    </div>
+                  </>
+                )}
+
+                {product.effects && product.effects.length > 0 && (
+                  <>
+                    <Divider style={{ margin: '16px 0', borderColor: 'var(--border)' }} />
+                    <div style={{ width: '100%', overflow: 'hidden' }}>
+                      <Text strong style={{ fontSize: 15, color: 'var(--card-foreground)' }}>Effects</Text>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 8 }}>
+                        {product.effects.map((eff) => (
+                          <Tag key={eff} style={{ margin: 0 }}>
+                            {eff}
+                          </Tag>
+                        ))}
+                      </div>
                     </div>
                   </>
                 )}

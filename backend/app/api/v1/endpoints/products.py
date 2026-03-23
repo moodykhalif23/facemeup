@@ -10,6 +10,7 @@ from app.core.redis_client import cache_get_json, cache_set_json, get_redis_clie
 from app.models.product import ProductCatalog
 from app.models.user import User
 from app.schemas.products import Product, ProductDetail
+from app.services.effects import normalize_effects, split_effects_csv
 
 
 class ProductUpsert(BaseModel):
@@ -47,7 +48,7 @@ def list_products(db: Session = Depends(get_db)) -> list[Product]:
             image_url=row.image_url,
             category=row.category,
             suitable_for=row.suitable_for,
-            effects=[v for v in (row.effects_csv or "").split(",") if v]
+            effects=split_effects_csv(row.effects_csv),
         )
         for row in rows
     ]
@@ -106,7 +107,7 @@ def get_product(product_id: str, db: Session = Depends(get_db)) -> ProductDetail
         stock=row.stock,
         image_url=row.image_url,
         suitable_for=row.suitable_for,
-        effects=[v for v in (row.effects_csv or "").split(",") if v]
+        effects=split_effects_csv(row.effects_csv),
     )
     
     cache_set_json(cache_key, product.model_dump())
@@ -146,7 +147,7 @@ def create_product(
         ingredients_csv=",".join(payload.ingredients),
         image_url=payload.image_url,
         suitable_for=(payload.suitable_for or "all").lower(),
-        effects_csv=",".join(payload.effects or []),
+        effects_csv=",".join(normalize_effects(payload.effects)),
     )
     db.add(row)
     db.commit()
@@ -188,7 +189,7 @@ def update_product(
     row.ingredients_csv = ",".join(payload.ingredients)
     row.image_url = payload.image_url
     row.suitable_for = (payload.suitable_for or "all").lower()
-    row.effects_csv = ",".join(payload.effects or [])
+    row.effects_csv = ",".join(normalize_effects(payload.effects))
     db.commit()
     db.refresh(row)
     _invalidate_product_cache(sku)
