@@ -15,7 +15,7 @@ import { adminClearCache, adminSeedProducts, adminSyncWooCommerce, adminSyncTrai
 
 const { Text } = Typography;
 
-function ActionCard({ icon, title, description, buttonLabel, buttonProps, onAction, result, danger }) {
+function ActionCard({ icon, title, description, buttonLabel, buttonProps, onAction, result, danger, renderOutcome }) {
   const [loading, setLoading] = useState(false);
   const [outcome, setOutcome] = useState(result ?? null);
 
@@ -24,7 +24,11 @@ function ActionCard({ icon, title, description, buttonLabel, buttonProps, onActi
     setOutcome(null);
     try {
       const res = await onAction();
-      setOutcome({ type: 'success', text: typeof res === 'string' ? res : JSON.stringify(res, null, 2) });
+      setOutcome({
+        type: 'success',
+        text: typeof res === 'string' ? res : JSON.stringify(res, null, 2),
+        data: typeof res === 'string' ? null : res,
+      });
     } catch (err) {
       setOutcome({ type: 'error', text: err.response?.data?.error?.message ?? 'Action failed' });
     } finally {
@@ -63,7 +67,11 @@ function ActionCard({ icon, title, description, buttonLabel, buttonProps, onActi
           {outcome && (
             <Alert
               type={outcome.type}
-              message={<Text style={{ fontSize: 12, whiteSpace: 'pre-wrap', fontFamily: 'monospace' }}>{outcome.text}</Text>}
+              message={renderOutcome && outcome.data ? (
+                renderOutcome(outcome.data)
+              ) : (
+                <Text style={{ fontSize: 12, whiteSpace: 'pre-wrap', fontFamily: 'monospace' }}>{outcome.text}</Text>
+              )}
               style={{ marginTop: 10 }}
               closable
               onClose={() => setOutcome(null)}
@@ -128,9 +136,26 @@ export default function AdminConfig() {
       buttonLabel: 'Sync Training Data',
       onAction: async () => {
         const r = await adminSyncTrainingAssets();
-        const sync = r.data.sync || {};
-        const manifest = r.data.manifest || {};
-        return `Processed ${sync.processed ?? 0}, skipped ${sync.skipped ?? 0}. Manifest rows: ${manifest.rows ?? 0}`;
+        return r.data;
+      },
+      renderOutcome: (data) => {
+        const sync = data?.sync || {};
+        const manifest = data?.manifest || {};
+        return (
+          <div>
+            <Text style={{ display: 'block', fontSize: 12, fontFamily: 'monospace' }}>
+              processed={sync.processed ?? 0}  skipped={sync.skipped ?? 0}
+            </Text>
+            <Text style={{ display: 'block', fontSize: 12, fontFamily: 'monospace' }}>
+              manifest_rows={manifest.rows ?? 0}
+            </Text>
+            {manifest.path && (
+              <Text style={{ display: 'block', fontSize: 12, fontFamily: 'monospace' }}>
+                manifest_path={manifest.path}
+              </Text>
+            )}
+          </div>
+        );
       },
     },
   ];
