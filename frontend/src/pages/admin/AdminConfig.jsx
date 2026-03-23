@@ -104,8 +104,18 @@ export default function AdminConfig() {
       buttonLabel: 'Clear Cache',
       onAction: async () => {
         const r = await adminClearCache();
-        return `Cleared ${r.data.cleared} key(s): ${(r.data.keys ?? []).join(', ') || 'none'}`;
+        return r.data;
       },
+      renderOutcome: (data) => (
+        <div>
+          <Text style={{ display: 'block', fontSize: 12, fontFamily: 'monospace' }}>
+            cleared={data?.cleared ?? 0}
+          </Text>
+          <Text style={{ display: 'block', fontSize: 12, fontFamily: 'monospace' }}>
+            keys={(data?.keys ?? []).length ? (data.keys ?? []).join(', ') : 'none'}
+          </Text>
+        </div>
+      ),
     },
     {
       icon: <CloudSyncOutlined />,
@@ -114,9 +124,18 @@ export default function AdminConfig() {
       buttonLabel: 'Sync Now',
       onAction: async () => {
         const r = await adminSyncWooCommerce();
-        const d = r.data;
-        return `Synced ${d.products_synced} | Added ${d.products_added} | Updated ${d.products_updated} | Failed ${d.products_failed}`;
+        return r.data;
       },
+      renderOutcome: (data) => (
+        <div>
+          <Text style={{ display: 'block', fontSize: 12, fontFamily: 'monospace' }}>
+            synced={data?.products_synced ?? 0}  added={data?.products_added ?? 0}
+          </Text>
+          <Text style={{ display: 'block', fontSize: 12, fontFamily: 'monospace' }}>
+            updated={data?.products_updated ?? 0}  failed={data?.products_failed ?? 0}
+          </Text>
+        </div>
+      ),
     },
     {
       icon: <DatabaseOutlined />,
@@ -126,8 +145,15 @@ export default function AdminConfig() {
       danger: true,
       onAction: async () => {
         const r = await adminSeedProducts();
-        return `Catalog reset — ${r.data.products} products loaded`;
+        return r.data;
       },
+      renderOutcome: (data) => (
+        <div>
+          <Text style={{ display: 'block', fontSize: 12, fontFamily: 'monospace' }}>
+            products_loaded={data?.products ?? 0}
+          </Text>
+        </div>
+      ),
     },
     {
       icon: <ExperimentOutlined />,
