@@ -8,6 +8,7 @@ import {
   GiftOutlined,
   ShopOutlined,
   SettingOutlined,
+  FileTextOutlined,
 } from '@ant-design/icons';
 import AppHeader from '../components/AppHeader';
 
@@ -43,6 +44,14 @@ export default function Home() {
       color: '#7C3AED',
       bg: '#7C3AED15',
       path: '/profile',
+    },
+    {
+      title: 'My Reports',
+      description: 'Comprehensive analysis reports',
+      icon: <FileTextOutlined style={{ fontSize: 32 }} />,
+      color: '#0EA5E9',
+      bg: '#0EA5E915',
+      path: '/reports',
     },
     {
       title: 'Shopping Cart',

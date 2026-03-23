@@ -13,6 +13,7 @@ from app.models.order import LoyaltyLedger, Order
 from app.models.product import ProductCatalog
 from app.models.profile import SkinProfileHistory
 from app.models.user import User, RefreshToken
+from app.services.profile_service import get_profile_history
 
 router = APIRouter()
 
@@ -145,6 +146,62 @@ def delete_user(
     db.delete(user)
     db.commit()
     return {"deleted": user_id}
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Reports
+# ──────────────────────────────────────────────────────────────────────────────
+
+@router.get("/reports")
+def list_reports(
+    db: Session = Depends(get_db),
+    _: User = Depends(require_roles("admin")),
+) -> dict:
+    rows = db.execute(
+        select(SkinProfileHistory, User)
+        .join(User, User.id == SkinProfileHistory.user_id)
+        .order_by(SkinProfileHistory.created_at.desc())
+    ).all()
+
+    reports = []
+    for record, user in rows:
+        reports.append({
+            "id": record.id,
+            "user_id": record.user_id,
+            "email": user.email,
+            "full_name": user.full_name,
+            "skin_type": record.skin_type,
+            "conditions": [v for v in record.conditions_csv.split(",") if v],
+            "confidence": record.confidence,
+            "created_at": record.created_at.isoformat(),
+            "questionnaire": json.loads(record.questionnaire_json) if record.questionnaire_json else None,
+            "skin_type_scores": json.loads(record.skin_type_scores_json) if record.skin_type_scores_json else None,
+            "condition_scores": json.loads(record.condition_scores_json) if record.condition_scores_json else None,
+            "inference_mode": record.inference_mode,
+        })
+
+    return {"reports": reports}
+
+
+@router.get("/reports/{user_id}")
+def get_user_reports(
+    user_id: str,
+    db: Session = Depends(get_db),
+    _: User = Depends(require_roles("admin")),
+) -> dict:
+    user = db.execute(select(User).where(User.id == user_id)).scalar_one_or_none()
+    if not user:
+        raise AppError(404, "not_found", "User not found")
+
+    history = get_profile_history(db, user_id)
+    return {
+        "user": {
+            "id": user.id,
+            "email": user.email,
+            "full_name": user.full_name,
+        },
+        "history": history,
+    }
 
 
 # ──────────────────────────────────────────────────────────────────────────────

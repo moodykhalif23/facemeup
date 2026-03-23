@@ -25,5 +25,15 @@ def analyze(
     
     questionnaire = payload.questionnaire.model_dump() if payload.questionnaire else None
     profile, mode = run_skin_inference(payload.image_base64, landmarks, questionnaire)
-    append_profile(db, current_user.id, profile.skin_type, profile.conditions, profile.confidence)
+    append_profile(
+        db,
+        current_user.id,
+        profile.skin_type,
+        profile.conditions,
+        profile.confidence,
+        questionnaire=questionnaire,
+        skin_type_scores=profile.skin_type_scores,
+        condition_scores=profile.condition_scores,
+        inference_mode=mode,
+    )
     return AnalyzeResponse(profile=profile, inference_mode=mode)

@@ -14,6 +14,7 @@ import {
   MenuUnfoldOutlined,
   SkinOutlined,
   PlusOutlined,
+  FileTextOutlined,
 } from '@ant-design/icons';
 import { logout } from '../store/slices/authSlice';
 
@@ -27,6 +28,7 @@ const NAV_ITEMS = [
   { key: '/admin/users', icon: <UserOutlined />, label: 'Clients' },
   { key: '/admin/orders', icon: <OrderedListOutlined />, label: 'Orders' },
   { key: '/admin/loyalty', icon: <GiftOutlined />, label: 'Loyalty' },
+  { key: '/admin/reports', icon: <FileTextOutlined />, label: 'Reports' },
   { key: '/admin/config', icon: <SettingOutlined />, label: 'Config' },
 ];
 

@@ -8,7 +8,8 @@ import {
   ShoppingCartOutlined,
   ArrowLeftOutlined,
   SunOutlined,
-  MoonOutlined
+  MoonOutlined,
+  FileTextOutlined
 } from '@ant-design/icons';
 import { logout } from '../store/slices/authSlice';
 import { useTheme } from '../contexts/ThemeContext';
@@ -53,6 +54,12 @@ export default function AppHeader({ title, showBack = false }) {
       ),
       label: `Shopping Cart ${cartCount > 0 ? `(${cartCount})` : ''}`,
       onClick: () => navigate('/cart'),
+    },
+    {
+      key: 'reports',
+      icon: <FileTextOutlined />,
+      label: 'My Reports',
+      onClick: () => navigate('/reports'),
     },
     {
       key: 'loyalty',

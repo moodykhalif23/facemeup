@@ -19,7 +19,14 @@ def sync_bitmoji(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ) -> BitmojiSyncResponse:
-    append_profile(db, current_user.id, payload.skin_type, payload.conditions, confidence=0.95)
+    append_profile(
+        db,
+        current_user.id,
+        payload.skin_type,
+        payload.conditions,
+        confidence=0.95,
+        inference_mode="bitmoji_sync",
+    )
     return BitmojiSyncResponse(synced=True)
 
 

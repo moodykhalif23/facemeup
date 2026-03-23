@@ -20,6 +20,8 @@ import AdminUsers from './pages/admin/AdminUsers';
 import AdminOrders from './pages/admin/AdminOrders';
 import AdminLoyalty from './pages/admin/AdminLoyalty';
 import AdminConfig from './pages/admin/AdminConfig';
+import AdminReports from './pages/admin/AdminReports';
+import Reports from './pages/Reports';
 
 const { Content } = Layout;
 
@@ -123,6 +125,14 @@ function App() {
                 </PrivateRoute>
               }
             />
+            <Route
+              path="/reports"
+              element={
+                <PrivateRoute>
+                  <Reports />
+                </PrivateRoute>
+              }
+            />
 
             {/* Admin routes */}
             <Route
@@ -152,6 +162,10 @@ function App() {
             <Route
               path="/admin/config"
               element={<AdminRoute><AdminConfig /></AdminRoute>}
+            />
+            <Route
+              path="/admin/reports"
+              element={<AdminRoute><AdminReports /></AdminRoute>}
             />
           </Routes>
         </Content>

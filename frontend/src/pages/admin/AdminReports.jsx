@@ -1,0 +1,253 @@
+import { useEffect, useMemo, useState } from 'react';
+import {
+  Table, Card, Typography, Space, Input, Tag, Avatar, Button, Drawer, Divider, Progress, App,
+} from 'antd';
+import { SearchOutlined, EyeOutlined, UserOutlined } from '@ant-design/icons';
+import AdminLayout from '../../components/AdminLayout';
+import { adminGetReports } from '../../services/api';
+
+const { Text } = Typography;
+
+const formatDateTime = (value) => {
+  if (!value) return '—';
+  const d = new Date(value);
+  return d.toLocaleString();
+};
+
+const prettyGender = (value) => {
+  if (!value) return '—';
+  return value.charAt(0).toUpperCase() + value.slice(1);
+};
+
+export default function AdminReports() {
+  const { message } = App.useApp();
+  const [reports, setReports] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [selected, setSelected] = useState(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  const load = () => {
+    setLoading(true);
+    adminGetReports()
+      .then((r) => setReports(r.data.reports || []))
+      .catch(() => message.error('Failed to load reports'))
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => { load(); }, []);
+
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return reports;
+    return reports.filter((r) => {
+      const target = [
+        r.email,
+        r.full_name,
+        r.skin_type,
+        ...(r.conditions || []),
+        r.inference_mode,
+      ].filter(Boolean).join(' ').toLowerCase();
+      return target.includes(q);
+    });
+  }, [reports, search]);
+
+  const columns = [
+    {
+      title: 'Customer',
+      key: 'customer',
+      render: (_, r) => (
+        <Space>
+          <Avatar size={32} icon={<UserOutlined />} style={{ background: 'var(--primary)' }} />
+          <div>
+            <Text style={{ display: 'block', color: 'var(--foreground)', fontSize: 13 }}>
+              {r.full_name || 'Unknown'}
+            </Text>
+            <Text style={{ fontSize: 12, color: 'var(--muted-foreground)' }}>{r.email}</Text>
+          </div>
+        </Space>
+      ),
+    },
+    {
+      title: 'Gender',
+      dataIndex: 'questionnaire',
+      key: 'gender',
+      width: 90,
+      render: (q) => prettyGender(q?.gender),
+      responsive: ['sm'],
+    },
+    {
+      title: 'Age',
+      dataIndex: 'questionnaire',
+      key: 'age',
+      width: 70,
+      render: (q) => q?.age ?? '—',
+      responsive: ['sm'],
+    },
+    {
+      title: 'Skin Type',
+      dataIndex: 'skin_type',
+      key: 'skin_type',
+      width: 120,
+      render: (v) => <Tag color="blue">{v}</Tag>,
+    },
+    {
+      title: 'Conditions',
+      dataIndex: 'conditions',
+      key: 'conditions',
+      render: (list) => (
+        <Space size={[4, 4]} wrap>
+          {(list || []).length > 0 ? list.map((c) => <Tag key={c}>{c}</Tag>) : <Text type="secondary">—</Text>}
+        </Space>
+      ),
+    },
+    {
+      title: 'Confidence',
+      dataIndex: 'confidence',
+      key: 'confidence',
+      width: 120,
+      render: (v) => (
+        <Progress percent={Math.round((v ?? 0) * 100)} size="small" strokeColor="var(--primary)" />
+      ),
+    },
+    {
+      title: 'Test Time',
+      dataIndex: 'created_at',
+      key: 'created_at',
+      width: 160,
+      render: (v) => formatDateTime(v),
+      responsive: ['md'],
+    },
+    {
+      title: 'Action',
+      key: 'action',
+      width: 80,
+      render: (_, r) => (
+        <Button
+          type="link"
+          icon={<EyeOutlined />}
+          onClick={() => { setSelected(r); setDrawerOpen(true); }}
+        >
+          View
+        </Button>
+      ),
+    },
+  ];
+
+  return (
+    <AdminLayout>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, gap: 12, flexWrap: 'wrap' }}>
+        <Input
+          prefix={<SearchOutlined />}
+          placeholder="Search by name, email, skin type, condition..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          allowClear
+          style={{ width: '100%', maxWidth: 420 }}
+        />
+      </div>
+
+      <div style={{ background: 'var(--card)', borderRadius: 10, border: '1px solid var(--border)', overflow: 'hidden' }}>
+        <Table
+          dataSource={filtered}
+          columns={columns}
+          rowKey="id"
+          loading={loading}
+          size="small"
+          pagination={{ pageSize: 20 }}
+          style={{ background: 'transparent' }}
+        />
+      </div>
+
+      <Drawer
+        title="Report Details"
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        width={520}
+        styles={{
+          body: { background: 'var(--background)' },
+          header: { background: 'var(--card)', borderBottom: '1px solid var(--border)' },
+        }}
+      >
+        {selected && (
+          <div>
+            <Card style={{ border: '1px solid var(--border)', background: 'var(--card)', borderRadius: 10 }}>
+              <Space align="start">
+                <Avatar size={48} icon={<UserOutlined />} style={{ background: 'var(--primary)' }} />
+                <div>
+                  <Text style={{ display: 'block', color: 'var(--foreground)', fontSize: 16 }} strong>
+                    {selected.full_name || 'Unknown'}
+                  </Text>
+                  <Text style={{ color: 'var(--muted-foreground)' }}>{selected.email}</Text>
+                  <div style={{ marginTop: 6 }}>
+                    <Tag color="blue">{selected.skin_type}</Tag>
+                    {selected.questionnaire?.gender && (
+                      <Tag>{prettyGender(selected.questionnaire.gender)}</Tag>
+                    )}
+                    {selected.questionnaire?.age && (
+                      <Tag>Age {selected.questionnaire.age}</Tag>
+                    )}
+                  </div>
+                </div>
+              </Space>
+              <Divider style={{ borderColor: 'var(--border)' }} />
+              <Text style={{ color: 'var(--muted-foreground)' }}>Tested at {formatDateTime(selected.created_at)}</Text>
+            </Card>
+
+            <Divider style={{ borderColor: 'var(--border)' }} />
+
+            <Card style={{ border: '1px solid var(--border)', background: 'var(--card)', borderRadius: 10 }}>
+              <Text strong style={{ color: 'var(--foreground)' }}>Conditions</Text>
+              <div style={{ marginTop: 8, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                {(selected.conditions || []).length > 0
+                  ? selected.conditions.map((c) => <Tag key={c}>{c}</Tag>)
+                  : <Text type="secondary">None detected</Text>}
+              </div>
+              <Divider style={{ borderColor: 'var(--border)' }} />
+              <Text strong style={{ color: 'var(--foreground)' }}>Confidence</Text>
+              <Progress percent={Math.round((selected.confidence ?? 0) * 100)} strokeColor="var(--primary)" />
+            </Card>
+
+            {(selected.skin_type_scores || selected.condition_scores) && (
+              <>
+                <Divider style={{ borderColor: 'var(--border)' }} />
+                <Card style={{ border: '1px solid var(--border)', background: 'var(--card)', borderRadius: 10 }}>
+                  <Text strong style={{ color: 'var(--foreground)' }}>Score Breakdown</Text>
+                  <div style={{ marginTop: 10 }}>
+                    {selected.skin_type_scores && (
+                      <>
+                        <Text style={{ color: 'var(--muted-foreground)' }}>Skin Type Scores</Text>
+                        <div style={{ marginTop: 6 }}>
+                          {Object.entries(selected.skin_type_scores).map(([k, v]) => (
+                            <div key={k} style={{ marginBottom: 6 }}>
+                              <Text style={{ fontSize: 12, color: 'var(--foreground)' }}>{k}</Text>
+                              <Progress percent={Math.round(v * 100)} size="small" />
+                            </div>
+                          ))}
+                        </div>
+                      </>
+                    )}
+                    {selected.condition_scores && (
+                      <>
+                        <Divider style={{ borderColor: 'var(--border)' }} />
+                        <Text style={{ color: 'var(--muted-foreground)' }}>Condition Scores</Text>
+                        <div style={{ marginTop: 6 }}>
+                          {Object.entries(selected.condition_scores).map(([k, v]) => (
+                            <div key={k} style={{ marginBottom: 6 }}>
+                              <Text style={{ fontSize: 12, color: 'var(--foreground)' }}>{k}</Text>
+                              <Progress percent={Math.round(v * 100)} size="small" />
+                            </div>
+                          ))}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </Card>
+              </>
+            )}
+          </div>
+        )}
+      </Drawer>
+    </AdminLayout>
+  );
+}
