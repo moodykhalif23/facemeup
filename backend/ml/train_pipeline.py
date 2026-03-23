@@ -288,6 +288,8 @@ def build_label_index(meta_path: Path, all_imgs: list) -> dict:
         label_index.update(user_labels)
         print(f"\n  ✓ Added user-captured images: {len(user_labels)}")
 
+    export_training_manifest_csv(label_index, DATA_DIR / "training_manifest.csv")
+
     # Distribution
     from collections import Counter
     skin_dist = Counter(v["skin_type"] for v in label_index.values())
@@ -361,6 +363,41 @@ def _load_user_captured_labels(data_dir: Path) -> dict:
                 "source": "user_captured",
             }
     return label_index
+
+
+def export_training_manifest_csv(label_index: dict, output_path: Path) -> None:
+    """
+    Export a unified manifest of all training items (HAM10000 + user-captured)
+    for auditability and future feature-store joins.
+    """
+    fields = [
+        "image_path",
+        "skin_type",
+        "condition",
+        "skin_idx",
+        "cond_idx",
+        "source",
+        "questionnaire",
+    ]
+    rows = []
+    for v in label_index.values():
+        rows.append(
+            {
+                "image_path": str(v.get("path")),
+                "skin_type": v.get("skin_type"),
+                "condition": v.get("condition"),
+                "skin_idx": v.get("skin_idx"),
+                "cond_idx": v.get("cond_idx"),
+                "source": v.get("source", "ham10000"),
+                "questionnaire": json.dumps(v.get("questionnaire") or {}, ensure_ascii=False),
+            }
+        )
+
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(output_path, "w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=fields)
+        writer.writeheader()
+        writer.writerows(rows)
 
 
 # ---------------------------------------------------------------------------
