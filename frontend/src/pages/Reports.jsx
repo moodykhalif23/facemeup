@@ -58,7 +58,7 @@ export default function Reports() {
       <Content style={{ padding: '16px' }}>
         <div style={{ maxWidth: 960, margin: '0 auto' }}>
           <div>
-            <div style={{ marginBottom: 12 }}>
+            <div style={{ marginBottom: 12, display: 'flex', justifyContent: 'center' }}>
               <RangePicker onChange={(val) => setDateRange(val)} />
             </div>
             {loading ? (
@@ -72,15 +72,19 @@ export default function Reports() {
             ) : (
               <div
                 style={{
-                  maxHeight: 'calc(100vh - 220px)',
+                  maxHeight: 'calc(100vh - 210px)',
                   overflowY: 'auto',
                   paddingRight: 4,
+                  paddingBottom: 0,
+                  minHeight: 'calc(100vh - 210px)',
                 }}
               >
                 <List
                   dataSource={listItems}
+                  style={{ background: 'transparent' }}
                   renderItem={(item) => (
                     <List.Item
+                      style={{ borderBottom: '2px solid var(--border)' }}
                       actions={[
                         <Button
                           key="view"
