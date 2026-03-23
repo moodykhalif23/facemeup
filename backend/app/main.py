@@ -10,7 +10,7 @@ from app.core.database import SessionLocal
 from app.core.errors import register_exception_handlers
 from app.services.bootstrap import seed_products
 from app.services.seed_admin import seed_admin
-from app.services.training_scheduler import process_user_captured_images
+from app.services.training_scheduler import process_user_captured_images, refresh_training_assets
 
 
 logger = logging.getLogger(__name__)
@@ -35,6 +35,13 @@ async def lifespan(_: FastAPI):
         trigger="interval",
         hours=6,
         id="training_data_sync",
+        replace_existing=True,
+    )
+    scheduler.add_job(
+        refresh_training_assets,
+        trigger="interval",
+        hours=24,
+        id="training_manifest_refresh",
         replace_existing=True,
     )
     scheduler.start()

@@ -12,6 +12,7 @@ from datetime import datetime
 
 logger = logging.getLogger(__name__)
 from app.services.training_metadata import export_training_metadata_csv
+from app.services.training_manifest import refresh_training_manifest
 
 # Base paths (relative to the backend/ directory)
 USER_CAPTURED_DIR = os.path.join(
@@ -88,4 +89,21 @@ def process_user_captured_images() -> dict:
         )
     except Exception as exc:
         logger.warning("Failed to export user metadata CSV: %s", exc)
+    try:
+        refresh_training_manifest()
+    except Exception as exc:
+        logger.warning("Failed to refresh training manifest: %s", exc)
     return {"processed": processed, "skipped": skipped}
+
+
+def refresh_training_assets() -> dict:
+    """
+    Periodic manifest refresh without moving files.
+    """
+    result = {"manifest_rows": 0}
+    try:
+        manifest = refresh_training_manifest()
+        result["manifest_rows"] = manifest.get("rows", 0)
+    except Exception as exc:
+        logger.warning("Failed to refresh training manifest: %s", exc)
+    return result
