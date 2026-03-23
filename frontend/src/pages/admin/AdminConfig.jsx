@@ -11,7 +11,7 @@ import {
   ShopOutlined,
 } from '@ant-design/icons';
 import AdminLayout from '../../components/AdminLayout';
-import { adminClearCache, adminSeedProducts, adminSyncWooCommerce } from '../../services/api';
+import { adminClearCache, adminSeedProducts, adminSyncWooCommerce, adminSyncTrainingAssets } from '../../services/api';
 
 const { Text } = Typography;
 
@@ -121,6 +121,18 @@ export default function AdminConfig() {
         return `Catalog reset — ${r.data.products} products loaded`;
       },
     },
+    {
+      icon: <ExperimentOutlined />,
+      title: 'Sync Training Data + Refresh Manifest',
+      description: 'Move user-captured images into training data and rebuild the unified training manifest CSV.',
+      buttonLabel: 'Sync Training Data',
+      onAction: async () => {
+        const r = await adminSyncTrainingAssets();
+        const sync = r.data.sync || {};
+        const manifest = r.data.manifest || {};
+        return `Processed ${sync.processed ?? 0}, skipped ${sync.skipped ?? 0}. Manifest rows: ${manifest.rows ?? 0}`;
+      },
+    },
   ];
 
   const endpoints = [
@@ -138,6 +150,7 @@ export default function AdminConfig() {
     { method: 'POST', path: '/products/admin/seed', description: 'Seed default products' },
     { method: 'POST', path: '/sync/woocommerce', description: 'Sync from WooCommerce' },
     { method: 'POST', path: '/loyalty/earn', description: 'Award / deduct points' },
+    { method: 'POST', path: '/admin/training/sync', description: 'Sync training images + refresh manifest' },
   ];
 
   const METHOD_COLOR = { GET: 'green', POST: 'blue', PUT: 'orange', DELETE: 'red' };

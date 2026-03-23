@@ -4,7 +4,6 @@ import {
   UserOutlined,
   ShoppingOutlined,
   OrderedListOutlined,
-  DollarOutlined,
   ExperimentOutlined,
 } from '@ant-design/icons';
 import ReactECharts from 'echarts-for-react';
@@ -83,11 +82,11 @@ export default function AdminDashboard() {
               gap: 16,
               marginBottom: 24,
               gridTemplateColumns: screens.xl
-                ? 'repeat(5, minmax(0, 1fr))'
+                ? 'repeat(4, minmax(0, 1fr))'
                 : screens.lg
-                  ? 'repeat(3, minmax(0, 1fr))'
+                  ? 'repeat(2, minmax(0, 1fr))'
                   : screens.md
-                    ? 'repeat(3, minmax(0, 1fr))'
+                    ? 'repeat(2, minmax(0, 1fr))'
                     : screens.sm
                       ? 'repeat(2, minmax(0, 1fr))'
                       : 'repeat(1, minmax(0, 1fr))',
@@ -97,13 +96,6 @@ export default function AdminDashboard() {
               { title: 'Total Users', value: stats?.total_users, icon: <UserOutlined />, color: '#B45309' },
               { title: 'Products', value: stats?.total_products, icon: <ShoppingOutlined />, color: '#0891b2' },
               { title: 'Orders', value: stats?.total_orders, icon: <OrderedListOutlined />, color: '#7c3aed' },
-              {
-                title: 'Revenue',
-                value: `KES ${(stats?.total_revenue ?? 0).toLocaleString()}`,
-                icon: <DollarOutlined />,
-                color: '#059669',
-                isString: true,
-              },
               { title: 'Skin Analyses', value: stats?.total_analyses, icon: <ExperimentOutlined />, color: '#db2777' },
             ].map((s) => (
               <Card

@@ -85,5 +85,6 @@ export const adminBulkDeleteProducts = () => api.delete('/products/admin/bulk');
 export const adminSyncWooCommerce = () => api.post('/sync/woocommerce');
 export const syncWooCommerceWcIds = () => api.post('/sync/woocommerce/wc-id');
 export const adminClearCache = () => api.post('/admin/cache/clear');
+export const adminSyncTrainingAssets = () => api.post('/admin/training/sync');
 
 export default api;
