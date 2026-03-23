@@ -101,14 +101,16 @@ export default function AdminLoyalty() {
     {
       title: 'Actions',
       key: 'actions',
-      width: 180,
+      width: 140,
+      align: 'center',
       render: (_, record) => (
-        <Space wrap>
+        <Space direction="vertical" size={6} align="center" style={{ width: '100%' }}>
           <Button
             size="small"
             type="primary"
             icon={<PlusOutlined />}
             onClick={() => openModal(record, true)}
+            style={{ paddingInline: 10 }}
           >
             Award
           </Button>
@@ -117,6 +119,7 @@ export default function AdminLoyalty() {
             danger
             icon={<MinusOutlined />}
             onClick={() => openModal(record, false)}
+            style={{ paddingInline: 10 }}
           >
             Deduct
           </Button>
@@ -151,7 +154,7 @@ export default function AdminLoyalty() {
 
       {/* Tier reference */}
       <div style={{
-        display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap',
+        display: 'flex', gap: 10, marginBottom: 16, flexWrap: 'wrap',
       }}>
         {[
           { label: 'Bronze', range: '0–499 pts', color: '#92400e' },
@@ -163,12 +166,11 @@ export default function AdminLoyalty() {
             background: 'var(--card)',
             border: `1px solid ${t.color}44`,
             borderRadius: 8,
-            padding: '8px 16px',
-            display: 'flex',
+            padding: '6px 12px',
+            display: 'inline-flex',
             alignItems: 'center',
             gap: 8,
-            flex: '1 1 180px',
-            minWidth: 160,
+            maxWidth: '100%',
           }}>
             <div style={{ width: 10, height: 10, borderRadius: '50%', background: t.color }} />
             <Text strong style={{ color: t.color, fontSize: 13 }}>{t.label}</Text>
