@@ -55,9 +55,9 @@ export default function Profile() {
               <Title level={4} style={{ color: 'var(--card-foreground)', marginBottom: 16 }}>
                 Analysis History
               </Title>
-              {history.length > 0 ? (
+              {(profileData?.history?.length || history.length) > 0 ? (
                 <Timeline>
-                  {history.map((item, index) => (
+                  {(profileData?.history || history).map((item, index) => (
                     <Timeline.Item
                       key={index}
                       dot={<ClockCircleOutlined style={{ color: 'var(--primary)' }} />}
@@ -69,15 +69,15 @@ export default function Profile() {
                         borderRadius: 8,
                       }}>
                         <Text strong style={{ color: 'var(--card-foreground)' }}>Skin Type: </Text>
-                        <Tag color="orange">{item.profile?.skin_type}</Tag>
+                        <Tag color="orange">{item.skin_type ?? item.profile?.skin_type}</Tag>
                         <br />
                         <Text strong style={{ color: 'var(--card-foreground)' }}>Conditions: </Text>
-                        {item.profile?.conditions?.map((c, i) => (
+                        {(item.conditions ?? item.profile?.conditions ?? []).map((c, i) => (
                           <Tag key={i} color="orange">{c}</Tag>
                         ))}
                         <br />
                         <Text style={{ color: 'var(--muted-foreground)', fontSize: 13 }}>
-                          {new Date(item.timestamp || Date.now()).toLocaleDateString()}
+                          {new Date(item.timestamp || item.created_at || Date.now()).toLocaleDateString()}
                         </Text>
                       </Card>
                     </Timeline.Item>
