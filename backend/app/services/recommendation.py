@@ -23,7 +23,9 @@ INGREDIENT_MAP: dict[str, list[str]] = {
     "Fine lines": ["Retinol", "Peptides", "Vitamin C", "Hyaluronic Acid"],
     "Wrinkles": ["Retinol", "Peptides", "Vitamin C", "Collagen"],
     "Dark spots": ["Vitamin C", "Alpha Arbutin", "Kojic Acid", "Niacinamide"],
-    "Redness": ["Centella", "Niacinamide", "Aloe Vera", "Green Tea"],
+    # Redness / sensitivity — spec §1 lists this as a detectable condition
+    "Redness": ["Centella", "Niacinamide", "Aloe Vera", "Green Tea", "Panthenol"],
+    "Sensitivity": ["Panthenol", "Ceramides", "Aloe Vera", "Centella", "Chamomile"],
 }
 
 # Keywords to match in product names/descriptions for each skin type/condition
@@ -43,7 +45,8 @@ KEYWORD_MAP: dict[str, list[str]] = {
     "Fine lines": ["anti-aging", "retinol", "wrinkle", "firm", "peptide"],
     "Wrinkles": ["anti-aging", "retinol", "wrinkle", "firm", "collagen"],
     "Dark spots": ["bright", "whitening", "dark spot", "pigment", "vitamin c"],
-    "Redness": ["soothing", "calm", "redness", "sensitive", "centella"],
+    "Redness": ["soothing", "calm", "redness", "sensitive", "centella", "aloe"],
+    "Sensitivity": ["gentle", "soothing", "calm", "sensitive", "aloe", "fragrance-free"],
 }
 
 def recommend_products(

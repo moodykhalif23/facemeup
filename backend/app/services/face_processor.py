@@ -4,6 +4,15 @@ from typing import List, Dict, Tuple, Optional
 import base64
 
 
+# MediaPipe Face Mesh landmark indices for key features
+# These are stable across MediaPipe versions
+_LM_LEFT_EYE_CENTER = 33    # left eye outer corner (from viewer's perspective)
+_LM_RIGHT_EYE_CENTER = 263  # right eye outer corner
+_LM_NOSE_TIP = 1
+_LM_MOUTH_LEFT = 61
+_LM_MOUTH_RIGHT = 291
+
+
 class FaceLandmark:
     """Represents a single face landmark point"""
     def __init__(self, x: float, y: float, z: float = 0.0):
@@ -13,211 +22,226 @@ class FaceLandmark:
 
 
 class FaceProcessor:
-    """Process face images with MediaPipe landmarks"""
-    
+    """Process face images with MediaPipe landmarks.
+
+    Pipeline (per the spec):
+      1. Face alignment  — rotate image so eyes are horizontal
+      2. Illumination normalization — CLAHE + white-balance correction in LAB space
+      3. Face extraction  — crop bounding box with padding
+      4. Resize + normalize — model-ready float32 array
+    """
+
     def __init__(self):
-        self.padding = 0.2  # 20% padding around face
-        self.target_size = (224, 224)  # Model input size
-    
+        self.padding = 0.2        # 20% padding around face bounding box
+        self.target_size = (224, 224)
+
+    # ------------------------------------------------------------------
+    # 1.  Illumination normalization (spec §3.3)
+    # ------------------------------------------------------------------
+    def normalize_illumination(self, image: np.ndarray) -> np.ndarray:
+        """Apply CLAHE + grey-world white-balance in LAB colour space.
+
+        This is the single biggest quality improvement for skin-AI models.
+        - Converts BGR → LAB
+        - Applies CLAHE only to the L (luminance) channel to improve contrast
+          without amplifying colour noise (Contrast Limited AHE)
+        - Grey-world white-balance on A and B channels to remove colour casts
+          from phone sensors / mixed lighting
+        - Converts back to BGR
+        """
+        if image is None or image.size == 0:
+            return image
+
+        # BGR → LAB
+        lab = cv2.cvtColor(image, cv2.COLOR_BGR2LAB)
+        l_ch, a_ch, b_ch = cv2.split(lab)
+
+        # CLAHE on L channel only (clip_limit=2.0 keeps noise under control)
+        clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+        l_eq = clahe.apply(l_ch)
+
+        # Grey-world white balance: shift A and B channels toward neutral 128
+        a_mean = float(np.mean(a_ch))
+        b_mean = float(np.mean(b_ch))
+        a_shift = int((128 - a_mean) * 0.5)
+        b_shift = int((128 - b_mean) * 0.5)
+        a_balanced = np.clip(a_ch.astype(np.int32) + a_shift, 0, 255).astype(np.uint8)
+        b_balanced = np.clip(b_ch.astype(np.int32) + b_shift, 0, 255).astype(np.uint8)
+
+        # Merge back and convert LAB → BGR
+        lab_eq = cv2.merge([l_eq, a_balanced, b_balanced])
+        return cv2.cvtColor(lab_eq, cv2.COLOR_LAB2BGR)
+
+    # ------------------------------------------------------------------
+    # 2.  Face alignment (spec §3.2)
+    # ------------------------------------------------------------------
+    def align_face(self, image: np.ndarray, landmarks: List[Dict]) -> np.ndarray:
+        """Rotate image so that the eye-line is horizontal.
+
+        Uses left-eye and right-eye landmark indices to compute the angle
+        between the two eye centres, then rotates the whole image around
+        its centre to correct head-tilt bias.
+        """
+        if not landmarks or len(landmarks) <= max(_LM_LEFT_EYE_CENTER, _LM_RIGHT_EYE_CENTER):
+            return image
+
+        h, w = image.shape[:2]
+        lm = landmarks
+
+        lx = lm[_LM_LEFT_EYE_CENTER]['x'] * w
+        ly = lm[_LM_LEFT_EYE_CENTER]['y'] * h
+        rx = lm[_LM_RIGHT_EYE_CENTER]['x'] * w
+        ry = lm[_LM_RIGHT_EYE_CENTER]['y'] * h
+
+        dx = rx - lx
+        dy = ry - ly
+        angle = float(np.degrees(np.arctan2(dy, dx)))
+
+        # Only correct if angle is meaningful (> 1°) and not extreme (> 30° = bad detection)
+        if abs(angle) < 1.0 or abs(angle) > 30.0:
+            return image
+
+        center = (w / 2.0, h / 2.0)
+        M = cv2.getRotationMatrix2D(center, angle, 1.0)
+        aligned = cv2.warpAffine(image, M, (w, h), flags=cv2.INTER_LINEAR,
+                                  borderMode=cv2.BORDER_REFLECT_101)
+        return aligned
+
+    # ------------------------------------------------------------------
+    # 3.  Face region extraction (spec §3.4 + §4)
+    # ------------------------------------------------------------------
     def extract_face_region(
-        self, 
-        image: np.ndarray, 
-        landmarks: Optional[List[Dict]] = None
+        self,
+        image: np.ndarray,
+        landmarks: Optional[List[Dict]] = None,
     ) -> np.ndarray:
-        """
-        Extract and normalize face region from landmarks
-        
-        Args:
-            image: Input image as numpy array
-            landmarks: List of landmark dicts with x, y, z coordinates (normalized 0-1)
-        
-        Returns:
-            Cropped and normalized face region
-        """
+        """Crop the face bounding box (with padding) from landmark coordinates."""
         if landmarks is None or len(landmarks) == 0:
-            # No landmarks - use center crop
             return self._center_crop(image)
-        
-        # Convert landmarks to FaceLandmark objects
-        face_landmarks = [
-            FaceLandmark(lm['x'], lm['y'], lm.get('z', 0.0)) 
-            for lm in landmarks
-        ]
-        
-        # Get face bounding box
-        x_coords = [lm.x for lm in face_landmarks]
-        y_coords = [lm.y for lm in face_landmarks]
-        
+
+        x_coords = [lm['x'] for lm in landmarks]
+        y_coords = [lm['y'] for lm in landmarks]
+
         x_min, x_max = min(x_coords), max(x_coords)
         y_min, y_max = min(y_coords), max(y_coords)
-        
-        # Add padding
-        width = x_max - x_min
+
+        width  = x_max - x_min
         height = y_max - y_min
-        
-        x_min = max(0, x_min - width * self.padding)
-        x_max = min(1, x_max + width * self.padding)
-        y_min = max(0, y_min - height * self.padding)
-        y_max = min(1, y_max + height * self.padding)
-        
-        # Convert to pixel coordinates
+
+        x_min = max(0.0, x_min - width  * self.padding)
+        x_max = min(1.0, x_max + width  * self.padding)
+        y_min = max(0.0, y_min - height * self.padding)
+        y_max = min(1.0, y_max + height * self.padding)
+
         h, w = image.shape[:2]
         x1, x2 = int(x_min * w), int(x_max * w)
         y1, y2 = int(y_min * h), int(y_max * h)
-        
-        # Crop face region
+
         face = image[y1:y2, x1:x2]
-        
-        # Ensure we got a valid crop
         if face.size == 0:
             return self._center_crop(image)
-        
         return face
-    
+
     def _center_crop(self, image: np.ndarray) -> np.ndarray:
-        """Fallback: center crop if no landmarks available"""
+        """Fallback: square center crop when no landmarks are available."""
         h, w = image.shape[:2]
         size = min(h, w)
-        
         y1 = (h - size) // 2
         x1 = (w - size) // 2
-        
-        return image[y1:y1+size, x1:x1+size]
-    
+        return image[y1:y1 + size, x1:x1 + size]
+
+    # ------------------------------------------------------------------
+    # 4.  Resize + normalize
+    # ------------------------------------------------------------------
     def preprocess_for_model(self, face_image: np.ndarray) -> np.ndarray:
-        """
-        Preprocess face image for model input
-        
-        Args:
-            face_image: Cropped face region
-        
-        Returns:
-            Preprocessed image ready for model
-        """
-        # Resize to model input size
+        """Resize to target size, ensure RGB channel order, normalize to [0, 1]."""
         resized = cv2.resize(face_image, self.target_size, interpolation=cv2.INTER_AREA)
-        
-        # Convert to RGB if needed
+
         if len(resized.shape) == 2:
             resized = cv2.cvtColor(resized, cv2.COLOR_GRAY2RGB)
         elif resized.shape[2] == 4:
             resized = cv2.cvtColor(resized, cv2.COLOR_BGRA2RGB)
-        
-        # Normalize to [0, 1]
-        normalized = resized.astype(np.float32) / 255.0
-        
-        return normalized
-    
+        else:
+            # OpenCV loads as BGR; model expects RGB
+            resized = cv2.cvtColor(resized, cv2.COLOR_BGR2RGB)
+
+        return resized.astype(np.float32) / 255.0
+
+    # ------------------------------------------------------------------
+    # Public helpers
+    # ------------------------------------------------------------------
     def decode_base64_image(self, base64_string: str) -> np.ndarray:
-        """Decode base64 image string to numpy array"""
+        """Decode base64 image string to numpy array (BGR)."""
         img_bytes = base64.b64decode(base64_string)
         img_array = np.frombuffer(img_bytes, dtype=np.uint8)
         image = cv2.imdecode(img_array, cv2.IMREAD_COLOR)
-        
         if image is None:
             raise ValueError("Failed to decode image")
-        
         return image
-    
+
     def process_image_with_landmarks(
-        self, 
-        base64_image: str, 
-        landmarks: Optional[List[Dict]] = None
+        self,
+        base64_image: str,
+        landmarks: Optional[List[Dict]] = None,
     ) -> np.ndarray:
+        """Full preprocessing pipeline: decode → align → normalise → crop → resize.
+
+        Steps per spec:
+          §3.1  Face detection   — handled by MediaPipe on the frontend
+          §3.2  Face alignment   — rotate to horizontal eye-line
+          §3.3  Illumination     — CLAHE + grey-world white balance in LAB space
+          §3.4  Skin segmentation — (U-Net not yet integrated; landmark crop used)
+          §4    Patch extraction — bounding-box crop of full face region
         """
-        Complete pipeline: decode, extract face, preprocess
-        
-        Args:
-            base64_image: Base64 encoded image string
-            landmarks: Optional face landmarks from MediaPipe
-        
-        Returns:
-            Preprocessed image ready for model inference
-        """
-        # Decode image
         image = self.decode_base64_image(base64_image)
-        
-        # Extract face region
+
+        # Step 1: align face orientation using eye landmarks
+        if landmarks:
+            image = self.align_face(image, landmarks)
+
+        # Step 2: illumination normalization (CLAHE + white balance)
+        image = self.normalize_illumination(image)
+
+        # Step 3: crop face region
         face = self.extract_face_region(image, landmarks)
-        
-        # Preprocess for model
-        processed = self.preprocess_for_model(face)
-        
-        return processed
+
+        # Step 4: resize + normalize for model
+        return self.preprocess_for_model(face)
     
     def get_face_quality_score(self, landmarks: List[Dict]) -> float:
-        """
-        Calculate quality score based on face landmarks
-        Higher score = better quality for analysis
-        
-        Args:
-            landmarks: Face landmarks from MediaPipe
-        
-        Returns:
-            Quality score between 0 and 1
-        """
+        """Quality score 0–1 based on face size and centering in frame."""
         if not landmarks or len(landmarks) < 468:
             return 0.0
-        
-        # Convert to FaceLandmark objects
-        face_landmarks = [
-            FaceLandmark(lm['x'], lm['y'], lm.get('z', 0.0)) 
-            for lm in landmarks
-        ]
-        
-        # Check face size (larger is better)
-        x_coords = [lm.x for lm in face_landmarks]
-        y_coords = [lm.y for lm in face_landmarks]
-        
-        face_width = max(x_coords) - min(x_coords)
+
+        x_coords = [lm['x'] for lm in landmarks]
+        y_coords = [lm['y'] for lm in landmarks]
+
+        face_width  = max(x_coords) - min(x_coords)
         face_height = max(y_coords) - min(y_coords)
-        
-        size_score = min(1.0, (face_width + face_height) / 1.0)
-        
-        # Check face centering
+        size_score  = min(1.0, (face_width + face_height) / 1.0)
+
         center_x = (max(x_coords) + min(x_coords)) / 2
         center_y = (max(y_coords) + min(y_coords)) / 2
-        
-        center_score = 1.0 - abs(center_x - 0.5) - abs(center_y - 0.5)
-        center_score = max(0.0, center_score)
-        
-        # Combined score
-        quality_score = (size_score * 0.6 + center_score * 0.4)
-        
-        return quality_score
-    
+        center_score = max(0.0, 1.0 - abs(center_x - 0.5) - abs(center_y - 0.5))
+
+        return size_score * 0.6 + center_score * 0.4
+
     def extract_face_features(self, landmarks: List[Dict]) -> Dict:
-        """
-        Extract useful features from face landmarks
-        
-        Args:
-            landmarks: Face landmarks from MediaPipe
-        
-        Returns:
-            Dictionary of extracted features
-        """
+        """Return a dict of face geometry features extracted from landmarks."""
         if not landmarks:
             return {}
-        
-        face_landmarks = [
-            FaceLandmark(lm['x'], lm['y'], lm.get('z', 0.0)) 
-            for lm in landmarks
-        ]
-        
-        # Calculate face dimensions
-        x_coords = [lm.x for lm in face_landmarks]
-        y_coords = [lm.y for lm in face_landmarks]
-        
-        features = {
-            'face_width': max(x_coords) - min(x_coords),
-            'face_height': max(y_coords) - min(y_coords),
-            'center_x': (max(x_coords) + min(x_coords)) / 2,
-            'center_y': (max(y_coords) + min(y_coords)) / 2,
+
+        x_coords = [lm['x'] for lm in landmarks]
+        y_coords = [lm['y'] for lm in landmarks]
+
+        return {
+            'face_width':    max(x_coords) - min(x_coords),
+            'face_height':   max(y_coords) - min(y_coords),
+            'center_x':      (max(x_coords) + min(x_coords)) / 2,
+            'center_y':      (max(y_coords) + min(y_coords)) / 2,
             'num_landmarks': len(landmarks),
-            'quality_score': self.get_face_quality_score(landmarks)
+            'quality_score': self.get_face_quality_score(landmarks),
         }
-        
-        return features
 
 
 # Global instance

@@ -678,7 +678,8 @@ def export_saved_model(model):
     probs = list(out.values())[0].numpy()[0]
     print(f"  ✓ Signature   : serving_default")
     print(f"  ✓ Output shape: {probs.shape}")
-    print(f"  ✓ Prob sum    : {probs.sum():.4f}  (should be ≈ 1.0)")
+    # sigmoid outputs are independent probabilities — they do NOT sum to 1.0
+    print(f"  ✓ Prob range  : [{probs.min():.4f}, {probs.max():.4f}]  (sigmoid, each in [0,1])")
 
     # Human-readable sample prediction
     skin_probs = probs[:len(SKIN_TYPES)]

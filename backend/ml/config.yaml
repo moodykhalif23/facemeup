@@ -74,11 +74,12 @@ architecture:
   dense_activation: "relu"
   batch_normalization: true
   dropout_rate: 0.4
-  output_activation: "softmax"
+  output_activation: "sigmoid"
 
 loss:
-  function: "categorical_crossentropy"
-  
+  # binary_crossentropy required for multi-label (sigmoid) output
+  function: "binary_crossentropy"
+
 metrics:
   - "accuracy"
   - "precision"
@@ -90,7 +91,7 @@ export:
   
   # TFLite for mobile
   tflite_path: "app/models_artifacts/model.tflite"
-  quantization: "int8"  # Options: none, float16, int8
+  quantization: "int8" 
   
   # ONNX (optional)
   onnx_path: "app/models_artifacts/model.onnx"

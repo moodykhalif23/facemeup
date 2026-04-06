@@ -68,11 +68,14 @@ _SKIN_FEEL_MAP = {
 _CONCERN_MAP = {
     "acne": "Acne",
     "dark_spots": "Hyperpigmentation",
-    "wrinkles": "Uneven tone",
-    "redness": "Sensitive",
+    # wrinkles → Dehydration is the closest condition in the current model label set
+    # (model was trained with: Acne, Hyperpigmentation, Uneven tone, Dehydration, None detected)
+    # TODO: add "Wrinkles" and "Redness" to model conditions and retrain
+    "wrinkles": "Dehydration",
+    "redness": "Uneven tone",
     "dryness": "Dehydration",
     "oiliness": "Acne",
-    "sensitivity": "Sensitive",
+    "sensitivity": "Uneven tone",
     "dark_circles": "Hyperpigmentation",
     "blackheads": "Acne",
     "pigmentation": "Hyperpigmentation",

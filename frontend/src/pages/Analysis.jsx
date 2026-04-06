@@ -43,9 +43,14 @@ export default function Analysis() {
   };
 
   const onFinish = async (values) => {
-    if (!capturedImage || !landmarks) {
+    if (!capturedImage) {
       message.warning('Please capture your face first');
       return;
+    }
+    // landmarks are optional: if face mesh failed, the backend falls back
+    // to the questionnaire-only inference path
+    if (!landmarks) {
+      message.info('No face landmarks detected — analysis will use questionnaire answers only.');
     }
     if (loading) return;
 

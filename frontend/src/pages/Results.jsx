@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { Layout, Card, Button, Typography, Tag, Space, Progress } from 'antd';
-import { ShopOutlined } from '@ant-design/icons';
+import { Layout, Card, Button, Typography, Tag, Space, Progress, Alert } from 'antd';
+import { ShopOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import AppHeader from '../components/AppHeader';
 import SkinCharts from '../components/SkinCharts';
 
@@ -43,7 +43,9 @@ export default function Results() {
     );
   }
 
-  const { profile } = currentAnalysis;
+  const { profile, disclaimer } = currentAnalysis;
+  const displayDisclaimer = disclaimer ||
+    "This analysis is informational and does not replace professional dermatology advice.";
 
   return (
     <Layout style={{ minHeight: '100vh', background: 'var(--background)' }}>
@@ -52,6 +54,16 @@ export default function Results() {
       <Content style={{ padding: '16px' }}>
         <div style={{ maxWidth: 800, margin: '0 auto' }}>
           <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+            {/* Medical Disclaimer — required by legal framework (spec §12) */}
+            <Alert
+              message="Medical Disclaimer"
+              description={displayDisclaimer}
+              type="warning"
+              showIcon
+              icon={<InfoCircleOutlined />}
+              style={{ borderRadius: 6 }}
+            />
+
             {/* Skin Profile */}
             <div>
               <Title level={4} style={{ marginBottom: 16, textAlign: 'center', color: 'var(--foreground)' }}>

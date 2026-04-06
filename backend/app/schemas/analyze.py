@@ -37,3 +37,7 @@ class SkinProfile(BaseModel):
 class AnalyzeResponse(BaseModel):
     profile: SkinProfile
     inference_mode: str
+    disclaimer: str = (
+        "This analysis is informational and does not replace professional "
+        "dermatology advice. Consult a qualified dermatologist for medical concerns."
+    )
