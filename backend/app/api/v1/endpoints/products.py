@@ -100,11 +100,14 @@ def get_product(product_id: str, db: Session = Depends(get_db)) -> ProductDetail
         sku=row.sku,
         name=row.name,
         price=row.price,
-        category=row.category or "Skincare",
-        description=row.description or f"Premium skincare product: {row.name}",
+        category=row.category or "",
+        # Use the description stored by admin or synced from WooCommerce.
+        # An empty string is intentional — no fake placeholder copy.
+        description=row.description or "",
         benefits=benefits,
         ingredients=", ".join(ingredients_list),
-        usage="Apply twice daily to clean, dry skin. Gently massage until fully absorbed.",
+        # usage is left empty; admin fills it in or WooCommerce sync provides it.
+        usage="",
         stock=row.stock,
         image_url=row.image_url,
         suitable_for=row.suitable_for,

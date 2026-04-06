@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Table, Button, Modal, Form, Input, InputNumber, Select,
-  Space, Popconfirm, Tag, Typography, App, Image, Tooltip, Segmented,
+  Space, Popconfirm, Tag, Typography, App, Image, Tooltip, Segmented, Alert,
 } from 'antd';
-import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined } from '@ant-design/icons';
+import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import AdminLayout from '../../components/AdminLayout';
 import {
   getProducts,
@@ -110,7 +110,8 @@ export default function AdminProducts() {
       suitable_for: record.suitable_for ?? 'all',
       effects: record.effects ?? [],
       image_url: record.image_url ?? '',
-      description: '',
+      // Pre-populate description so admin sees current value
+      description: record.description ?? '',
     });
   };
 
@@ -211,9 +212,10 @@ export default function AdminProducts() {
             <Button type="text" icon={<EditOutlined />} onClick={() => openEdit(record)} />
           </Tooltip>
           <Popconfirm
-            title="Delete this product?"
+            title="Remove from local catalog?"
+            description="This only removes the product from this app. Your WooCommerce store is not affected."
             onConfirm={() => handleDelete(record.sku)}
-            okText="Delete"
+            okText="Remove"
             okButtonProps={{ danger: true }}
           >
             <Tooltip title="Delete">
@@ -227,6 +229,16 @@ export default function AdminProducts() {
 
   return (
     <AdminLayout>
+      {/* Local-only scope notice */}
+      <Alert
+        icon={<InfoCircleOutlined />}
+        showIcon
+        type="info"
+        message="Changes here only affect this app's local product catalog."
+        description="Deleting or editing products does not modify your live WooCommerce store (drrashel.co.ke). Use the Sync button to pull fresh data from WooCommerce."
+        style={{ marginBottom: 16, borderRadius: 6 }}
+      />
+
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, gap: 12, flexWrap: 'wrap' }}>
         <Input
           prefix={<SearchOutlined />}

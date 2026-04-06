@@ -165,4 +165,4 @@ def recommend_products(
             )
     
     # Sort by score (highest first) and return top recommendations
-    return sorted(scored, key=lambda x: x.score, reverse=True)[:20]
+    return sorted(scored, key=lambda x: x.score, reverse=True)[:10]

@@ -82,9 +82,9 @@ export default function AdminDashboard() {
               gap: 16,
               marginBottom: 24,
               gridTemplateColumns: screens.xl
-                ? 'repeat(4, minmax(0, 1fr))'
+                ? 'repeat(5, minmax(0, 1fr))'
                 : screens.lg
-                  ? 'repeat(2, minmax(0, 1fr))'
+                  ? 'repeat(3, minmax(0, 1fr))'
                   : screens.md
                     ? 'repeat(2, minmax(0, 1fr))'
                     : screens.sm
@@ -97,6 +97,13 @@ export default function AdminDashboard() {
               { title: 'Products', value: stats?.total_products, icon: <ShoppingOutlined />, color: '#0891b2' },
               { title: 'Orders', value: stats?.total_orders, icon: <OrderedListOutlined />, color: '#7c3aed' },
               { title: 'Skin Analyses', value: stats?.total_analyses, icon: <ExperimentOutlined />, color: '#db2777' },
+              {
+                title: 'Revenue (KES)',
+                value: stats?.total_revenue ?? 0,
+                icon: <span style={{ fontWeight: 700, fontSize: 16 }}>KES</span>,
+                color: '#059669',
+                prefix: '',
+              },
             ].map((s) => (
               <Card
                 key={s.title}

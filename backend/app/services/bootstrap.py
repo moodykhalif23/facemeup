@@ -565,8 +565,21 @@ DEFAULT_PRODUCTS = [
 
 
 def seed_products(db: Session) -> None:
+    """Seed the product catalog with default products if the table is empty.
+
+    Descriptions are intentionally cleared to None so that:
+      - WooCommerce sync (drrashel.co.ke) provides the authoritative description
+      - Admins can write descriptions from the Admin Products page
+      - No generic placeholder text appears on the storefront
+    """
     existing = db.execute(select(ProductCatalog.sku)).first()
     if existing:
         return
+
+    # Strip hardcoded descriptions before inserting — they are kept in the
+    # DEFAULT_PRODUCTS list only as dev-time references, not production copy.
+    for product in DEFAULT_PRODUCTS:
+        product.description = None
+
     db.add_all(DEFAULT_PRODUCTS)
     db.commit()
