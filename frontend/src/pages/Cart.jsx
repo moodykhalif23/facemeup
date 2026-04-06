@@ -20,16 +20,41 @@ export default function Cart() {
   const total = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   const missingWc = items.filter((item) => !item.wc_id);
 
+  /**
+   * Build a WooCommerce multi-product cart URL.
+   *
+   * Uses comma-separated IDs and quantities so the external site can add all
+   * items in a single request.  Format (requires a tiny WooCommerce snippet
+   * on drrashel.co.ke — see /docs/woocommerce_cart_fill.md):
+   *
+   *   /checkout/?add-to-cart=ID1,ID2&quantity=QTY1,QTY2
+   *
+   * Falls back to single-item format when there is only one product.
+   */
   const buildCheckoutUrl = (wcMap = new Map()) => {
-    const base = 'https://drrashel.co.ke/checkout/';
-    const params = [];
+    const base = import.meta.env.VITE_CHECKOUT_URL || 'https://drrashel.co.ke/checkout/';
+
+    const wcIds = [];
+    const quantities = [];
+
     items.forEach((item) => {
       const wcId = item.wc_id || wcMap.get(item.sku) || wcMap.get(item.id);
-      if (!wcId) return;
-      params.push(`add-to-cart=${encodeURIComponent(wcId)}`);
-      params.push(`quantity=${encodeURIComponent(item.quantity)}`);
+      if (!wcId) return;           // skip items without a WC product ID
+      wcIds.push(wcId);
+      quantities.push(item.quantity);
     });
-    return `${base}?${params.join('&')}`;
+
+    if (wcIds.length === 0) return base;
+
+    // Single item: use native WooCommerce single-product URL
+    if (wcIds.length === 1) {
+      return `${base}?add-to-cart=${wcIds[0]}&quantity=${quantities[0]}`;
+    }
+
+    // Multiple items: comma-separated format (requires server-side snippet)
+    return (
+      `${base}?add-to-cart=${wcIds.join(',')}&quantity=${quantities.join(',')}`
+    );
   };
 
   const ensureWcIds = async () => {
@@ -138,17 +163,27 @@ export default function Cart() {
                     onClick={() => {
                       (async () => {
                         const wcMap = await ensureWcIds();
-                        if (wcMap === null) return;
+                        if (wcMap === null) return;   // sync itself failed
 
                         const stillMissing = items.filter(
                           (item) => !item.wc_id && !wcMap.get(item.sku) && !wcMap.get(item.id)
                         );
+
+                        // Warn about un-synced items but proceed with the rest
                         if (stillMissing.length > 0) {
-                          message.error('Some items are not synced to the website yet.');
+                          message.warning(
+                            `${stillMissing.length} item(s) could not be synced and will be skipped at checkout.`
+                          );
+                        }
+
+                        const checkoutUrl = buildCheckoutUrl(wcMap);
+                        if (checkoutUrl === (import.meta.env.VITE_CHECKOUT_URL || 'https://drrashel.co.ke/checkout/')) {
+                          // All items were skipped — nothing to send
+                          message.error('No items are available for checkout. Please try syncing again.');
                           return;
                         }
 
-                        window.location.href = buildCheckoutUrl(wcMap);
+                        window.location.href = checkoutUrl;
                       })();
                     }}
                     loading={syncing}

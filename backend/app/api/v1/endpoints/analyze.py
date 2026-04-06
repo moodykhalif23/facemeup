@@ -6,12 +6,14 @@ from PIL import Image
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
+from app.core.config import settings
 from app.core.database import get_db
 from app.core.deps import get_current_user
 from app.models.profile import SkinProfileHistory
 from app.models.user import User
 from app.schemas.analyze import AnalyzeRequest, AnalyzeResponse
-from app.services.inference import run_skin_inference
+from app.services.gradcam import generate_condition_heatmaps
+from app.services.inference import _load_model, _preprocess_image, run_skin_inference
 from app.services.profile_service import append_profile
 
 logger = logging.getLogger(__name__)
@@ -97,4 +99,21 @@ def analyze(
         inference_mode=mode,
         report_image_base64=thumbnail,
     )
-    return AnalyzeResponse(profile=profile, inference_mode=mode)
+
+    # Grad-CAM heatmaps — only generated when a real SavedModel ran inference
+    heatmaps = None
+    if mode.startswith("server_savedmodel") and profile.condition_scores:
+        try:
+            skin_labels = [v.strip() for v in settings.model_skin_types.split(",") if v.strip()]
+            cond_labels  = [v.strip() for v in settings.model_conditions.split(",") if v.strip()]
+            model = _load_model()
+            batch = _preprocess_image(payload.image_base64, landmarks)
+            heatmaps = generate_condition_heatmaps(
+                model, batch, skin_labels, cond_labels, profile.condition_scores or {}
+            )
+            if not heatmaps:
+                heatmaps = None
+        except Exception as exc:
+            logger.warning("Grad-CAM generation failed (non-fatal): %s", exc)
+
+    return AnalyzeResponse(profile=profile, inference_mode=mode, heatmaps=heatmaps)

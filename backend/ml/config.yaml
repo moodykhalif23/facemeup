@@ -21,6 +21,8 @@ model:
     - "Hyperpigmentation"
     - "Uneven tone"
     - "Dehydration"
+    - "Wrinkles"
+    - "Redness"
     - "None detected"
 
 dataset:

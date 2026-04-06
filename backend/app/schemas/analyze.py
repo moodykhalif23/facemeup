@@ -37,6 +37,9 @@ class SkinProfile(BaseModel):
 class AnalyzeResponse(BaseModel):
     profile: SkinProfile
     inference_mode: str
+    # condition_name → base64 JPEG Grad-CAM overlay (spec §7)
+    # Only populated when a trained SavedModel is available
+    heatmaps: dict[str, str] | None = None
     disclaimer: str = (
         "This analysis is informational and does not replace professional "
         "dermatology advice. Consult a qualified dermatologist for medical concerns."

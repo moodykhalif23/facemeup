@@ -41,8 +41,16 @@ SAVED_MODEL_DIR = Path("app/models_artifacts/saved_model")
 # Label spaces (must match config.yaml and inference.py)
 # ---------------------------------------------------------------------------
 SKIN_TYPES = ["Oily", "Dry", "Combination", "Normal", "Sensitive"]
-CONDITIONS = ["Acne", "Hyperpigmentation", "Uneven tone", "Dehydration", "None detected"]
-NUM_CLASSES = len(SKIN_TYPES) + len(CONDITIONS)  # 10
+CONDITIONS = [
+    "Acne",
+    "Hyperpigmentation",
+    "Uneven tone",
+    "Dehydration",
+    "Wrinkles",      # spec §1: detectable condition
+    "Redness",       # spec §1: redness / sensitivity indicator
+    "None detected",
+]
+NUM_CLASSES = len(SKIN_TYPES) + len(CONDITIONS)  # 12
 
 # ---------------------------------------------------------------------------
 # HAM10000 clinical label → our label space
@@ -52,7 +60,7 @@ NUM_CLASSES = len(SKIN_TYPES) + len(CONDITIONS)  # 10
 #   bkl  = benign keratosis (pigmented plaques)       → Combination / Hyperpigmentation
 #   bcc  = basal cell carcinoma (oily/exposed areas)  → Oily / Acne
 #   akiec= actinic keratoses (dry sun-damaged)        → Dry / Uneven tone
-#   vasc = vascular lesions (redness, dilation)       → Sensitive / Acne
+#   vasc = vascular lesions (redness, dilation)       → Sensitive / Redness
 #   df   = dermatofibroma (benign, normal skin)       → Normal / None detected
 # ---------------------------------------------------------------------------
 HAM_TO_SKIN_TYPE = {
@@ -70,7 +78,7 @@ HAM_TO_CONDITION = {
     "bkl":   "Hyperpigmentation",
     "bcc":   "Acne",
     "akiec": "Uneven tone",
-    "vasc":  "Acne",
+    "vasc":  "Redness",       # vascular lesions → Redness (more accurate than Acne)
     "df":    "None detected",
 }
 

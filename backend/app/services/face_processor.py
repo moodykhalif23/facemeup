@@ -6,11 +6,35 @@ import base64
 
 # MediaPipe Face Mesh landmark indices for key features
 # These are stable across MediaPipe versions
-_LM_LEFT_EYE_CENTER = 33    # left eye outer corner (from viewer's perspective)
+_LM_LEFT_EYE_CENTER  = 33   # left eye outer corner (from viewer's perspective)
 _LM_RIGHT_EYE_CENTER = 263  # right eye outer corner
-_LM_NOSE_TIP = 1
-_LM_MOUTH_LEFT = 61
-_LM_MOUTH_RIGHT = 291
+_LM_NOSE_TIP         = 1
+_LM_MOUTH_LEFT       = 61
+_LM_MOUTH_RIGHT      = 291
+
+# ---------------------------------------------------------------------------
+# Skin patch zone landmark clusters (spec §4)
+# Each zone is defined by a set of landmark indices whose centroid + spread
+# determines the crop rectangle.
+# ---------------------------------------------------------------------------
+# Forehead:  between eyebrows and top of face (~lm 10, 107, 336, 338, 297, 67)
+_ZONE_FOREHEAD   = [10, 107, 336, 338, 297, 67, 54, 284]
+# Left cheek (viewer left = face right):  ~lm 234, 93, 132, 58, 172
+_ZONE_LEFT_CHEEK = [234, 93, 132,  58, 172, 136, 150]
+# Right cheek: ~lm 454, 323, 361, 288, 397
+_ZONE_RIGHT_CHEEK= [454, 323, 361, 288, 397, 365, 379]
+# Nose:       ~lm 1, 2, 5, 4, 195, 197
+_ZONE_NOSE       = [1, 2, 5, 4, 195, 197, 19, 94]
+# Chin:       ~lm 152, 175, 18, 200, 199
+_ZONE_CHIN       = [152, 175,  18, 200, 199, 396, 171]
+
+SKIN_ZONES: Dict[str, List[int]] = {
+    "forehead":    _ZONE_FOREHEAD,
+    "left_cheek":  _ZONE_LEFT_CHEEK,
+    "right_cheek": _ZONE_RIGHT_CHEEK,
+    "nose":        _ZONE_NOSE,
+    "chin":        _ZONE_CHIN,
+}
 
 
 class FaceLandmark:
@@ -208,6 +232,56 @@ class FaceProcessor:
         # Step 4: resize + normalize for model
         return self.preprocess_for_model(face)
     
+    def extract_skin_patches(
+        self,
+        image: np.ndarray,
+        landmarks: List[Dict],
+        patch_size: int = 224,
+        zone_padding: float = 0.15,
+    ) -> Dict[str, np.ndarray]:
+        """Extract per-zone skin patches for multi-region analysis (spec §4).
+
+        Returns a dict of zone_name → preprocessed float32 array [H, W, 3]
+        ready for model input.  Zones that cannot be cropped (too small, out
+        of bounds) are silently skipped so the caller can fall back gracefully.
+        """
+        if not landmarks:
+            return {}
+
+        h, w = image.shape[:2]
+        patches: Dict[str, np.ndarray] = {}
+
+        for zone_name, lm_indices in SKIN_ZONES.items():
+            # Collect landmark pixel coordinates for this zone
+            xs, ys = [], []
+            for idx in lm_indices:
+                if idx < len(landmarks):
+                    xs.append(landmarks[idx]['x'] * w)
+                    ys.append(landmarks[idx]['y'] * h)
+            if not xs:
+                continue
+
+            cx = sum(xs) / len(xs)
+            cy = sum(ys) / len(ys)
+
+            # Half-size = spread of landmarks + padding
+            half_w = (max(xs) - min(xs)) / 2 + zone_padding * w
+            half_h = (max(ys) - min(ys)) / 2 + zone_padding * h
+            half   = max(half_w, half_h, 20)  # at least 20 px
+
+            x1 = max(0, int(cx - half))
+            x2 = min(w, int(cx + half))
+            y1 = max(0, int(cy - half))
+            y2 = min(h, int(cy + half))
+
+            crop = image[y1:y2, x1:x2]
+            if crop.size == 0 or crop.shape[0] < 10 or crop.shape[1] < 10:
+                continue
+
+            patches[zone_name] = self.preprocess_for_model(crop)
+
+        return patches
+
     def get_face_quality_score(self, landmarks: List[Dict]) -> float:
         """Quality score 0–1 based on face size and centering in frame."""
         if not landmarks or len(landmarks) < 468:

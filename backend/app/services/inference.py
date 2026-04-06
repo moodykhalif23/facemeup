@@ -68,14 +68,11 @@ _SKIN_FEEL_MAP = {
 _CONCERN_MAP = {
     "acne": "Acne",
     "dark_spots": "Hyperpigmentation",
-    # wrinkles → Dehydration is the closest condition in the current model label set
-    # (model was trained with: Acne, Hyperpigmentation, Uneven tone, Dehydration, None detected)
-    # TODO: add "Wrinkles" and "Redness" to model conditions and retrain
-    "wrinkles": "Dehydration",
-    "redness": "Uneven tone",
+    "wrinkles": "Wrinkles",         # now a first-class model label
+    "redness": "Redness",           # now a first-class model label
     "dryness": "Dehydration",
     "oiliness": "Acne",
-    "sensitivity": "Uneven tone",
+    "sensitivity": "Redness",
     "dark_circles": "Hyperpigmentation",
     "blackheads": "Acne",
     "pigmentation": "Hyperpigmentation",
@@ -141,7 +138,7 @@ def _questionnaire_profile(questionnaire: Optional[Dict]) -> SkinProfile:
 
     confidence = 0.72
     all_skin = ["Oily", "Dry", "Combination", "Normal", "Sensitive"]
-    all_cond  = ["Acne", "Hyperpigmentation", "Uneven tone", "Dehydration", "None detected"]
+    all_cond  = ["Acne", "Hyperpigmentation", "Uneven tone", "Dehydration", "Wrinkles", "Redness", "None detected"]
 
     # Synthesise scores: detected label gets `confidence`, rest share remainder equally
     remainder = round((1.0 - confidence) / (len(all_skin) - 1), 4)
@@ -165,25 +162,71 @@ def _questionnaire_profile(questionnaire: Optional[Dict]) -> SkinProfile:
     )
 
 
+def _run_single_inference(
+    infer,
+    batch: np.ndarray,
+    skin_labels: List[str],
+    condition_labels: List[str],
+) -> Optional[np.ndarray]:
+    """Run the SavedModel signature on a single preprocessed batch.
+    Returns raw probability vector or None on error.
+    """
+    import tensorflow as tf
+
+    tensor = tf.convert_to_tensor(batch, dtype=tf.float32)
+    input_args = infer.structured_input_signature[1]
+    try:
+        if input_args:
+            input_key = next(iter(input_args.keys()))
+            outputs = infer(**{input_key: tensor})
+        else:
+            outputs = infer(tensor)
+        values = list(outputs.values())
+        if not values:
+            return None
+        probs = np.array(values[0].numpy()[0], dtype=np.float32)
+        return probs if probs.size else None
+    except Exception as exc:
+        logger.debug("Single inference failed: %s", exc)
+        return None
+
+
+def _aggregate_zone_probs(
+    all_probs: List[np.ndarray],
+    skin_labels: List[str],
+) -> np.ndarray:
+    """Average probability vectors across zones.
+
+    Skin-type scores are averaged uniformly; condition scores are
+    taken as the per-condition maximum across zones (spec §4 intent:
+    a condition showing up in *any* zone should be surfaced).
+    """
+    n_skin = len(skin_labels)
+    stacked = np.stack(all_probs, axis=0)          # [zones, num_classes]
+
+    skin_avg  = stacked[:, :n_skin].mean(axis=0)   # average skin type probabilities
+    cond_max  = stacked[:, n_skin:].max(axis=0)    # max condition probability per zone
+
+    return np.concatenate([skin_avg, cond_max])
+
+
 def run_skin_inference(
     image_base64: str,
     landmarks: Optional[List[Dict]] = None,
     questionnaire: Optional[Dict] = None,
 ) -> tuple[SkinProfile, str]:
-    """
-    Run skin analysis inference on the provided image
-    
-    Args:
-        image_base64: Base64 encoded image string
-        landmarks: Optional MediaPipe face landmarks for better face extraction
-        
-    Returns:
-        Tuple of (SkinProfile, inference_mode)
+    """Run skin analysis using multi-zone patch inference (spec §4).
+
+    Pipeline:
+      1. Extract per-zone patches (forehead, cheeks, nose, chin) from landmarks
+      2. Run model inference on each patch independently
+      3. Aggregate: average skin-type scores, max condition scores across zones
+      4. Fall back to full-face inference if zone extraction fails
+      5. Fall back to questionnaire if model is unavailable
     """
     skin_labels = [v.strip() for v in settings.model_skin_types.split(",") if v.strip()]
     condition_labels = [v.strip() for v in settings.model_conditions.split(",") if v.strip()]
 
-    # Calculate face quality score if landmarks provided
     face_quality_score = None
     if landmarks:
         face_quality_score = face_processor.get_face_quality_score(landmarks)
@@ -192,59 +235,68 @@ def run_skin_inference(
         import tensorflow as tf
 
         model = _load_model()
-        batch = _preprocess_image(image_base64, landmarks)
         infer = model.signatures.get("serving_default")
         if infer is None:
             return _questionnaire_profile(questionnaire), "savedmodel_missing_signature"
 
-        tensor = tf.convert_to_tensor(batch, dtype=tf.float32)
-        input_args = infer.structured_input_signature[1]
-        if input_args:
-            input_key = next(iter(input_args.keys()))
-            outputs = infer(**{input_key: tensor})
-        else:
-            outputs = infer(tensor)
+        # ── Multi-zone patch inference ───────────────────────────────────
+        inference_mode = "server_savedmodel"
+        all_probs: List[np.ndarray] = []
 
-        values = list(outputs.values())
-        if not values:
-            return _questionnaire_profile(questionnaire), "savedmodel_empty_output"
+        if landmarks:
+            raw_image = face_processor.decode_base64_image(image_base64)
+            raw_image = face_processor.align_face(raw_image, landmarks)
+            raw_image = face_processor.normalize_illumination(raw_image)
 
-        probs = np.array(values[0].numpy()[0], dtype=np.float32)
-        if probs.size == 0:
-            return _questionnaire_profile(questionnaire), "savedmodel_empty_probs"
+            patches = face_processor.extract_skin_patches(raw_image, landmarks)
+            for zone_name, patch in patches.items():
+                batch = np.expand_dims(patch, axis=0)
+                probs = _run_single_inference(infer, batch, skin_labels, condition_labels)
+                if probs is not None and len(probs) == len(skin_labels) + len(condition_labels):
+                    all_probs.append(probs)
+                    logger.debug("Zone '%s' inference ok, probs shape %s", zone_name, probs.shape)
 
-        # Determine skin type (first N labels)
-        top_skin_idx = int(np.argmax(probs[: len(skin_labels)])) if len(probs) >= len(skin_labels) else 0
+            if all_probs:
+                inference_mode = f"server_savedmodel_zones:{len(all_probs)}"
+
+        # ── Full-face fallback when no zone patches available ────────────
+        if not all_probs:
+            batch = _preprocess_image(image_base64, landmarks)
+            probs = _run_single_inference(infer, batch, skin_labels, condition_labels)
+            if probs is None or len(probs) == 0:
+                return _questionnaire_profile(questionnaire), "savedmodel_empty_output"
+            all_probs = [probs]
+            inference_mode = "server_savedmodel_fullface"
+
+        # ── Aggregate ────────────────────────────────────────────────────
+        final_probs = _aggregate_zone_probs(all_probs, skin_labels) if len(all_probs) > 1 else all_probs[0]
+
+        top_skin_idx = int(np.argmax(final_probs[: len(skin_labels)]))
         skin_type = skin_labels[top_skin_idx] if skin_labels else "Unknown"
-        skin_confidence = float(probs[top_skin_idx]) if top_skin_idx < len(probs) else 0.5
+        skin_confidence = float(final_probs[top_skin_idx])
 
-        # Determine conditions (remaining labels)
-        cond_start = len(skin_labels)
-        cond_scores = probs[cond_start : cond_start + len(condition_labels)]
-        
-        # Use adaptive threshold based on confidence
-        # Higher threshold for more confident predictions
+        cond_start  = len(skin_labels)
+        cond_scores = final_probs[cond_start : cond_start + len(condition_labels)]
+
+        # Adaptive threshold: higher confidence → tighter threshold
         threshold = 0.40 if skin_confidence > 0.7 else 0.35
-        
+
         conditions = [
             condition_labels[i]
             for i, score in enumerate(cond_scores)
-            if i < len(condition_labels) 
-            and float(score) >= threshold 
+            if i < len(condition_labels)
+            and float(score) >= threshold
             and condition_labels[i] != "None detected"
         ]
-        
-        # If no conditions detected, mark as "None detected"
         if not conditions:
             conditions = ["None detected"]
-        
-        # Use the highest confidence score as overall confidence
+
         confidence = float(max(skin_confidence, np.max(cond_scores) if len(cond_scores) > 0 else 0.5))
-        
+
         skin_type_scores = {
-            skin_labels[i]: round(float(probs[i]), 4)
+            skin_labels[i]: round(float(final_probs[i]), 4)
             for i in range(len(skin_labels))
-            if i < len(probs)
+            if i < len(final_probs)
         }
         condition_scores = {
             condition_labels[i]: round(float(cond_scores[i]), 4)
@@ -261,7 +313,7 @@ def run_skin_inference(
                 skin_type_scores=skin_type_scores,
                 condition_scores=condition_scores,
             ),
-            "server_savedmodel",
+            inference_mode,
         )
     except Exception as e:
         logger.warning("Inference error, falling back to questionnaire: %s", e)
