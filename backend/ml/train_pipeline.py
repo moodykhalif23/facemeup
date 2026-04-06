@@ -718,7 +718,7 @@ def main():
     print("\n" + "█" * 70)
     print("  SKINCARE ML – REAL DATA TRAINING PIPELINE")
     print("  Dataset : HAM10000 (clinician-labeled, Harvard Dataverse)")
-    print("  Model   : EfficientNetB0 → 10-class skin analysis")
+    print(f"  Model   : EfficientNetB0 → {NUM_CLASSES}-class skin analysis ({len(SKIN_TYPES)} skin types + {len(CONDITIONS)} conditions)")
     print("█" * 70)
 
     # Load config
