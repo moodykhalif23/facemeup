@@ -79,6 +79,7 @@ export const adminGetOrders = () => api.get('/admin/orders');
 export const adminUpdateOrderStatus = (orderId, status) =>
   api.put(`/admin/orders/${orderId}/status`, { status });
 export const adminGetReports = () => api.get('/admin/reports');
+export const adminDeleteReport = (reportId) => api.delete(`/admin/reports/${reportId}`);
 export const adminGetUserReports = (userId) => api.get(`/admin/reports/${userId}`);
 export const adminCreateProduct = (data) => api.post('/products/admin/create', data);
 export const adminUpdateProduct = (sku, data) => api.put(`/products/admin/${sku}`, data);

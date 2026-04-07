@@ -181,6 +181,21 @@ def list_reports(
     return {"reports": reports}
 
 
+@router.delete("/reports/{report_id}")
+def delete_report(
+    report_id: int,
+    db: Session = Depends(get_db),
+    _: User = Depends(require_roles("admin")),
+) -> dict:
+    """Delete a single skin analysis report by ID."""
+    record = db.get(SkinProfileHistory, report_id)
+    if not record:
+        raise AppError(404, "not_found", "Report not found")
+    db.delete(record)
+    db.commit()
+    return {"deleted": report_id}
+
+
 @router.get("/reports/{user_id}")
 def get_user_reports(
     user_id: str,

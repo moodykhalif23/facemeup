@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
-  Table, Card, Typography, Space, Input, Tag, Avatar, Button, Drawer, Divider, Progress, App, DatePicker,
+  Table, Card, Typography, Space, Input, Tag, Avatar, Button, Drawer, Divider, Progress, App, DatePicker, Popconfirm,
 } from 'antd';
-import { SearchOutlined, EyeOutlined, UserOutlined } from '@ant-design/icons';
+import { SearchOutlined, EyeOutlined, UserOutlined, DeleteOutlined } from '@ant-design/icons';
 import AdminLayout from '../../components/AdminLayout';
-import { adminGetReports } from '../../services/api';
+import { adminGetReports, adminDeleteReport } from '../../services/api';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
@@ -38,6 +38,17 @@ export default function AdminReports() {
       .then((r) => setReports(r.data.reports || []))
       .catch(() => message.error('Failed to load reports'))
       .finally(() => setLoading(false));
+  };
+
+  const handleDelete = async (reportId) => {
+    try {
+      await adminDeleteReport(reportId);
+      message.success('Report deleted');
+      setReports((prev) => prev.filter((r) => r.id !== reportId));
+      if (selected?.id === reportId) setDrawerOpen(false);
+    } catch {
+      message.error('Failed to delete report');
+    }
   };
 
   useEffect(() => { load(); }, []);
@@ -147,15 +158,26 @@ export default function AdminReports() {
     {
       title: 'Action',
       key: 'action',
-      width: 80,
+      width: 120,
       render: (_, r) => (
-        <Button
-          type="link"
-          icon={<EyeOutlined />}
-          onClick={() => { setSelected(r); setDrawerOpen(true); }}
-        >
-          View
-        </Button>
+        <Space>
+          <Button
+            type="link"
+            icon={<EyeOutlined />}
+            onClick={() => { setSelected(r); setDrawerOpen(true); }}
+          >
+            View
+          </Button>
+          <Popconfirm
+            title="Delete this report?"
+            description="This cannot be undone."
+            onConfirm={() => handleDelete(r.id)}
+            okText="Delete"
+            okButtonProps={{ danger: true }}
+          >
+            <Button type="text" danger icon={<DeleteOutlined />} size="small" />
+          </Popconfirm>
+        </Space>
       ),
     },
   ];
