@@ -11,6 +11,7 @@ import {
   adminUpdateProduct,
   adminDeleteProduct,
   adminBulkDeleteProducts,
+  adminSyncWooCommerce,
 } from '../../services/api';
 
 const { Text } = Typography;
@@ -67,6 +68,7 @@ export default function AdminProducts() {
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(null); // null = create, object = edit
   const [saving, setSaving] = useState(false);
+  const [resyncing, setResyncing] = useState(false);
   const [search, setSearch] = useState('');
   const [form] = Form.useForm();
 
@@ -148,6 +150,27 @@ export default function AdminProducts() {
       load();
     } catch (err) {
       message.error(err.response?.data?.error?.message ?? 'Bulk delete failed');
+    }
+  };
+
+  const handleDeleteAndResync = async () => {
+    setResyncing(true);
+    try {
+      // Step 1: wipe all local products
+      const del = await adminBulkDeleteProducts();
+      message.info(`Cleared ${del.data.deleted} old product(s). Syncing from WooCommerce…`);
+
+      // Step 2: pull fresh data from WooCommerce
+      const sync = await adminSyncWooCommerce();
+      message.success(
+        `Sync complete — ${sync.data.products_added} added, ${sync.data.products_updated} updated, ${sync.data.products_failed} failed.`
+      );
+      setSearch('');
+      load();
+    } catch (err) {
+      message.error(err.response?.data?.detail ?? err.response?.data?.error?.message ?? 'Resync failed');
+    } finally {
+      setResyncing(false);
     }
   };
 
@@ -249,6 +272,15 @@ export default function AdminProducts() {
           style={{ width: '100%', maxWidth: 420 }}
         />
         <Space>
+          <Popconfirm
+            title="Delete all &amp; re-sync from WooCommerce?"
+            description="This wipes all 106 local products and replaces them with a fresh pull from drrashel.co.ke. Images will be included."
+            onConfirm={handleDeleteAndResync}
+            okText="Delete & Re-sync"
+            okButtonProps={{ danger: true }}
+          >
+            <Button danger loading={resyncing}>Delete All &amp; Re-sync WooCommerce</Button>
+          </Popconfirm>
           <Popconfirm
             title="Delete all products from this system?"
             description="This only clears the local catalog and does not affect WooCommerce."
