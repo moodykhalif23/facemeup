@@ -12,6 +12,7 @@ import {
   adminDeleteProduct,
   adminBulkDeleteProducts,
   adminSyncWooCommerce,
+  adminClearCache,
 } from '../../services/api';
 
 const { Text } = Typography;
@@ -156,11 +157,16 @@ export default function AdminProducts() {
   const handleDeleteAndResync = async () => {
     setResyncing(true);
     try {
-      // Step 1: wipe all local products
+      // Step 1: flush all Redis product caches (kills stale "Product not found" entries)
+      await adminClearCache().catch(() => {}); // non-fatal if Redis is unavailable
+
+      // Step 2: wipe all local products
       const del = await adminBulkDeleteProducts();
+      setProducts([]);
+      setFiltered([]);
       message.info(`Cleared ${del.data.deleted} old product(s). Syncing from WooCommerce…`);
 
-      // Step 2: pull fresh data from WooCommerce
+      // Step 3: pull fresh data from WooCommerce
       const sync = await adminSyncWooCommerce();
       message.success(
         `Sync complete — ${sync.data.products_added} added, ${sync.data.products_updated} updated, ${sync.data.products_failed} failed.`
