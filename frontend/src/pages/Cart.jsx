@@ -197,34 +197,27 @@ export default function Cart() {
               </Card>
             </>
           ) : (
-            <Card style={{
-              borderRadius: 6,
-              boxShadow: 'var(--card-shadow)',
-              border: '1px solid var(--border)',
-              background: 'var(--card)',
-            }}>
-              <Empty
-                image={<ShoppingOutlined style={{ fontSize: 64, color: 'var(--border)' }} />}
-                description={
-                  <div>
-                    <Title level={4} style={{ marginTop: 16, color: 'var(--card-foreground)' }}>
-                      Your cart is empty
-                    </Title>
-                    <Text style={{ color: 'var(--muted-foreground)' }}>Add some products to get started</Text>
-                  </div>
-                }
+            <Empty
+              image={<ShoppingOutlined style={{ fontSize: 64, color: 'var(--border)' }} />}
+              description={
+                <div>
+                  <Title level={4} style={{ marginTop: 16, color: 'var(--card-foreground)' }}>
+                    Your cart is empty
+                  </Title>
+                  <Text style={{ color: 'var(--muted-foreground)' }}>Add some products to get started</Text>
+                </div>
+              }
+            >
+              <Button
+                type="primary"
+                icon={<ShoppingOutlined />}
+                onClick={() => navigate('/recommendations')}
+                size="large"
+                style={{ height: 48, fontSize: 16, marginTop: 16 }}
               >
-                <Button
-                  type="primary"
-                  icon={<ShoppingOutlined />}
-                  onClick={() => navigate('/recommendations')}
-                  size="large"
-                  style={{ height: 48, fontSize: 16, marginTop: 16 }}
-                >
-                  Browse Products
-                </Button>
-              </Empty>
-            </Card>
+                Browse Products
+              </Button>
+            </Empty>
           )}
         </div>
       </Content>

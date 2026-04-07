@@ -235,28 +235,21 @@ export default function Recommendations() {
               })}
             </Row>
           ) : (
-            <Card style={{
-              borderRadius: 6,
-              boxShadow: 'var(--card-shadow)',
-              border: '1px solid var(--border)',
-              background: 'var(--card)',
-            }}>
-              <div style={{ textAlign: 'center', padding: '50px 20px' }}>
-                <Title level={4} style={{ color: 'var(--card-foreground)' }}>No recommendations available</Title>
-                <Text style={{ color: 'var(--muted-foreground)' }}>
-                  Complete a skin analysis to get personalized recommendations
-                </Text>
-                <br /><br />
-                <Button
-                  type="primary"
-                  onClick={() => navigate('/analysis')}
-                  size="large"
-                  style={{ height: 48, fontSize: 16 }}
-                >
-                  Start Analysis
-                </Button>
-              </div>
-            </Card>
+            <div style={{ textAlign: 'center', padding: '50px 20px' }}>
+              <Title level={4} style={{ color: 'var(--card-foreground)' }}>No recommendations available</Title>
+              <Text style={{ color: 'var(--muted-foreground)' }}>
+                Complete a skin analysis to get personalized recommendations
+              </Text>
+              <br /><br />
+              <Button
+                type="primary"
+                onClick={() => navigate('/analysis')}
+                size="large"
+                style={{ height: 48, fontSize: 16 }}
+              >
+                Start Analysis
+              </Button>
+            </div>
           )}
         </div>
       </Content>
