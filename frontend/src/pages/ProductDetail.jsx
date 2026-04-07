@@ -61,7 +61,7 @@ export default function ProductDetail() {
         quantity: quantity,
         wc_id: product.wc_id,
       }));
-      message.success('Added to cart!');
+      navigate('/cart');
     }
   };
 
@@ -153,15 +153,7 @@ export default function ProductDetail() {
             </Card>
 
             {/* Product Info */}
-            <Card style={{
-              borderRadius: 6,
-              boxShadow: 'var(--card-shadow)',
-              border: '1px solid var(--border)',
-              background: 'var(--card)',
-              width: '100%',
-              maxWidth: '100%',
-              overflow: 'hidden'
-            }}>
+            <div style={{ width: '100%', maxWidth: '100%', overflow: 'hidden' }}>
               <Space direction="vertical" size="small" style={{ width: '100%' }}>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, width: '100%', marginBottom: 8 }}>
                   {product.category && product.category.split(',').map((cat, index) => (
@@ -254,7 +246,7 @@ export default function ProductDetail() {
                   </>
                 )}
               </Space>
-            </Card>
+            </div>
           </div>
         </div>
       </Content>

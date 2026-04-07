@@ -112,32 +112,34 @@ export default function Cart() {
                 <List
                   dataSource={items}
                   renderItem={(item) => (
-                    <List.Item
-                      style={{ padding: '16px 0', borderColor: 'var(--border)' }}
-                      actions={[
+                    <List.Item style={{ padding: '16px 0', borderColor: 'var(--border)' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 12, width: '100%' }}>
+                        {/* Name + price */}
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <Text strong style={{ fontSize: 14, color: 'var(--card-foreground)', display: 'block', lineHeight: '1.4' }}>
+                            {item.name}
+                          </Text>
+                          <Text style={{ fontSize: 13, color: 'var(--primary)', fontWeight: 600 }}>
+                            KSh {item.price ? item.price.toLocaleString() : '0'}
+                          </Text>
+                        </div>
+                        {/* Quantity */}
                         <InputNumber
-                          key="quantity"
                           min={1}
                           value={item.quantity}
                           onChange={(value) => handleQuantityChange(item.id, value)}
-                          size="large"
-                          style={{ width: 80 }}
-                        />,
+                          size="middle"
+                          style={{ width: 70, flexShrink: 0 }}
+                        />
+                        {/* Remove */}
                         <Button
-                          key="delete"
                           danger
                           icon={<DeleteOutlined />}
                           onClick={() => handleRemove(item.id)}
-                          size="large"
-                        >
-                          Remove
-                        </Button>
-                      ]}
-                    >
-                      <List.Item.Meta
-                        title={<Text strong style={{ fontSize: 15, color: 'var(--card-foreground)' }}>{item.name}</Text>}
-                        description={<Text style={{ fontSize: 14, color: 'var(--muted-foreground)' }}>KSh {item.price ? item.price.toLocaleString() : '0'} each</Text>}
-                      />
+                          size="middle"
+                          style={{ flexShrink: 0 }}
+                        />
+                      </div>
                     </List.Item>
                   )}
                 />
