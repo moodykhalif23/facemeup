@@ -4,7 +4,7 @@ import { HomeOutlined, ScanOutlined, UserOutlined } from '@ant-design/icons';
 const TABS = [
   { path: '/',          icon: HomeOutlined,  label: 'Home'     },
   { path: '/analysis',  icon: ScanOutlined,  label: 'Analysis' },
-  { path: '/profile',   icon: UserOutlined,  label: 'Settings' },
+  { path: '/profile',   icon: UserOutlined,  label: 'Profile'  },
 ];
 
 export default function BottomNav() {
