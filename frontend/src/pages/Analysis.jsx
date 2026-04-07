@@ -257,7 +257,7 @@ export default function Analysis() {
                       </Select>
                     </Form.Item>
 
-                    <Form.Item shouldUpdate>
+                    <Form.Item shouldUpdate style={{ marginBottom: 0 }}>
                       {({ getFieldValue }) =>
                         getFieldValue('routine') === 'other' ? (
                           <Form.Item
@@ -277,6 +277,7 @@ export default function Analysis() {
                     <Form.Item
                       label={<Text strong style={{ color: 'var(--card-foreground)' }}>Skin concerns</Text>}
                       name="concerns"
+                      style={{ marginTop: 8 }}
                     >
                       <Checkbox.Group style={{ width: '100%' }}>
                         <div
