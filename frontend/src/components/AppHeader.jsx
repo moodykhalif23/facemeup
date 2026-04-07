@@ -7,12 +7,9 @@ import {
   GiftOutlined,
   ShoppingCartOutlined,
   ArrowLeftOutlined,
-  SunOutlined,
-  MoonOutlined,
   FileTextOutlined
 } from '@ant-design/icons';
 import { logout } from '../store/slices/authSlice';
-import { useTheme } from '../contexts/ThemeContext';
 
 const { Header } = Layout;
 const { Title } = Typography;
@@ -22,8 +19,6 @@ export default function AppHeader({ title, showBack = false }) {
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
   const { items } = useSelector((state) => state.cart);
-  const { isDark, toggleTheme } = useTheme();
-
   const cartCount = items.reduce((total, item) => total + item.quantity, 0);
 
   const handleLogout = () => {
@@ -108,13 +103,6 @@ export default function AppHeader({ title, showBack = false }) {
       </div>
 
       <Space size={8}>
-        <Button
-          type="text"
-          icon={isDark ? <SunOutlined /> : <MoonOutlined />}
-          onClick={toggleTheme}
-          size="large"
-          style={{ color: 'var(--muted-foreground)' }}
-        />
         <Dropdown
           menu={{ items: menuItems }}
           placement="bottomRight"
