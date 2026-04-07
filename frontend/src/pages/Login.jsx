@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { Form, Input, Button, Card, Typography, App } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
+import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { login } from '../services/api';
 import { setCredentials } from '../store/slices/authSlice';
 
@@ -49,6 +50,31 @@ export default function Login() {
         <Text style={{ color: 'var(--muted-foreground)', fontSize: 14 }}>
           Your personal AI skincare advisor
         </Text>
+      </div>
+
+      {/* Animation */}
+      <div style={{ 
+        width: '100%', 
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: 24,
+        minHeight: 150,
+        backgroundColor: 'transparent'
+      }}>
+        <DotLottieReact
+          src="/animations/Spin.lottie"
+          loop
+          autoplay
+          renderConfig={{
+            autoResize: true,
+          }}
+          style={{ 
+            width: 150, 
+            height: 150,
+            display: 'block',
+          }}
+        />
       </div>
 
       <Card style={{
@@ -116,4 +142,3 @@ export default function Login() {
     </div>
   );
 }
-

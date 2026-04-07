@@ -12,6 +12,7 @@
     "@capacitor/network": "^6.0.0",
     "@capacitor/preferences": "^6.0.0",
     "@ionic/pwa-elements": "^3.4.0",
+    "@lottiefiles/dotlottie-react": "^0.18.10",
     "@mediapipe/camera_utils": "^0.3.1675466862",
     "@mediapipe/face_mesh": "^0.4.1633559619",
     "@reduxjs/toolkit": "^2.2.0",

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Form, Input, Button, Card, Typography, App, Checkbox } from 'antd';
 import { UserOutlined, LockOutlined, MailOutlined } from '@ant-design/icons';
+import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { register } from '../services/api';
 
 const { Title, Text } = Typography;
@@ -41,6 +42,31 @@ export default function Register() {
         <Text style={{ color: 'var(--muted-foreground)', fontSize: 14 }}>
           Your personal AI skincare advisor
         </Text>
+      </div>
+
+      {/* Animation */}
+      <div style={{ 
+        width: '100%', 
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: 24,
+        minHeight: 150,
+        backgroundColor: 'transparent'
+      }}>
+        <DotLottieReact
+          src="/animations/Sample Animation.lottie"
+          loop
+          autoplay
+          renderConfig={{
+            autoResize: true,
+          }}
+          style={{ 
+            width: 150, 
+            height: 150,
+            display: 'block',
+          }}
+        />
       </div>
 
       <Card style={{
@@ -168,4 +194,3 @@ export default function Register() {
     </div>
   );
 }
-
