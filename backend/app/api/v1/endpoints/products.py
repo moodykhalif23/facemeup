@@ -214,25 +214,6 @@ def update_product(
     )
 
 
-@router.delete("/admin/{sku}")
-def delete_product(
-    sku: str,
-    db: Session = Depends(get_db),
-    _: User = Depends(require_roles("admin")),
-) -> dict:
-    """Delete a product from the catalog."""
-    row = db.execute(
-        select(ProductCatalog).where(ProductCatalog.sku == sku)
-    ).scalar_one_or_none()
-    if not row:
-        raise AppError(404, "not_found", "Product not found")
-
-    db.delete(row)
-    db.commit()
-    _invalidate_product_cache(sku)
-    return {"deleted": sku}
-
-
 @router.post("/admin/seed", response_model=dict[str, int])
 def reseed_catalog(
     db: Session = Depends(get_db),
@@ -276,3 +257,22 @@ def bulk_delete_catalog(
         pass
 
     return {"deleted": total}
+
+
+@router.delete("/admin/{sku}")
+def delete_product(
+    sku: str,
+    db: Session = Depends(get_db),
+    _: User = Depends(require_roles("admin")),
+) -> dict:
+    """Delete a product from the catalog."""
+    row = db.execute(
+        select(ProductCatalog).where(ProductCatalog.sku == sku)
+    ).scalar_one_or_none()
+    if not row:
+        raise AppError(404, "not_found", "Product not found")
+
+    db.delete(row)
+    db.commit()
+    _invalidate_product_cache(sku)
+    return {"deleted": sku}
