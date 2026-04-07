@@ -1,6 +1,7 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { Layout } from 'antd';
+import BottomNav from './components/BottomNav';
 
 // Pages
 import Login from './pages/Login';
@@ -37,11 +38,32 @@ function AdminRoute({ children }) {
   return children;
 }
 
+const NO_NAV_PATHS = ['/login', '/register'];
+const ADMIN_PREFIX = '/admin';
+
+function AppShell({ children }) {
+  const { pathname } = useLocation();
+  const { token, user } = useSelector((state) => state.auth);
+  const showNav = token && user?.role !== 'admin'
+    && !NO_NAV_PATHS.includes(pathname)
+    && !pathname.startsWith(ADMIN_PREFIX);
+
+  return (
+    <>
+      <div style={{ paddingBottom: showNav ? 60 : 0 }}>
+        {children}
+      </div>
+      {showNav && <BottomNav />}
+    </>
+  );
+}
+
 function App() {
   return (
     <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Layout style={{ minHeight: '100vh' }}>
         <Content>
+          <AppShell>
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
@@ -168,6 +190,7 @@ function App() {
               element={<AdminRoute><AdminReports /></AdminRoute>}
             />
           </Routes>
+          </AppShell>
         </Content>
       </Layout>
     </BrowserRouter>
