@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
+import { useState, useEffect } from 'react';
 import { Layout, Typography, Space, Avatar, Dropdown, Button, Badge } from 'antd';
 import {
   UserOutlined,
@@ -20,6 +21,15 @@ export default function AppHeader({ title, showBack = false }) {
   const { user } = useSelector((state) => state.auth);
   const { items } = useSelector((state) => state.cart);
   const cartCount = items.reduce((total, item) => total + item.quantity, 0);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 0);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const handleLogout = () => {
     dispatch(logout());
@@ -77,15 +87,14 @@ export default function AppHeader({ title, showBack = false }) {
   return (
     <>
       <Header style={{
-        background: 'rgba(15, 8, 4, 0.72)',
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
+        background: isScrolled ? 'rgba(15, 8, 4, 0.72)' : 'transparent',
+        backdropFilter: isScrolled ? 'blur(20px)' : 'none',
+        WebkitBackdropFilter: isScrolled ? 'blur(20px)' : 'none',
         padding: '0 16px',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        boxShadow: '0 1px 0 rgba(249,115,22,0.2), 0 4px 32px rgba(0,0,0,0.35)',
-        borderBottom: '1px solid rgba(249,115,22,0.2)',
+        boxShadow: isScrolled ? '0 4px 32px rgba(0,0,0,0.35)' : 'none',
         position: 'sticky',
         top: 0,
         zIndex: 10,
