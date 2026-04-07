@@ -54,7 +54,7 @@ export default function Recommendations() {
     }
   };
 
-  const imgHeight = isMobile ? 160 : 180;
+  const imgHeight = isMobile ? 110 : 150;
 
   return (
     <Layout style={{ minHeight: '100vh', background: 'var(--background)' }}>
@@ -90,7 +90,7 @@ export default function Recommendations() {
                       }}
                       styles={{
                         body: {
-                          padding: isMobile ? '12px' : '16px',
+                          padding: isMobile ? '8px' : '16px',
                           display: 'flex',
                           flexDirection: 'column',
                           flex: 1,
@@ -152,21 +152,21 @@ export default function Recommendations() {
                         </div>
                       }
                     >
-                      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', marginBottom: 12 }}>
+                      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', marginBottom: isMobile ? 6 : 12 }}>
                         <Text
                           strong
                           style={{
-                            fontSize: isMobile ? 13 : 14,
+                            fontSize: isMobile ? 12 : 14,
                             display: 'block',
-                            marginBottom: 8,
-                            lineHeight: '1.4',
+                            marginBottom: isMobile ? 4 : 8,
+                            lineHeight: '1.3',
                             color: 'var(--card-foreground)',
                             flex: 1,
                           }}
                         >
                           {product.name}
                         </Text>
-                        {product.effects && product.effects.length > 0 && (
+                        {!isMobile && product.effects && product.effects.length > 0 && (
                           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
                             {product.effects.slice(0, 4).map((eff) => (
                               <span
@@ -185,7 +185,7 @@ export default function Recommendations() {
                             ))}
                           </div>
                         )}
-                        <Text strong style={{ fontSize: isMobile ? 15 : 17, color: 'var(--primary)', fontWeight: 700 }}>
+                        <Text strong style={{ fontSize: isMobile ? 13 : 17, color: 'var(--primary)', fontWeight: 700 }}>
                           KSh {product.price ? product.price.toLocaleString() : '—'}
                         </Text>
                       </div>
@@ -194,11 +194,11 @@ export default function Recommendations() {
                         type="primary"
                         icon={<ShoppingCartOutlined />}
                         onClick={(e) => { e.stopPropagation(); navigate(`/product/${product.id}`); }}
-                        size={isMobile ? 'middle' : 'large'}
+                        size={isMobile ? 'small' : 'large'}
                         block
                         style={{
-                          fontSize: isMobile ? 13 : 14,
-                          height: isMobile ? 38 : 42,
+                          fontSize: isMobile ? 12 : 14,
+                          height: isMobile ? 32 : 42,
                           fontWeight: 600,
                         }}
                       >
