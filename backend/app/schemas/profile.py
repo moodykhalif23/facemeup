@@ -5,10 +5,12 @@ from pydantic import BaseModel
 
 
 class ProfileRecord(BaseModel):
-    timestamp: datetime
+    id: int
+    created_at: datetime
     skin_type: str
     conditions: list[str]
     confidence: float
+    user_feedback: str | None = None
     questionnaire: dict[str, Any] | None = None
     skin_type_scores: dict[str, float] | None = None
     condition_scores: dict[str, float] | None = None

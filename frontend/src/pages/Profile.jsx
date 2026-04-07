@@ -68,8 +68,8 @@ export default function Profile() {
   };
 
   const timelineItems = historyItems.map((item) => {
-    const conditions = item.conditions
-      ? item.conditions.split(',').map((c) => c.trim()).filter(Boolean)
+    const conditions = Array.isArray(item.conditions)
+      ? item.conditions.filter(Boolean)
       : [];
     const feedback = feedbackMap[item.id];
     const isBusy   = !!submitting[item.id];
@@ -103,7 +103,7 @@ export default function Profile() {
 
           <div style={{ marginBottom: 10 }}>
             <Text style={{ color: 'var(--muted-foreground)', fontSize: 12 }}>
-              {new Date(item.created_at).toLocaleString()}
+              {new Date(item.created_at ?? item.timestamp).toLocaleString()}
               {item.inference_mode && (
                 <span style={{ marginLeft: 8, opacity: 0.6 }}>
                   · {item.inference_mode}

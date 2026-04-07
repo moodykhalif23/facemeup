@@ -15,10 +15,12 @@ def get_profile_history(db: Session, user_id: str) -> list[ProfileRecord]:
 
     return [
         ProfileRecord(
-            timestamp=row.created_at,
+            id=row.id,
+            created_at=row.created_at,
             skin_type=row.skin_type,
             conditions=[v for v in row.conditions_csv.split(",") if v],
             confidence=row.confidence,
+            user_feedback=row.user_feedback,
             questionnaire=json.loads(row.questionnaire_json) if row.questionnaire_json else None,
             skin_type_scores=json.loads(row.skin_type_scores_json) if row.skin_type_scores_json else None,
             condition_scores=json.loads(row.condition_scores_json) if row.condition_scores_json else None,

@@ -278,8 +278,8 @@ def run_skin_inference(
         cond_start  = len(skin_labels)
         cond_scores = final_probs[cond_start : cond_start + len(condition_labels)]
 
-        # Adaptive threshold: higher confidence → tighter threshold
-        threshold = 0.40 if skin_confidence > 0.7 else 0.35
+        # Adaptive threshold: higher confidence → tighter threshold (lowered for better recall)
+        threshold = 0.30 if skin_confidence > 0.7 else 0.25
 
         conditions = [
             condition_labels[i]
@@ -288,8 +288,24 @@ def run_skin_inference(
             and float(score) >= threshold
             and condition_labels[i] != "None detected"
         ]
+
+        # Always honour questionnaire-stated concerns — user knows their skin.
+        # If the model missed them (low score), add them anyway.
+        if questionnaire:
+            raw_concerns = questionnaire.get("concerns") or []
+            for c in raw_concerns:
+                mapped = _CONCERN_MAP.get(c)
+                if mapped and mapped not in conditions:
+                    conditions.append(mapped)
+
         if not conditions:
             conditions = ["None detected"]
+
+        # Blend skin type: if questionnaire strongly disagrees with model, use questionnaire
+        if questionnaire:
+            q_skin_type = _derive_skin_type_from_new_fields(questionnaire)
+            if q_skin_type != skin_type and skin_confidence < 0.60:
+                skin_type = q_skin_type
 
         confidence = float(max(skin_confidence, np.max(cond_scores) if len(cond_scores) > 0 else 0.5))
 
