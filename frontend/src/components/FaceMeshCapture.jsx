@@ -103,6 +103,17 @@ const drawArrow = (ctx, sx, sy, ex, ey, color, size = 12) => {
   ctx.restore();
 };
 
+/** Capture a clean frame from the video element (no mesh overlay). */
+const captureCleanFrame = (video, quality = 0.92) =>
+  new Promise((resolve) => {
+    if (!video || video.readyState < 2) { resolve(null); return; }
+    const tmp = document.createElement('canvas');
+    tmp.width  = video.videoWidth  || 640;
+    tmp.height = video.videoHeight || 480;
+    tmp.getContext('2d').drawImage(video, 0, 0, tmp.width, tmp.height);
+    tmp.toBlob((blob) => resolve(blob), 'image/jpeg', quality);
+  });
+
 // ─── Main component ───────────────────────────────────────────────────────────
 const FaceMeshCapture = ({ onCapture, onFaceDetected }) => {
   const videoRef   = useRef(null);
@@ -245,9 +256,9 @@ const FaceMeshCapture = ({ onCapture, onFaceDetected }) => {
               drawScene(ctx, landmarks, w, h, true, progress, phase.id);
 
               if (elapsed >= HOLD_MS) {
-                // Auto-capture this phase
+                // Auto-capture this phase — use video element for a clean frame
                 isCapturedRef.current = true;
-                canvas.toBlob((blob) => {
+                captureCleanFrame(videoRef.current).then((blob) => {
                   if (!blob || !mounted) { isCapturedRef.current = false; return; }
 
                   capturedPhasesRef.current = [
@@ -330,7 +341,7 @@ const FaceMeshCapture = ({ onCapture, onFaceDetected }) => {
     if (!faceDetected || isCapturedRef.current) return;
     isCapturedRef.current = true;
     const phaseIdx = currentPhaseRef.current;
-    canvasRef.current?.toBlob((blob) => {
+    captureCleanFrame(videoRef.current).then((blob) => {
       if (!blob) { isCapturedRef.current = false; return; }
       capturedPhasesRef.current = [
         ...capturedPhasesRef.current,
