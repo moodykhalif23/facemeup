@@ -23,60 +23,46 @@ export default function Home() {
   const cardMenuItems = [
     {
       title: 'Skin Analysis',
-      description: '',
+      description: 'Get AI-powered skin analysis',
       icon: <CameraOutlined style={{ fontSize: 32 }} />,
-      color: 'var(--primary)',
-      bg: 'var(--muted)',
       path: '/analysis',
     },
     {
       title: 'Recommendations',
-      description: '',
+      description: 'Personalized product picks',
       icon: <ShopOutlined style={{ fontSize: 32 }} />,
-      color: '#10B981',
-      bg: '#10B98115',
       path: '/recommendations',
     },
     {
       title: 'Profile History',
-      description: '',
+      description: 'View your analysis history',
       icon: <HistoryOutlined style={{ fontSize: 32 }} />,
-      color: '#7C3AED',
-      bg: '#7C3AED15',
       path: '/profile',
     },
     {
       title: 'My Reports',
-      description: '',
+      description: 'Download detailed reports',
       icon: <FileTextOutlined style={{ fontSize: 32 }} />,
-      color: '#0EA5E9',
-      bg: '#0EA5E915',
       path: '/reports',
     },
     {
       title: 'Shopping Cart',
-      description: '',
+      description: 'Review selected items',
       icon: <ShoppingCartOutlined style={{ fontSize: 32 }} />,
-      color: 'var(--chart-5)',
-      bg: 'var(--accent)',
       path: '/cart',
     },
     {
       title: 'Loyalty Rewards',
-      description: '',
+      description: 'Earn and redeem points',
       icon: <GiftOutlined style={{ fontSize: 32 }} />,
-      color: '#DB2777',
-      bg: '#DB277715',
       path: '/loyalty',
     },
   ];
 
   const adminCard = {
     title: 'Admin Panel',
-    description: '',
+    description: 'Manage system settings',
     icon: <SettingOutlined style={{ fontSize: 32 }} />,
-    color: '#ef4444',
-    bg: '#ef444415',
     path: '/admin',
   };
 
@@ -84,49 +70,47 @@ export default function Home() {
     <Layout style={{ minHeight: '100vh', background: 'var(--background)' }}>
       <AppHeader title="SkinCare AI" />
 
-      <Content style={{ padding: '16px' }}>
+      <Content style={{ padding: '24px' }}>
         <div style={{ maxWidth: 1200, margin: '0 auto' }}>
-          <div style={{ marginBottom: 24, textAlign: 'center', padding: '20px 0 8px' }}>
-            <div style={{
-              display: 'inline-block',
-              background: 'linear-gradient(135deg, rgba(249,115,22,0.12) 0%, rgba(251,146,60,0.07) 100%)',
-              backdropFilter: 'blur(12px)',
-              WebkitBackdropFilter: 'blur(12px)',
-              border: '1px solid rgba(249,115,22,0.25)',
-              borderRadius: 999,
-              padding: '8px 28px',
-              boxShadow: '0 2px 20px rgba(249,115,22,0.12)',
+          <div style={{ marginBottom: 48, textAlign: 'center', paddingTop: 16 }}>
+            <Title level={2} style={{
+              margin: '0 0 8px 0',
+              color: 'var(--card-foreground)',
+              fontSize: 28,
+              fontWeight: 600,
             }}>
-              <Title level={3} style={{
-                margin: 0,
-                fontFamily: "'Oxanium', sans-serif",
-                background: 'linear-gradient(135deg, #F97316 0%, #fb923c 55%, #fdba74 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-                fontSize: 20,
-              }}>
-                Welcome to Your Skincare Journey
-              </Title>
-            </div>
+              Welcome Back
+            </Title>
+            <Text style={{ fontSize: 15, color: 'var(--muted-foreground)' }}>
+              Analyze your skin and discover personalized skincare solutions
+            </Text>
           </div>
 
-          <Row gutter={[12, 12]}>
+          <Row gutter={[16, 16]}>
             {[...cardMenuItems, ...(user?.role === 'admin' ? [adminCard] : [])].map((item, index) => (
-              <Col xs={12} sm={12} md={8} key={index}>
+              <Col xs={12} sm={12} md={8} lg={6} key={index}>
                 <Card
                   hoverable
                   onClick={() => navigate(item.path)}
                   style={{
                     height: '100%',
-                    borderRadius: 6,
+                    borderRadius: 8,
                     boxShadow: 'var(--card-shadow)',
                     border: '1px solid var(--border)',
                     background: 'var(--card)',
                     cursor: 'pointer',
+                    transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-4px)';
+                    e.currentTarget.style.boxShadow = '0 12px 32px rgba(0,0,0,0.15)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = 'var(--card-shadow)';
                   }}
                   styles={{
-                    body: { padding: '20px 16px' }
+                    body: { padding: '24px 20px' }
                   }}
                 >
                   <div style={{ textAlign: 'center' }}>
@@ -134,23 +118,31 @@ export default function Home() {
                       display: 'inline-flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      width: 64,
-                      height: 64,
-                      borderRadius: 6,
-                      background: item.bg,
-                      color: item.color,
-                      marginBottom: 12,
+                      width: 56,
+                      height: 56,
+                      borderRadius: 8,
+                      background: 'var(--muted)',
+                      color: 'var(--primary)',
+                      marginBottom: 16,
+                      transition: 'all 0.3s ease',
                     }}>
                       {item.icon}
                     </div>
-                    <Title level={5} style={{ marginBottom: 4, fontSize: 15, color: 'var(--card-foreground)' }}>
+                    <Title level={5} style={{
+                      marginBottom: 8,
+                      fontSize: 15,
+                      fontWeight: 600,
+                      color: 'var(--card-foreground)',
+                    }}>
                       {item.title}
                     </Title>
-                    {item.description ? (
-                      <Text style={{ fontSize: 13, color: 'var(--muted-foreground)' }}>
-                        {item.description}
-                      </Text>
-                    ) : null}
+                    <Text style={{
+                      fontSize: 13,
+                      color: 'var(--muted-foreground)',
+                      lineHeight: 1.5,
+                    }}>
+                      {item.description}
+                    </Text>
                   </div>
                 </Card>
               </Col>
