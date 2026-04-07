@@ -54,9 +54,30 @@ export default function Results() {
           <Space direction="vertical" size="middle" style={{ width: '100%' }}>
             {/* Skin Profile */}
             <div>
-              <Title level={4} style={{ marginBottom: 16, textAlign: 'center', color: 'var(--foreground)' }}>
-                Skin Profile
-              </Title>
+              <div style={{ textAlign: 'center', marginBottom: 16 }}>
+                <span style={{
+                  display: 'inline-block',
+                  background: 'linear-gradient(135deg, rgba(249,115,22,0.12) 0%, rgba(251,146,60,0.07) 100%)',
+                  backdropFilter: 'blur(12px)',
+                  WebkitBackdropFilter: 'blur(12px)',
+                  border: '1px solid rgba(249,115,22,0.25)',
+                  borderRadius: 999,
+                  padding: '5px 22px',
+                  boxShadow: '0 2px 16px rgba(249,115,22,0.1)',
+                }}>
+                  <span style={{
+                    background: 'linear-gradient(135deg, #F97316 0%, #fb923c 55%, #fdba74 100%)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text',
+                    fontSize: 17,
+                    fontWeight: 700,
+                    fontFamily: "'Oxanium', sans-serif",
+                  }}>
+                    Skin Profile
+                  </span>
+                </span>
+              </div>
               <div style={{
                 background: 'var(--card)',
                 borderRadius: 6,
@@ -126,9 +147,30 @@ export default function Results() {
                 border: '1px solid var(--border)',
                 background: 'var(--card)',
               }}>
-                <Title level={4} style={{ marginBottom: 16, color: 'var(--card-foreground)' }}>
-                  Recommendations
-                </Title>
+                <div style={{ marginBottom: 16 }}>
+                  <span style={{
+                    display: 'inline-block',
+                    background: 'linear-gradient(135deg, rgba(139,92,246,0.12) 0%, rgba(56,189,248,0.08) 100%)',
+                    backdropFilter: 'blur(12px)',
+                    WebkitBackdropFilter: 'blur(12px)',
+                    border: '1px solid rgba(139,92,246,0.22)',
+                    borderRadius: 999,
+                    padding: '5px 22px',
+                    boxShadow: '0 2px 16px rgba(139,92,246,0.1)',
+                  }}>
+                    <span style={{
+                      background: 'linear-gradient(135deg, #F97316 0%, #fb923c 55%, #fdba74 100%)',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                      backgroundClip: 'text',
+                      fontSize: 17,
+                      fontWeight: 700,
+                      fontFamily: "'Oxanium', sans-serif",
+                    }}>
+                      Recommendations
+                    </span>
+                  </span>
+                </div>
                 <Space direction="vertical" style={{ width: '100%' }} size="middle">
                   {profile.recommendations.map((rec, index) => (
                     <Card

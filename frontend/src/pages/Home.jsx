@@ -86,10 +86,29 @@ export default function Home() {
 
       <Content style={{ padding: '16px' }}>
         <div style={{ maxWidth: 1200, margin: '0 auto' }}>
-          <div style={{ marginBottom: 24, textAlign: 'center', padding: '16px 0' }}>
-            <Title level={3} style={{ marginBottom: 8, color: 'var(--foreground)' }}>
-              Welcome to Your Skincare Journey
-            </Title>
+          <div style={{ marginBottom: 24, textAlign: 'center', padding: '20px 0 8px' }}>
+            <div style={{
+              display: 'inline-block',
+              background: 'linear-gradient(135deg, rgba(249,115,22,0.12) 0%, rgba(251,146,60,0.07) 100%)',
+              backdropFilter: 'blur(12px)',
+              WebkitBackdropFilter: 'blur(12px)',
+              border: '1px solid rgba(249,115,22,0.25)',
+              borderRadius: 999,
+              padding: '8px 28px',
+              boxShadow: '0 2px 20px rgba(249,115,22,0.12)',
+            }}>
+              <Title level={3} style={{
+                margin: 0,
+                fontFamily: "'Oxanium', sans-serif",
+                background: 'linear-gradient(135deg, #F97316 0%, #fb923c 55%, #fdba74 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+                fontSize: 20,
+              }}>
+                Welcome to Your Skincare Journey
+              </Title>
+            </div>
           </div>
 
           <Row gutter={[12, 12]}>

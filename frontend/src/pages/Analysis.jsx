@@ -121,10 +121,46 @@ export default function Analysis() {
         <div style={{ maxWidth: 600, margin: '0 auto' }}>
           <Space direction="vertical" size="large" style={{ width: '100%' }}>
               <div style={{ textAlign: 'center' }}>
-                <ScanOutlined style={{ fontSize: 48, color: 'var(--primary)', marginBottom: 16 }} />
-                <Title level={4} style={{ marginBottom: 8, color: 'var(--card-foreground)' }}>
-                  AI Face Detection
-                </Title>
+                <div style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: 72,
+                  height: 72,
+                  borderRadius: '50%',
+                  background: 'linear-gradient(135deg, rgba(249,115,22,0.15) 0%, rgba(251,146,60,0.08) 100%)',
+                  backdropFilter: 'blur(10px)',
+                  WebkitBackdropFilter: 'blur(10px)',
+                  border: '1px solid rgba(249,115,22,0.28)',
+                  boxShadow: '0 0 24px rgba(249,115,22,0.15)',
+                  marginBottom: 14,
+                }}>
+                  <ScanOutlined style={{ fontSize: 34, color: '#F97316' }} />
+                </div>
+                <div style={{ marginBottom: 10 }}>
+                  <span style={{
+                    display: 'inline-block',
+                    background: 'linear-gradient(135deg, rgba(249,115,22,0.12) 0%, rgba(251,146,60,0.07) 100%)',
+                    backdropFilter: 'blur(12px)',
+                    WebkitBackdropFilter: 'blur(12px)',
+                    border: '1px solid rgba(249,115,22,0.25)',
+                    borderRadius: 999,
+                    padding: '5px 22px',
+                    boxShadow: '0 2px 16px rgba(249,115,22,0.1)',
+                  }}>
+                    <span style={{
+                      background: 'linear-gradient(135deg, #F97316 0%, #fb923c 55%, #fdba74 100%)',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                      backgroundClip: 'text',
+                      fontSize: 17,
+                      fontWeight: 700,
+                      fontFamily: "'Oxanium', sans-serif",
+                    }}>
+                      AI Face Detection
+                    </span>
+                  </span>
+                </div>
                 <Text style={{ color: 'var(--muted-foreground)' }}>
                   Follow the on-screen prompts to capture 5 poses for a complete skin analysis.
                   The system will auto-capture each pose when you hold it steady.
