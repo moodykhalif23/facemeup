@@ -13,6 +13,8 @@ const COND_PALETTE = {
   Hyperpigmentation: '#8B5CF6',   // violet-500
   'Uneven tone':     '#F59E0B',   // amber-400
   Dehydration:       '#3B82F6',   // blue-500
+  Wrinkles:          '#EC4899',   // pink-500
+  Redness:           '#F97316',   // orange-500
   'None detected':   '#10B981',   // emerald-500
 };
 
@@ -250,17 +252,34 @@ export default function SkinCharts({ profile }) {
   const { skin_type, conditions = [], skin_type_scores, condition_scores, face_quality_score } = profile;
 
   const allSkinTypes  = ['Oily', 'Dry', 'Combination', 'Normal', 'Sensitive'];
-  const allConditions = ['Acne', 'Hyperpigmentation', 'Uneven tone', 'Dehydration', 'None detected'];
+  const allConditions = ['Acne', 'Hyperpigmentation', 'Uneven tone', 'Dehydration', 'Wrinkles', 'Redness', 'None detected'];
 
   const skinData = allSkinTypes.map((name) => ({
     name,
     value: skin_type_scores?.[name] ?? (name === skin_type ? profile.confidence : (1 - profile.confidence) / 4),
   }));
 
-  const condData = allConditions.map((name) => ({
-    name,
-    value: condition_scores?.[name] ?? (conditions.includes(name) ? 0.65 : 0.15),
-  }));
+  // `conditions` is the authoritative list (model + questionnaire merged).
+  // Override raw scores so charts always agree with the profile card:
+  //   - detected conditions get a score of at least 0.65
+  //   - "None detected" is zeroed out when real conditions are present
+  const hasRealConditions = conditions.some((c) => c !== 'None detected');
+  const condData = allConditions
+    .filter((name) => {
+      // Hide "None detected" entry from charts when real conditions exist
+      if (name === 'None detected' && hasRealConditions) return false;
+      return true;
+    })
+    .map((name) => {
+      const isDetected = conditions.includes(name);
+      const rawScore   = condition_scores?.[name] ?? 0;
+      const value = isDetected
+        ? Math.max(rawScore, 0.65)   // floor detected conditions at 65%
+        : name === 'None detected'
+          ? rawScore                 // show actual score for None detected
+          : Math.min(rawScore, 0.30); // cap undetected conditions at 30% so they don't dominate
+      return { name, value };
+    });
 
   const sectionTitle = {
     fontSize: 13,

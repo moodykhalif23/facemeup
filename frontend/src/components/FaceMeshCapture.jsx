@@ -168,24 +168,6 @@ const FaceMeshCapture = ({ onCapture, onFaceDetected }) => {
     drawContour(ctx, landmarks, RIGHT_BROW, w, h, false);
     drawContour(ctx, landmarks, NOSE_BRIDGE, w, h, false);
 
-    // Hold-progress ring around face center
-    if (poseMatches && progress > 0) {
-      const cx = landmarks[168].x * w;  // nose bridge = approx face center
-      const cy = landmarks[168].y * h;
-      const r  = 70;
-      const circ = 2 * Math.PI * r;
-      ctx.save();
-      ctx.lineWidth = 4;
-      ctx.lineCap   = 'round';
-      ctx.strokeStyle = '#10B981';
-      ctx.shadowColor = '#10B981';
-      ctx.shadowBlur  = 8;
-      ctx.beginPath();
-      ctx.arc(cx, cy, r, -Math.PI / 2, -Math.PI / 2 + (progress / 100) * 2 * Math.PI);
-      ctx.stroke();
-      ctx.restore();
-    }
-
     // Directional guide arrow
     const arrowColor = poseMatches ? '#10B981' : 'rgba(255,255,255,0.75)';
     const arrows = {
