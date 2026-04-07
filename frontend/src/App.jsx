@@ -1,7 +1,14 @@
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { Layout } from 'antd';
+import { useEffect } from 'react';
 import BottomNav from './components/BottomNav';
+
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => { window.scrollTo(0, 0); }, [pathname]);
+  return null;
+}
 
 // Pages
 import Login from './pages/Login';
@@ -63,6 +70,7 @@ function App() {
     <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Layout style={{ minHeight: '100vh' }}>
         <Content>
+          <ScrollToTop />
           <AppShell>
           <Routes>
             <Route path="/login" element={<Login />} />
