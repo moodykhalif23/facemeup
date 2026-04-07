@@ -282,7 +282,7 @@ export default function ProductDetail() {
       {isDesktop && (
         <div style={{ maxWidth: 1200, margin: '16px auto 0', padding: '0 16px' }}>
           <Card style={{
-            borderRadius: 6,
+            borderRadius: 4,
             boxShadow: 'var(--card-shadow)',
             border: '1px solid var(--border)',
             background: 'var(--card)',

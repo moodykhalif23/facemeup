@@ -155,7 +155,7 @@ export default function Reports() {
                         width: '100%',
                         aspectRatio: '1',
                         objectFit: 'cover',
-                        borderRadius: 6,
+                        borderRadius: 4,
                         border: '1px solid var(--border)',
                         display: 'block',
                       }}

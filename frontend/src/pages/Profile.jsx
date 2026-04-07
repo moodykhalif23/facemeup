@@ -94,7 +94,7 @@ export default function Profile() {
             marginBottom: 16,
             border: '1px solid var(--border)',
             background: 'var(--muted)',
-            borderRadius: 6,
+            borderRadius: 4,
           }}
         >
           <div style={{ marginBottom: 6 }}>

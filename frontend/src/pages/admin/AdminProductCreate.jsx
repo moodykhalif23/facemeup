@@ -160,7 +160,7 @@ export default function AdminProductCreate() {
           </Card>
 
           <Card
-            style={{ border: '1px solid var(--border)', background: 'var(--card)', borderRadius: 6 }}
+            style={{ border: '1px solid var(--border)', background: 'var(--card)', borderRadius: 4 }}
             styles={{ body: { padding: 20 } }}
           >
             <Title level={5} style={{ marginTop: 0, color: 'var(--foreground)' }}>Product Image</Title>
@@ -172,7 +172,7 @@ export default function AdminProductCreate() {
             <div
               style={{
                 border: '1px dashed var(--border)',
-                borderRadius: 6,
+                borderRadius: 4,
                 padding: 16,
                 background: 'var(--muted)',
                 minHeight: 220,

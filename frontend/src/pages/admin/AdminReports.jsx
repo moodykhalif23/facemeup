@@ -261,7 +261,7 @@ export default function AdminReports() {
                         width: '100%',
                         aspectRatio: '1',
                         objectFit: 'cover',
-                        borderRadius: 6,
+                        borderRadius: 4,
                         border: '1px solid var(--border)',
                         display: 'block',
                       }}
@@ -273,7 +273,7 @@ export default function AdminReports() {
               <img
                 src={selected.report_image_base64}
                 alt="Analysis capture"
-                style={{ width: '100%', borderRadius: 6, border: '1px solid var(--border)' }}
+                style={{ width: '100%', borderRadius: 4, border: '1px solid var(--border)' }}
               />
             ) : null}
 

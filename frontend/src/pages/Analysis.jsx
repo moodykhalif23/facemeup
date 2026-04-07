@@ -136,7 +136,7 @@ export default function Analysis() {
                       style={{
                         maxWidth: '100%',
                         maxHeight: 260,
-                        borderRadius: 6,
+                        borderRadius: 4,
                         border: '2px solid #10B981',
                         objectFit: 'contain',
                         background: 'var(--muted)',
@@ -155,7 +155,7 @@ export default function Analysis() {
                             style={{
                               fontSize: 11,
                               padding: '2px 8px',
-                              borderRadius: 6,
+                              borderRadius: 4,
                               background: 'var(--muted)',
                               border: '1px solid var(--border)',
                               color: 'var(--muted-foreground)',
@@ -326,7 +326,7 @@ export default function Analysis() {
               {!capturedImage && (
                 <div style={{
                   padding: '16px',
-                  borderRadius: 6,
+                  borderRadius: 4,
                   background: 'var(--muted)',
                   border: '1px solid var(--border)',
                 }}>

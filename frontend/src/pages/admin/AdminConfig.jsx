@@ -41,7 +41,7 @@ function ActionCard({ icon, title, description, buttonLabel, buttonProps, onActi
       style={{
         border: `1px solid ${danger ? '#fca5a544' : 'var(--border)'}`,
         background: 'var(--card)',
-        borderRadius: 6,
+        borderRadius: 4,
       }}
       styles={{ body: { padding: 20 } }}
     >
@@ -49,7 +49,7 @@ function ActionCard({ icon, title, description, buttonLabel, buttonProps, onActi
         <div style={{
           width: 42,
           height: 42,
-          borderRadius: 6,
+          borderRadius: 4,
           background: danger ? '#fca5a522' : 'var(--muted)',
           display: 'flex',
           alignItems: 'center',
@@ -221,7 +221,7 @@ export default function AdminConfig() {
 
       {/* API reference */}
       <Card
-        style={{ border: '1px solid var(--border)', background: 'var(--card)', borderRadius: 6 }}
+        style={{ border: '1px solid var(--border)', background: 'var(--card)', borderRadius: 4 }}
         styles={{ body: { padding: 0 } }}
       >
         <List

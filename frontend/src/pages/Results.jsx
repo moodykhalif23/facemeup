@@ -23,7 +23,7 @@ export default function Results() {
           justifyContent: 'center'
         }}>
           <Card style={{
-            borderRadius: 6,
+            borderRadius: 4,
             textAlign: 'center',
             border: '1px solid var(--border)',
             background: 'var(--card)',
@@ -56,7 +56,7 @@ export default function Results() {
             <div>
               <div style={{
                 background: 'var(--card)',
-                borderRadius: 6,
+                borderRadius: 4,
                 overflow: 'hidden',
                 boxShadow: 'var(--card-shadow)',
                 border: '1px solid var(--border)',
@@ -118,7 +118,7 @@ export default function Results() {
 
             {profile.recommendations && (
               <Card style={{
-                borderRadius: 6,
+                borderRadius: 4,
                 boxShadow: 'var(--card-shadow)',
                 border: '1px solid var(--border)',
                 background: 'var(--card)',

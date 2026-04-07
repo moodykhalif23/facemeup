@@ -118,7 +118,7 @@ export default function Home() {
                   onClick={() => navigate(item.path)}
                   style={{
                     height: '100%',
-                    borderRadius: 8,
+                    borderRadius: 4,
                     boxShadow: 'var(--card-shadow)',
                     border: '1px solid var(--border)',
                     background: 'var(--card)',
@@ -144,7 +144,7 @@ export default function Home() {
                       justifyContent: 'center',
                       width: 48,
                       height: 48,
-                      borderRadius: 8,
+                      borderRadius: 4,
                       background: 'var(--muted)',
                       color: 'var(--primary)',
                       marginBottom: 12,

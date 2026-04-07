@@ -110,7 +110,7 @@ export default function AdminDashboard() {
                 style={{
                   border: '1px solid var(--border)',
                   background: 'var(--card)',
-                  borderRadius: 6,
+                  borderRadius: 4,
                   minHeight: 132,
                 }}
                 styles={{ body: { padding: '16px 20px', height: '100%', display: 'flex', alignItems: 'center' } }}
@@ -119,7 +119,7 @@ export default function AdminDashboard() {
                   <div style={{
                     width: 40,
                     height: 40,
-                    borderRadius: 6,
+                    borderRadius: 4,
                     background: s.color + '22',
                     display: 'flex',
                     alignItems: 'center',
@@ -153,7 +153,7 @@ export default function AdminDashboard() {
             <Col xs={24} md={10}>
               <Card
                 title={<span style={{ color: 'var(--foreground)' }}>Skin Type Distribution</span>}
-                style={{ border: '1px solid var(--border)', background: 'var(--card)', borderRadius: 6 }}
+                style={{ border: '1px solid var(--border)', background: 'var(--card)', borderRadius: 4 }}
               >
                 {skinChartOption && Object.keys(stats.skin_distribution).length > 0 ? (
                   <ReactECharts option={skinChartOption} style={{ height: 280 }} />
@@ -168,7 +168,7 @@ export default function AdminDashboard() {
             <Col xs={24} md={14}>
               <Card
                 title={<span style={{ color: 'var(--foreground)' }}>Recent Orders</span>}
-                style={{ border: '1px solid var(--border)', background: 'var(--card)', borderRadius: 6, overflow: 'hidden' }}
+                style={{ border: '1px solid var(--border)', background: 'var(--card)', borderRadius: 4, overflow: 'hidden' }}
               >
                 <Table
                   dataSource={stats?.recent_orders ?? []}

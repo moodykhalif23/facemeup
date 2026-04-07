@@ -103,7 +103,7 @@ export default function Cart() {
           {items.length > 0 ? (
             <>
               <Card style={{
-                borderRadius: 6,
+                borderRadius: 4,
                 boxShadow: 'var(--card-shadow)',
                 border: '1px solid var(--border)',
                 background: 'var(--card)',
@@ -146,7 +146,7 @@ export default function Cart() {
               </Card>
 
               <Card style={{
-                borderRadius: 6,
+                borderRadius: 4,
                 boxShadow: 'var(--card-shadow)',
                 border: '1px solid var(--border)',
                 background: 'var(--card)',
