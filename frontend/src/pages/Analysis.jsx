@@ -115,7 +115,7 @@ export default function Analysis() {
 
   return (
     <Layout style={{ minHeight: '100vh', background: 'var(--background)' }}>
-      <AppHeader title="AI Skin Analysis" showBack />
+      <AppHeader title="AI Skin Analysis" />
 
       <Content style={{ padding: '16px' }}>
         <div style={{ maxWidth: 600, margin: '0 auto' }}>

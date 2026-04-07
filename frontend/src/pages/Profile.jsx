@@ -170,7 +170,7 @@ export default function Profile() {
 
   return (
     <Layout style={{ minHeight: '100vh', background: 'var(--background)' }}>
-      <AppHeader title="Profile History" showBack />
+      <AppHeader title="Profile History" />
 
       <Content style={{ padding: '24px' }}>
         <div style={{ maxWidth: 800, margin: '0 auto' }}>
