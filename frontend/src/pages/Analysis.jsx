@@ -119,16 +119,7 @@ export default function Analysis() {
 
       <Content style={{ padding: '16px' }}>
         <div style={{ maxWidth: 600, margin: '0 auto' }}>
-          <Card
-            style={{
-              borderRadius: 6,
-              boxShadow: 'var(--card-shadow)',
-              border: '1px solid var(--border)',
-              background: 'var(--card)',
-            }}
-            styles={{ body: { padding: 24 } }}
-          >
-            <Space direction="vertical" size="large" style={{ width: '100%' }}>
+          <Space direction="vertical" size="large" style={{ width: '100%' }}>
               <div style={{ textAlign: 'center' }}>
                 <ScanOutlined style={{ fontSize: 48, color: 'var(--primary)', marginBottom: 16 }} />
                 <Title level={4} style={{ marginBottom: 8, color: 'var(--card-foreground)' }}>
@@ -361,8 +352,7 @@ export default function Analysis() {
                   </ul>
                 </div>
               )}
-            </Space>
-          </Card>
+          </Space>
         </div>
       </Content>
     </Layout>

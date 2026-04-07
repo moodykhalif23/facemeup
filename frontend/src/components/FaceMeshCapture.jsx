@@ -179,18 +179,6 @@ const FaceMeshCapture = ({ onCapture, onFaceDetected }) => {
     drawContour(ctx, landmarks, RIGHT_BROW, w, h, false);
     drawContour(ctx, landmarks, NOSE_BRIDGE, w, h, false);
 
-    // Directional guide arrow
-    const arrowColor = poseMatches ? '#10B981' : 'rgba(255,255,255,0.75)';
-    const arrows = {
-      up:    { sx: w/2, sy: h*0.15, ex: w/2, ey: h*0.04 },
-      down:  { sx: w/2, sy: h*0.82, ex: w/2, ey: h*0.94 },
-      left:  { sx: w*0.12, sy: h/2, ex: w*0.03, ey: h/2 },
-      right: { sx: w*0.88, sy: h/2, ex: w*0.97, ey: h/2 },
-    };
-    if (arrows[phaseId]) {
-      const { sx, sy, ex, ey } = arrows[phaseId];
-      drawArrow(ctx, sx, sy, ex, ey, arrowColor, 14);
-    }
   };
 
   // ── faceMesh initialization ────────────────────────────────────────────────
@@ -445,9 +433,6 @@ const FaceMeshCapture = ({ onCapture, onFaceDetected }) => {
                   : 'var(--border)',
               transition: 'background 0.3s',
             }} />
-            <span style={{ fontSize: 9, color: 'var(--muted-foreground)', letterSpacing: 0.5 }}>
-              {p.emoji}
-            </span>
           </div>
         ))}
       </div>
