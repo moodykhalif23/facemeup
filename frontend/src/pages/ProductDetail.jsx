@@ -83,7 +83,7 @@ export default function ProductDetail() {
       <AppHeader title="Product Details" showBack />
 
       <Content style={{ overflowX: 'hidden' }}>
-        <div style={{ padding: '16px 16px 100px', maxWidth: 1200, margin: '0 auto', width: '100%' }}>
+        <div style={{ padding: '16px', maxWidth: 1200, margin: '0 auto', width: '100%' }}>
           <div style={{
             display: 'grid',
             gridTemplateColumns: isDesktop ? '1fr 1fr' : '1fr',
@@ -97,11 +97,8 @@ export default function ProductDetail() {
               const imgH = isDesktop ? 400 : 300;
               return (
                 <div style={{
-                  borderRadius: 6,
-                  overflow: 'hidden',
                   height: imgH,
                   position: 'relative',
-                  background: 'var(--muted)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -243,43 +240,40 @@ export default function ProductDetail() {
       {/* Fixed Bottom Bar - Mobile */}
       {!isDesktop && (
         <div style={{
-          position: 'fixed',
-          bottom: 60,
-          left: 0,
-          right: 0,
           background: 'var(--card)',
           backdropFilter: 'blur(10px)',
           padding: '12px 16px',
           boxShadow: '0 -2px 12px rgba(0,0,0,0.12)',
           borderTop: '1px solid var(--border)',
-          zIndex: 10
         }}>
-          <div style={{ display: 'flex', gap: 12, alignItems: 'flex-end' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', minWidth: 80 }}>
-              <Text style={{ fontSize: 12, marginBottom: 4, color: 'var(--muted-foreground)' }}>Quantity</Text>
-              <InputNumber
-                min={1}
-                max={10}
-                value={quantity}
-                onChange={setQuantity}
+          <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+            <div style={{ display: 'flex', gap: 12, alignItems: 'flex-end' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', minWidth: 80 }}>
+                <Text style={{ fontSize: 12, marginBottom: 4, color: 'var(--muted-foreground)' }}>Quantity</Text>
+                <InputNumber
+                  min={1}
+                  max={10}
+                  value={quantity}
+                  onChange={setQuantity}
+                  size="large"
+                  style={{ width: 80, fontSize: 16 }}
+                  controls={{
+                    upIcon: <span style={{ fontSize: 16 }}>+</span>,
+                    downIcon: <span style={{ fontSize: 16 }}>−</span>
+                  }}
+                />
+              </div>
+              <Button
+                type="primary"
+                icon={<ShoppingCartOutlined />}
+                onClick={handleAddToCart}
                 size="large"
-                style={{ width: 80, fontSize: 16 }}
-                controls={{
-                  upIcon: <span style={{ fontSize: 16 }}>+</span>,
-                  downIcon: <span style={{ fontSize: 16 }}>−</span>
-                }}
-              />
+                block
+                style={{ height: 52, fontSize: 16, fontWeight: 600, flex: 1 }}
+              >
+                Add to Cart
+              </Button>
             </div>
-            <Button
-              type="primary"
-              icon={<ShoppingCartOutlined />}
-              onClick={handleAddToCart}
-              size="large"
-              block
-              style={{ height: 52, fontSize: 16, fontWeight: 600, flex: 1 }}
-            >
-              Add to Cart
-            </Button>
           </div>
         </div>
       )}
