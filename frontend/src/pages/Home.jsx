@@ -112,7 +112,7 @@ export default function Home() {
 
           <Row gutter={[12, 12]}>
             {[...cardMenuItems, ...(user?.role === 'admin' ? [adminCard] : [])].map((item, index) => (
-              <Col xs={12} sm={12} md={8} lg={6} key={index}>
+              <Col xs={12} sm={12} md={12} lg={8} key={index}>
                 <Card
                   hoverable
                   onClick={() => navigate(item.path)}
