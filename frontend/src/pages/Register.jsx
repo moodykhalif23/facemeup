@@ -55,7 +55,7 @@ export default function Register() {
         backgroundColor: 'transparent'
       }}>
         <DotLottieReact
-          src="/animations/Sample Animation.lottie"
+          src="/animations/Face.lottie"
           loop
           autoplay
           renderConfig={{

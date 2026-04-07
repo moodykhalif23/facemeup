@@ -63,7 +63,7 @@ export default function Login() {
         backgroundColor: 'transparent'
       }}>
         <DotLottieReact
-          src="/animations/Spin.lottie"
+          src="/animations/login.lottie"
           loop
           autoplay
           renderConfig={{
