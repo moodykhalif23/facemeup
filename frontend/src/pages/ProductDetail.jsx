@@ -92,65 +92,54 @@ export default function ProductDetail() {
             width: '100%'
           }}>
             {/* Product Image */}
-            <Card
-              style={{
-                borderRadius: 6,
-                overflow: 'hidden',
-                boxShadow: 'var(--card-shadow)',
-                border: '1px solid var(--border)',
-                background: 'var(--card)',
-                height: 'fit-content',
-                width: '100%',
-              }}
-              styles={{ body: { padding: 0 } }}
-            >
-              {(() => {
-                const proxied = getProxiedImageUrl(product.image_url);
-                const imgH = isDesktop ? 400 : 300;
-                return (
+            {(() => {
+              const proxied = getProxiedImageUrl(product.image_url);
+              const imgH = isDesktop ? 400 : 300;
+              return (
+                <div style={{
+                  borderRadius: 6,
+                  overflow: 'hidden',
+                  height: imgH,
+                  position: 'relative',
+                  background: 'var(--muted)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '100%',
+                }}>
+                  {proxied && (
+                    <img
+                      src={proxied}
+                      alt={product.name}
+                      style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block', padding: '12px' }}
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                        e.currentTarget.nextSibling.style.display = 'flex';
+                      }}
+                    />
+                  )}
                   <div style={{
-                    height: imgH,
-                    overflow: 'hidden',
-                    position: 'relative',
-                    background: 'var(--muted)',
-                    display: 'flex',
+                    display: proxied ? 'none' : 'flex',
+                    width: '100%',
+                    height: '100%',
                     alignItems: 'center',
                     justifyContent: 'center',
+                    position: proxied ? 'absolute' : 'relative',
+                    top: 0, left: 0,
                   }}>
-                    {proxied && (
-                      <img
-                        src={proxied}
-                        alt={product.name}
-                        style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block', padding: '12px' }}
-                        onError={(e) => {
-                          e.currentTarget.style.display = 'none';
-                          e.currentTarget.nextSibling.style.display = 'flex';
-                        }}
-                      />
-                    )}
-                    <div style={{
-                      display: proxied ? 'none' : 'flex',
-                      width: '100%',
-                      height: '100%',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      position: proxied ? 'absolute' : 'relative',
-                      top: 0, left: 0,
+                    <span style={{
+                      fontSize: 13,
+                      fontWeight: 600,
+                      color: 'var(--muted-foreground)',
+                      textTransform: 'uppercase',
+                      letterSpacing: 2,
                     }}>
-                      <span style={{
-                        fontSize: 13,
-                        fontWeight: 600,
-                        color: 'var(--muted-foreground)',
-                        textTransform: 'uppercase',
-                        letterSpacing: 2,
-                      }}>
-                        {product.category || 'Skincare'}
-                      </span>
-                    </div>
+                      {product.category || 'Skincare'}
+                    </span>
                   </div>
-                );
-              })()}
-            </Card>
+                </div>
+              );
+            })()}
 
             {/* Product Info */}
             <div style={{ width: '100%', maxWidth: '100%', overflow: 'hidden' }}>
@@ -255,7 +244,7 @@ export default function ProductDetail() {
       {!isDesktop && (
         <div style={{
           position: 'fixed',
-          bottom: 0,
+          bottom: 60,
           left: 0,
           right: 0,
           background: 'var(--card)',
