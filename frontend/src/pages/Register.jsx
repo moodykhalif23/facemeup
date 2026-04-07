@@ -36,7 +36,14 @@ export default function Register() {
       padding: '20px'
     }}>
       <div style={{ textAlign: 'center', marginBottom: 24 }}>
-        <Title level={2} style={{ margin: 0, color: 'var(--foreground)', fontFamily: "'Oxanium', sans-serif" }}>
+        <Title level={2} style={{
+          margin: 0,
+          fontFamily: "'Oxanium', sans-serif",
+          background: 'linear-gradient(135deg, #F97316 0%, #fb923c 55%, #fdba74 100%)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          backgroundClip: 'text',
+        }}>
           SkinCare AI
         </Title>
         <Text style={{ color: 'var(--muted-foreground)', fontSize: 14 }}>
@@ -72,7 +79,7 @@ export default function Register() {
       <Card style={{
         width: '100%',
         maxWidth: 400,
-        borderRadius: 6,
+        borderRadius: 2,
         border: '1px solid var(--border)',
         background: 'var(--card)',
         boxShadow: 'var(--card-shadow)',
