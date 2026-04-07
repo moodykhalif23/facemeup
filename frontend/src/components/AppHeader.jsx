@@ -141,8 +141,9 @@ export default function AppHeader({ title, showBack = false }) {
           <Button
             icon={<ArrowLeftOutlined />}
             onClick={() => navigate(-1)}
-            type="text"
-            style={{ color: 'var(--foreground)', paddingLeft: 0 }}
+            type="primary"
+            size="small"
+            style={{ fontSize: 12 }}
           >
             Back
           </Button>

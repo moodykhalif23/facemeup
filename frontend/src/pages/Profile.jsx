@@ -76,7 +76,17 @@ export default function Profile() {
 
     return {
       key: item.id,
-      dot: <ClockCircleOutlined style={{ color: 'var(--primary)' }} />,
+      dot: (
+        <ClockCircleOutlined 
+          style={{ 
+            color: 'var(--primary)',
+            fontSize: 16,
+            background: 'transparent',
+            border: 'none',
+            padding: 0,
+          }} 
+        />
+      ),
       children: (
         <Card
           size="small"
