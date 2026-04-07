@@ -105,7 +105,7 @@ export default function Reports() {
                         )}
                         description={(
                           <Text style={{ color: 'var(--muted-foreground)' }}>
-                            {formatDateTime(item.timestamp)}
+                            {formatDateTime(item.created_at)}
                           </Text>
                         )}
                       />
@@ -129,105 +129,111 @@ export default function Reports() {
         }}
       >
         {selected && (
-          <div ref={reportRef}>
-            <Card style={{ border: '1px solid var(--border)', background: 'var(--card)', borderRadius: 6 }}>
-              <Space align="start">
-                <Avatar
-                  size={72}
-                  src={selected.report_image_base64 || undefined}
-                  style={{ background: 'var(--muted)' }}
-                />
-                <div>
-                  <Text strong style={{ fontSize: 16, color: 'var(--foreground)' }}>
-                    {selected.skin_type}
-                  </Text>
-                  <div style={{ marginTop: 8 }}>
-                    <Text style={{ color: 'var(--muted-foreground)' }}>Tested at {formatDateTime(selected.timestamp)}</Text>
-                  </div>
-                </div>
-              </Space>
-              <div style={{ marginTop: 8 }}>
-                <Text style={{ color: 'var(--muted-foreground)' }}>
-                  {selected.questionnaire?.gender ? `Gender: ${selected.questionnaire.gender}` : ''}{' '}
-                  {selected.questionnaire?.age ? `Age: ${selected.questionnaire.age}` : ''}
+          <div ref={reportRef} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+
+            {/* Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Tag color="blue" style={{ fontSize: 14, padding: '4px 12px' }}>{selected.skin_type}</Tag>
+              <Text style={{ color: 'var(--muted-foreground)', fontSize: 12 }}>
+                {formatDateTime(selected.created_at)}
+              </Text>
+            </div>
+
+            {/* Captured poses grid */}
+            {selected.capture_images?.length > 0 ? (
+              <div>
+                <Text strong style={{ color: 'var(--foreground)', fontSize: 13, display: 'block', marginBottom: 8 }}>
+                  Captured Poses ({selected.capture_images.length})
                 </Text>
-              </div>
-              {selected.questionnaire && (
-                <div style={{ marginTop: 10 }}>
-                  <Text strong style={{ color: 'var(--foreground)' }}>Questionnaire</Text>
-                  <div style={{ marginTop: 6, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                    {selected.questionnaire.skin_texture && (
-                      <Tag>Texture: {selected.questionnaire.skin_texture}</Tag>
-                    )}
-                    {selected.questionnaire.moisture_level && (
-                      <Tag>Moisture: {selected.questionnaire.moisture_level}</Tag>
-                    )}
-                    {selected.questionnaire.oil_levels && (
-                      <Tag>Oil: {selected.questionnaire.oil_levels}</Tag>
-                    )}
-                    {selected.questionnaire.routine && (
-                      <Tag>Routine: {selected.questionnaire.routine}</Tag>
-                    )}
-                    {selected.questionnaire.routine_other && (
-                      <Tag>Routine notes: {selected.questionnaire.routine_other}</Tag>
-                    )}
-                    {selected.questionnaire.skin_feel && (
-                      <Tag>Feel: {selected.questionnaire.skin_feel}</Tag>
-                    )}
-                    {(selected.questionnaire.concerns || []).map((c) => (
-                      <Tag key={`q-${c}`}>{c}</Tag>
-                    ))}
-                  </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
+                  {selected.capture_images.map((img, i) => (
+                    <img
+                      key={i}
+                      src={img}
+                      alt={`Pose ${i + 1}`}
+                      style={{
+                        width: '100%',
+                        aspectRatio: '1',
+                        objectFit: 'cover',
+                        borderRadius: 6,
+                        border: '1px solid var(--border)',
+                        display: 'block',
+                      }}
+                    />
+                  ))}
                 </div>
-              )}
-              <Divider style={{ borderColor: 'var(--border)' }} />
+              </div>
+            ) : selected.report_image_base64 ? (
+              <img
+                src={selected.report_image_base64}
+                alt="Analysis capture"
+                style={{ width: '100%', borderRadius: 6, border: '1px solid var(--border)' }}
+              />
+            ) : null}
+
+            <Divider style={{ borderColor: 'var(--border)', margin: '0' }} />
+
+            {/* Conditions + confidence */}
+            <div>
               <Text strong style={{ color: 'var(--foreground)' }}>Conditions</Text>
-              <div style={{ marginTop: 8, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+              <div style={{ marginTop: 6, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                 {(selected.conditions || []).length > 0
                   ? selected.conditions.map((c) => <Tag key={c}>{c}</Tag>)
                   : <Text type="secondary">None detected</Text>}
               </div>
-              <Divider style={{ borderColor: 'var(--border)' }} />
-              <Text strong style={{ color: 'var(--foreground)' }}>Confidence</Text>
-              <Progress percent={Math.round((selected.confidence ?? 0) * 100)} strokeColor="var(--primary)" />
-            </Card>
+              <div style={{ marginTop: 12 }}>
+                <Text strong style={{ color: 'var(--foreground)' }}>Confidence</Text>
+                <Progress percent={Math.round((selected.confidence ?? 0) * 100)} strokeColor="var(--primary)" style={{ marginTop: 4 }} />
+              </div>
+            </div>
 
+            {/* Questionnaire */}
+            {selected.questionnaire && (
+              <div>
+                <Text strong style={{ color: 'var(--foreground)' }}>Questionnaire</Text>
+                <div style={{ marginTop: 6, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                  {selected.questionnaire.skin_texture && <Tag>Texture: {selected.questionnaire.skin_texture}</Tag>}
+                  {selected.questionnaire.moisture_level && <Tag>Moisture: {selected.questionnaire.moisture_level}</Tag>}
+                  {selected.questionnaire.oil_levels && <Tag>Oil: {selected.questionnaire.oil_levels}</Tag>}
+                  {selected.questionnaire.routine && <Tag>Routine: {selected.questionnaire.routine}</Tag>}
+                  {selected.questionnaire.routine_other && <Tag>Notes: {selected.questionnaire.routine_other}</Tag>}
+                  {selected.questionnaire.skin_feel && <Tag>Feel: {selected.questionnaire.skin_feel}</Tag>}
+                  {(selected.questionnaire.concerns || []).map((c) => <Tag key={`q-${c}`}>{c}</Tag>)}
+                </div>
+              </div>
+            )}
+
+            {/* Score breakdown */}
             {(selected.skin_type_scores || selected.condition_scores) && (
-              <>
-                <Divider style={{ borderColor: 'var(--border)' }} />
-                <Card style={{ border: '1px solid var(--border)', background: 'var(--card)', borderRadius: 6 }}>
-                  <Text strong style={{ color: 'var(--foreground)' }}>Score Breakdown</Text>
-                  <div style={{ marginTop: 10 }}>
-                    {selected.skin_type_scores && (
-                      <>
-                        <Text style={{ color: 'var(--muted-foreground)' }}>Skin Type Scores</Text>
-                        <div style={{ marginTop: 6 }}>
-                          {Object.entries(selected.skin_type_scores).map(([k, v]) => (
-                            <div key={k} style={{ marginBottom: 6 }}>
-                              <Text style={{ fontSize: 12, color: 'var(--foreground)' }}>{k}</Text>
-                              <Progress percent={Math.round(v * 100)} size="small" />
-                            </div>
-                          ))}
+              <div>
+                <Divider style={{ borderColor: 'var(--border)', margin: '0' }} />
+                {selected.skin_type_scores && (
+                  <>
+                    <Text strong style={{ color: 'var(--foreground)' }}>Skin Type Scores</Text>
+                    <div style={{ marginTop: 6, marginBottom: 12 }}>
+                      {Object.entries(selected.skin_type_scores).map(([k, v]) => (
+                        <div key={k} style={{ marginBottom: 4 }}>
+                          <Text style={{ fontSize: 12, color: 'var(--foreground)' }}>{k}</Text>
+                          <Progress percent={Math.round(v * 100)} size="small" />
                         </div>
-                      </>
-                    )}
-                    {selected.condition_scores && (
-                      <>
-                        <Divider style={{ borderColor: 'var(--border)' }} />
-                        <Text style={{ color: 'var(--muted-foreground)' }}>Condition Scores</Text>
-                        <div style={{ marginTop: 6 }}>
-                          {Object.entries(selected.condition_scores).map(([k, v]) => (
-                            <div key={k} style={{ marginBottom: 6 }}>
-                              <Text style={{ fontSize: 12, color: 'var(--foreground)' }}>{k}</Text>
-                              <Progress percent={Math.round(v * 100)} size="small" />
-                            </div>
-                          ))}
+                      ))}
+                    </div>
+                  </>
+                )}
+                {selected.condition_scores && (
+                  <>
+                    <Text strong style={{ color: 'var(--foreground)' }}>Condition Scores</Text>
+                    <div style={{ marginTop: 6 }}>
+                      {Object.entries(selected.condition_scores).map(([k, v]) => (
+                        <div key={k} style={{ marginBottom: 4 }}>
+                          <Text style={{ fontSize: 12, color: 'var(--foreground)' }}>{k}</Text>
+                          <Progress percent={Math.round(v * 100)} size="small" />
                         </div>
-                      </>
-                    )}
-                  </div>
-                </Card>
-              </>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
             )}
           </div>
         )}
