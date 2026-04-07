@@ -72,7 +72,7 @@ export default function Recommendations() {
                 const proxied = getProxiedImageUrl(product.image_url);
 
                 return (
-                  <Col xs={24} sm={12} md={8} lg={6} key={product.id}>
+                  <Col xs={12} sm={12} md={8} lg={6} key={product.id}>
                     <Card
                       hoverable
                       onClick={() => navigate(`/product/${product.id}`)}
