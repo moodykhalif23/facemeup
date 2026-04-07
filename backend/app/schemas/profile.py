@@ -16,6 +16,7 @@ class ProfileRecord(BaseModel):
     condition_scores: dict[str, float] | None = None
     inference_mode: str | None = None
     report_image_base64: str | None = None
+    capture_images: list[str] | None = None
 
 
 class ProfileUpdate(BaseModel):

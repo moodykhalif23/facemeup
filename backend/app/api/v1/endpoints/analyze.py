@@ -87,6 +87,18 @@ def analyze(
     questionnaire = payload.questionnaire.model_dump() if payload.questionnaire else None
     profile, mode = run_skin_inference(payload.image_base64, landmarks, questionnaire)
     thumbnail = _make_report_thumbnail(payload.image_base64)
+
+    # Thumbnail all pose captures for storage (skip if identical to main image)
+    capture_thumbs: list[str] | None = None
+    if payload.capture_images:
+        capture_thumbs = []
+        for img_b64 in payload.capture_images:
+            t = _make_report_thumbnail(img_b64)
+            if t:
+                capture_thumbs.append(t)
+        if not capture_thumbs:
+            capture_thumbs = None
+
     append_profile(
         db,
         current_user.id,
@@ -98,6 +110,7 @@ def analyze(
         condition_scores=profile.condition_scores,
         inference_mode=mode,
         report_image_base64=thumbnail,
+        capture_images=capture_thumbs,
     )
 
     # Grad-CAM heatmaps — only generated when a real SavedModel ran inference

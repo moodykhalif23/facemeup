@@ -26,6 +26,7 @@ def get_profile_history(db: Session, user_id: str) -> list[ProfileRecord]:
             condition_scores=json.loads(row.condition_scores_json) if row.condition_scores_json else None,
             inference_mode=row.inference_mode,
             report_image_base64=row.report_image_base64,
+            capture_images=json.loads(row.capture_images_json) if row.capture_images_json else None,
         )
         for row in rows
     ]
@@ -42,6 +43,7 @@ def append_profile(
     condition_scores: dict | None = None,
     inference_mode: str | None = None,
     report_image_base64: str | None = None,
+    capture_images: list[str] | None = None,
 ) -> None:
     row = SkinProfileHistory(
         user_id=user_id,
@@ -53,6 +55,7 @@ def append_profile(
         condition_scores_json=json.dumps(condition_scores) if condition_scores else None,
         inference_mode=inference_mode,
         report_image_base64=report_image_base64,
+        capture_images_json=json.dumps(capture_images) if capture_images else None,
     )
     db.add(row)
     db.commit()

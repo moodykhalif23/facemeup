@@ -69,10 +69,16 @@ export default function Analysis() {
         age: values.age,
       };
 
+      // Convert all pose captures to base64 for storage in profile history
+      const captureBase64List = await Promise.all(
+        (allCaptures.length > 0 ? allCaptures : [{ blob: capturedImage }]).map((c) => blobToBase64(c.blob))
+      );
+
       const response = await api.post('/analyze', {
         image_base64: base64Image,
         questionnaire,
         landmarks: landmarks.map(({ x, y, z }) => ({ x, y, z })),
+        capture_images: captureBase64List,
       });
 
       const analysisPayload = { ...response.data, questionnaire };

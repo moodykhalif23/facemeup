@@ -21,4 +21,5 @@ class SkinProfileHistory(Base):
     report_image_base64: Mapped[str | None] = mapped_column(Text, nullable=True)
     # user_feedback: "confirmed" | "rejected" | None (spec §9 continuous learning loop)
     user_feedback: Mapped[str | None] = mapped_column(String(16), nullable=True)
+    capture_images_json: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)

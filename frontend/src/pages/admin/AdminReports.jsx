@@ -202,110 +202,123 @@ export default function AdminReports() {
         }}
       >
         {selected && (
-          <div ref={reportRef}>
-            <Card style={{ border: '1px solid var(--border)', background: 'var(--card)', borderRadius: 6 }}>
-              <Space align="start">
-                <Avatar
-                  size={64}
-                  src={selected.report_image_base64 || undefined}
-                  icon={<UserOutlined />}
-                  style={{ background: 'var(--primary)' }}
-                />
-                <div>
-                  <Text style={{ display: 'block', color: 'var(--foreground)', fontSize: 16 }} strong>
-                    {selected.full_name || 'Unknown'}
-                  </Text>
-                  <Text style={{ color: 'var(--muted-foreground)' }}>{selected.email}</Text>
-                  <div style={{ marginTop: 6 }}>
-                    <Tag color="blue">{selected.skin_type}</Tag>
-                    {selected.questionnaire?.gender && (
-                      <Tag>{prettyGender(selected.questionnaire.gender)}</Tag>
-                    )}
-                    {selected.questionnaire?.age && (
-                      <Tag>Age {selected.questionnaire.age}</Tag>
-                    )}
-                  </div>
-                  {selected.questionnaire && (
-                    <div style={{ marginTop: 8 }}>
-                      <Text strong style={{ color: 'var(--foreground)', fontSize: 13 }}>Questionnaire</Text>
-                      <div style={{ marginTop: 6, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                        {selected.questionnaire.skin_texture && (
-                          <Tag>Texture: {selected.questionnaire.skin_texture}</Tag>
-                        )}
-                        {selected.questionnaire.moisture_level && (
-                          <Tag>Moisture: {selected.questionnaire.moisture_level}</Tag>
-                        )}
-                        {selected.questionnaire.oil_levels && (
-                          <Tag>Oil: {selected.questionnaire.oil_levels}</Tag>
-                        )}
-                        {selected.questionnaire.routine && (
-                          <Tag>Routine: {selected.questionnaire.routine}</Tag>
-                        )}
-                        {selected.questionnaire.routine_other && (
-                          <Tag>Routine notes: {selected.questionnaire.routine_other}</Tag>
-                        )}
-                        {selected.questionnaire.skin_feel && (
-                          <Tag>Feel: {selected.questionnaire.skin_feel}</Tag>
-                        )}
-                        {(selected.questionnaire.concerns || []).map((c) => (
-                          <Tag key={`q-${c}`}>{c}</Tag>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+          <div ref={reportRef} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+
+            {/* ── Customer header ── */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <Avatar
+                size={52}
+                src={selected.report_image_base64 || undefined}
+                icon={<UserOutlined />}
+                style={{ background: 'var(--primary)', flexShrink: 0 }}
+              />
+              <div>
+                <Text strong style={{ display: 'block', color: 'var(--foreground)', fontSize: 15 }}>
+                  {selected.full_name || 'Unknown'}
+                </Text>
+                <Text style={{ color: 'var(--muted-foreground)', fontSize: 13 }}>{selected.email}</Text>
+                <Text style={{ display: 'block', color: 'var(--muted-foreground)', fontSize: 12, marginTop: 2 }}>
+                  {formatDateTime(selected.created_at)}
+                </Text>
+              </div>
+            </div>
+
+            {/* ── Captured poses grid ── */}
+            {(selected.capture_images?.length > 0) ? (
+              <div>
+                <Text strong style={{ color: 'var(--foreground)', fontSize: 13, display: 'block', marginBottom: 8 }}>
+                  Captured Poses ({selected.capture_images.length})
+                </Text>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
+                  {selected.capture_images.map((img, i) => (
+                    <img
+                      key={i}
+                      src={img}
+                      alt={`Pose ${i + 1}`}
+                      style={{
+                        width: '100%',
+                        aspectRatio: '1',
+                        objectFit: 'cover',
+                        borderRadius: 6,
+                        border: '1px solid var(--border)',
+                        display: 'block',
+                      }}
+                    />
+                  ))}
                 </div>
-              </Space>
-              <Divider style={{ borderColor: 'var(--border)' }} />
-              <Text style={{ color: 'var(--muted-foreground)' }}>Tested at {formatDateTime(selected.created_at)}</Text>
-            </Card>
+              </div>
+            ) : selected.report_image_base64 ? (
+              <img
+                src={selected.report_image_base64}
+                alt="Analysis capture"
+                style={{ width: '100%', borderRadius: 6, border: '1px solid var(--border)' }}
+              />
+            ) : null}
 
-            <Divider style={{ borderColor: 'var(--border)' }} />
+            <Divider style={{ borderColor: 'var(--border)', margin: '4px 0' }} />
 
-            <Card style={{ border: '1px solid var(--border)', background: 'var(--card)', borderRadius: 6 }}>
-              <Text strong style={{ color: 'var(--foreground)' }}>Conditions</Text>
-              <div style={{ marginTop: 8, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+            {/* ── Skin result ── */}
+            <div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
+                <Tag color="blue">{selected.skin_type}</Tag>
+                {selected.questionnaire?.gender && <Tag>{prettyGender(selected.questionnaire.gender)}</Tag>}
+                {selected.questionnaire?.age && <Tag>Age {selected.questionnaire.age}</Tag>}
+              </div>
+              <Text strong style={{ color: 'var(--foreground)', fontSize: 13 }}>Conditions</Text>
+              <div style={{ marginTop: 6, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                 {(selected.conditions || []).length > 0
                   ? selected.conditions.map((c) => <Tag key={c}>{c}</Tag>)
                   : <Text type="secondary">None detected</Text>}
               </div>
-            </Card>
+            </div>
 
+            {/* ── Questionnaire ── */}
+            {selected.questionnaire && (
+              <div>
+                <Text strong style={{ color: 'var(--foreground)', fontSize: 13 }}>Questionnaire</Text>
+                <div style={{ marginTop: 6, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                  {selected.questionnaire.skin_texture && <Tag>Texture: {selected.questionnaire.skin_texture}</Tag>}
+                  {selected.questionnaire.moisture_level && <Tag>Moisture: {selected.questionnaire.moisture_level}</Tag>}
+                  {selected.questionnaire.oil_levels && <Tag>Oil: {selected.questionnaire.oil_levels}</Tag>}
+                  {selected.questionnaire.routine && <Tag>Routine: {selected.questionnaire.routine}</Tag>}
+                  {selected.questionnaire.routine_other && <Tag>Notes: {selected.questionnaire.routine_other}</Tag>}
+                  {selected.questionnaire.skin_feel && <Tag>Feel: {selected.questionnaire.skin_feel}</Tag>}
+                  {(selected.questionnaire.concerns || []).map((c) => <Tag key={`q-${c}`}>{c}</Tag>)}
+                </div>
+              </div>
+            )}
+
+            {/* ── Score breakdown ── */}
             {(selected.skin_type_scores || selected.condition_scores) && (
-              <>
-                <Divider style={{ borderColor: 'var(--border)' }} />
-                <Card style={{ border: '1px solid var(--border)', background: 'var(--card)', borderRadius: 6 }}>
-                  <Text strong style={{ color: 'var(--foreground)' }}>Score Breakdown</Text>
-                  <div style={{ marginTop: 10 }}>
-                    {selected.skin_type_scores && (
-                      <>
-                        <Text style={{ color: 'var(--muted-foreground)' }}>Skin Type Scores</Text>
-                        <div style={{ marginTop: 6 }}>
-                          {Object.entries(selected.skin_type_scores).map(([k, v]) => (
-                            <div key={k} style={{ marginBottom: 6 }}>
-                              <Text style={{ fontSize: 12, color: 'var(--foreground)' }}>{k}</Text>
-                              <Progress percent={Math.round(v * 100)} size="small" />
-                            </div>
-                          ))}
+              <div>
+                <Divider style={{ borderColor: 'var(--border)', margin: '4px 0' }} />
+                {selected.skin_type_scores && (
+                  <>
+                    <Text strong style={{ color: 'var(--foreground)', fontSize: 13 }}>Skin Type Scores</Text>
+                    <div style={{ marginTop: 6, marginBottom: 12 }}>
+                      {Object.entries(selected.skin_type_scores).map(([k, v]) => (
+                        <div key={k} style={{ marginBottom: 4 }}>
+                          <Text style={{ fontSize: 12, color: 'var(--foreground)' }}>{k}</Text>
+                          <Progress percent={Math.round(v * 100)} size="small" />
                         </div>
-                      </>
-                    )}
-                    {selected.condition_scores && (
-                      <>
-                        <Divider style={{ borderColor: 'var(--border)' }} />
-                        <Text style={{ color: 'var(--muted-foreground)' }}>Condition Scores</Text>
-                        <div style={{ marginTop: 6 }}>
-                          {Object.entries(selected.condition_scores).map(([k, v]) => (
-                            <div key={k} style={{ marginBottom: 6 }}>
-                              <Text style={{ fontSize: 12, color: 'var(--foreground)' }}>{k}</Text>
-                              <Progress percent={Math.round(v * 100)} size="small" />
-                            </div>
-                          ))}
+                      ))}
+                    </div>
+                  </>
+                )}
+                {selected.condition_scores && (
+                  <>
+                    <Text strong style={{ color: 'var(--foreground)', fontSize: 13 }}>Condition Scores</Text>
+                    <div style={{ marginTop: 6 }}>
+                      {Object.entries(selected.condition_scores).map(([k, v]) => (
+                        <div key={k} style={{ marginBottom: 4 }}>
+                          <Text style={{ fontSize: 12, color: 'var(--foreground)' }}>{k}</Text>
+                          <Progress percent={Math.round(v * 100)} size="small" />
                         </div>
-                      </>
-                    )}
-                  </div>
-                </Card>
-              </>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
             )}
           </div>
         )}

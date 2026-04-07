@@ -23,6 +23,8 @@ class AnalyzeRequest(BaseModel):
     image_base64: str
     questionnaire: Questionnaire | None = None
     landmarks: list[FaceLandmark] | None = None
+    # All pose captures submitted during the session (up to 5)
+    capture_images: list[str] | None = None
 
 
 class SkinProfile(BaseModel):
