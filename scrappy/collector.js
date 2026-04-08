@@ -11,6 +11,7 @@
 const https = require('https');
 const fs = require('fs');
 const path = require('path');
+const { chromium } = require('playwright');
 
 const CONFIG = {
   base: 'zm.yiyuan.ai',
@@ -21,8 +22,12 @@ const CONFIG = {
 };
 
 const args = process.argv.slice(2);
-const LIMIT = parseInt(args[args.indexOf('--limit') + 1] || '100');
-const START_PAGE = parseInt(args[args.indexOf('--page') + 1] || '1');
+function getArg(name, fallback) {
+  const i = args.indexOf(name);
+  return i >= 0 && args[i + 1] ? args[i + 1] : fallback;
+}
+const LIMIT = parseInt(getArg('--limit', '100'));
+const START_PAGE = parseInt(getArg('--page', '1'));
 
 if (!fs.existsSync(CONFIG.rawDir)) fs.mkdirSync(CONFIG.rawDir, { recursive: true });
 
@@ -37,7 +42,7 @@ function apiGet(path, token) {
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
-        ...(token ? { 'Authorization': 'Bearer ' + token } : {}),
+        ...(token ? { 'access_token': token, 'locale': 'en', 'language': 'en' } : {}),
       },
     };
     const req = https.request(opts, (res) => {
@@ -145,35 +150,83 @@ function deriveSkinType(scores) {
   return 'Normal';
 }
 
+/** Headless Playwright login — returns a fresh access_token */
+async function getFreshToken() {
+  log('Getting fresh token via headless login...');
+  const browser = await chromium.launch({ headless: true, args: ['--no-sandbox'] });
+  const ctx = await browser.newContext({ ignoreHTTPSErrors: true });
+  const page = await ctx.newPage();
+  let token = null;
+
+  page.on('response', async (res) => {
+    if (res.url().includes('auth2/token')) {
+      const body = await res.json().catch(() => null);
+      if (body?.access_token) token = body.access_token;
+    }
+  });
+
+  await page.goto('https://zm.yiyuan.ai/', { waitUntil: 'networkidle', timeout: 25000 });
+
+  // Select English
+  await page.locator('.el-select').first().click({ force: true });
+  await page.waitForTimeout(400);
+  for (const o of await page.locator('.el-select-dropdown__item').all()) {
+    if ((await o.textContent().catch(() => '')).trim().toLowerCase() === 'english') {
+      await o.click({ force: true }); break;
+    }
+  }
+  await page.waitForTimeout(600);
+
+  // Fill credentials
+  await page.locator('input[type="text"]:not([readonly])').first().fill(CONFIG.username);
+  await page.locator('input[type="password"]').first().fill(CONFIG.password);
+  await page.locator('button[type="submit"], button:has-text("Login")').first().click();
+
+  try { await page.waitForLoadState('networkidle', { timeout: 12000 }); } catch (_) {}
+  await page.waitForTimeout(1000);
+  await browser.close();
+
+  if (token) {
+    // Persist for reuse
+    fs.writeFileSync(path.join(CONFIG.rawDir, 'fresh-token.json'),
+      JSON.stringify({ access_token: token, ts: Date.now() }, null, 2), 'utf8');
+    log('Fresh token obtained: ' + token.slice(0, 30) + '...');
+  }
+  return token;
+}
+
 (async () => {
   let token = null;
 
-  // token CLI argument
-  const tokenArg = args[args.indexOf('--token') + 1];
+  // Option A: --token CLI argument
+  const tokenArg = getArg('--token', null);
   if (tokenArg) {
     token = tokenArg;
     log('Using token from CLI arg');
   }
 
+  // Option B: Saved fresh token (< 23 hours old)
   if (!token) {
-    const rawFiles = ['p2-all-api-responses.json', 'all-api-responses.json', 'all-api-calls.json'];
-    for (const f of rawFiles) {
-      const fp = path.join(CONFIG.rawDir, f);
-      if (!fs.existsSync(fp)) continue;
+    const fp = path.join(CONFIG.rawDir, 'fresh-token.json');
+    if (fs.existsSync(fp)) {
       try {
         const saved = JSON.parse(fs.readFileSync(fp, 'utf8'));
-        const authEntry = saved.find(e => e.url?.includes('auth2/token') && e.body?.access_token);
-        if (authEntry) {
-          token = authEntry.body.access_token;
-          log('Using token from ' + f + ': ' + token.slice(0, 30) + '...');
-          break;
+        const ageHours = (Date.now() - saved.ts) / 3600000;
+        if (ageHours < 23 && saved.access_token) {
+          token = saved.access_token;
+          log('Using saved fresh token (' + ageHours.toFixed(1) + 'h old)');
         }
       } catch (_) {}
     }
   }
 
+  // Option C: Re-login via Playwright to get a new token
   if (!token) {
-    log('ERROR: No auth token found. Run scraper.js first, or pass --token <token>');
+    token = await getFreshToken();
+  }
+
+  if (!token) {
+    log('ERROR: Could not obtain auth token');
     process.exit(1);
   }
 
