@@ -93,28 +93,28 @@ function extractScores(analysis) {
 
   return {
     // The 15 Bitmoji detection metrics
-    uv_acne:      metricScore('acne'),       // UV Acne (deep layer)
-    blackhead:    metricScore('blackhead'),   // Blackheads (surface)
-    collagen:     metricScore('collagen'),    // Collagen Fibers
-    skin_tone:    {                           // Skin Color (ITA-based, special case)
+    uv_acne:      metricScore('acne'),       
+    blackhead:    metricScore('blackhead'),   
+    collagen:     metricScore('collagen'),    
+    skin_tone:    {                          
       score: analysis.color?.score ?? null,
       level: analysis.color?.level ?? null,
       ita:   analysis.color?.ita ?? null,
-      result: analysis.color?.result ?? null,  // e.g. "xiaomai", "ziran"
+      result: analysis.color?.result ?? null,  
     },
     dark_circles: metricScore('dark_circle'),
     moisture:     metricScore('ext_water'),
     pigmentation: metricScore('pigment'),
-    pimples:      metricScore('pockmark'),    // Acne marks / pimples
+    pimples:      metricScore('pockmark'),    
     pores:        metricScore('pore'),
-    sebum:        metricScore('skin_type'),   // Sebum / oiliness
-    sensitivity:  metricScore('sensitive'),   // PL Sensitivity
-    spots:        metricScore('spot'),        // Dark spots
-    uv_spots:     metricScore('uv_spot'),     // UV spots
+    sebum:        metricScore('skin_type'),   
+    sensitivity:  metricScore('sensitive'),  
+    spots:        metricScore('spot'),        
+    uv_spots:     metricScore('uv_spot'),     
     wrinkles:     metricScore('wrinkle'),
 
     // Additional derived metrics
-    face_score:   analysis.appearance?.score ?? null,  // Overall appearance score
+    face_score:   analysis.appearance?.score ?? null, 
     age_estimate: analysis.age?.result ?? null,
   };
 }
