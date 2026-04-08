@@ -213,14 +213,13 @@ async function getFreshToken() {
 (async () => {
   let token = null;
 
-  // Option A: --token CLI argument
+  // token CLI argument
   const tokenArg = getArg('--token', null);
   if (tokenArg) {
     token = tokenArg;
     log('Using token from CLI arg');
   }
 
-  // Option B: Saved fresh token (< 23 hours old)
   if (!token) {
     const fp = path.join(CONFIG.rawDir, 'fresh-token.json');
     if (fs.existsSync(fp)) {
@@ -235,17 +234,17 @@ async function getFreshToken() {
     }
   }
 
-  // Option C: Re-login via Playwright to get a new token
+  // Re-login via Playwright to get a new token
   if (!token) {
     token = await getFreshToken();
   }
-
+ //step 1: authenticate and get token
   if (!token) {
     log('ERROR: Could not obtain auth token');
     process.exit(1);
   }
 
-  // ── Step 2: Fetch detection schema (settings) ───────────────────────────
+  // Step 2: Fetch detection schema (settings) 
   log('Fetching detection schema...');
   const settingsResp = await apiPost('/skinMgrSrv/settings/get', token, {});
   if (settingsResp.body?.list) {
@@ -254,7 +253,7 @@ async function getFreshToken() {
     log('Settings saved (' + settingsResp.body.list.length + ' items)');
   }
 
-  // ── Step 3: Fetch copywriting (all conditions, all levels) ─────────────
+  // Step 3: Fetch copywriting (all conditions, all levels) 
   log('Fetching surface copywriting...');
   const surfaceResp = await apiPost('/skinMgrSrv/settings/articleList', token,
     { type: 'layer', page: 1, pageSize: 200 });
@@ -273,8 +272,7 @@ async function getFreshToken() {
     log('Deep copywriting saved (' + deepResp.body.list.length + ' entries)');
   }
 
-  // ── Step 4: Fetch records with full analysis ────────────────────────────
-  // Date range: last 90 days to now
+  // Step 4: Fetch records with full analysis 
   const now = new Date();
   const past = new Date(now - 90 * 24 * 3600 * 1000);
   const fmt = d => d.toISOString().slice(0, 16).replace('T', ' ');
@@ -375,7 +373,7 @@ async function getFreshToken() {
     await new Promise(r => setTimeout(r, 300)); // polite delay
   }
 
-  // ── Step 5: Save ─────────────────────────────────────────────────────────
+  //Step 5: Save 
   fs.writeFileSync(path.join(CONFIG.rawDir, 'records-full.json'),
     JSON.stringify(allRecords, null, 2), 'utf8');
   fs.writeFileSync(path.join(CONFIG.rawDir, 'records-scores.json'),
