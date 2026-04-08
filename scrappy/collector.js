@@ -53,33 +53,6 @@ function apiGet(path, token) {
   });
 }
 
-function apiPost(path, payload, token) {
-  const body = JSON.stringify(payload);
-  return new Promise((resolve, reject) => {
-    const opts = {
-      hostname: CONFIG.base,
-      path: path,
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Content-Length': Buffer.byteLength(body),
-        ...(token ? { 'Authorization': 'Bearer ' + token } : {}),
-      },
-    };
-    const req = https.request(opts, (res) => {
-      let data = '';
-      res.on('data', (chunk) => { data += chunk; });
-      res.on('end', () => {
-        try { resolve({ status: res.statusCode, body: JSON.parse(data) }); }
-        catch (e) { resolve({ status: res.statusCode, body: data }); }
-      });
-    });
-    req.on('error', reject);
-    req.write(body);
-    req.end();
-  });
-}
 
 /**
  * Extract the 15 standardized skin metric scores from a record's analysis object.
@@ -173,21 +146,36 @@ function deriveSkinType(scores) {
 }
 
 (async () => {
-  // ── Step 1: Authenticate ────────────────────────────────────────────────
-  log('Authenticating...');
-  const authResp = await apiPost('/auth2/token', {
-    client_id: 'skinmgr',
-    username: CONFIG.username,
-    password: CONFIG.password,
-    grant_type: 'password',
-  });
+  let token = null;
 
-  if (!authResp.body?.access_token) {
-    log('ERROR: Auth failed: ' + JSON.stringify(authResp.body));
+  // token CLI argument
+  const tokenArg = args[args.indexOf('--token') + 1];
+  if (tokenArg) {
+    token = tokenArg;
+    log('Using token from CLI arg');
+  }
+
+  if (!token) {
+    const rawFiles = ['p2-all-api-responses.json', 'all-api-responses.json', 'all-api-calls.json'];
+    for (const f of rawFiles) {
+      const fp = path.join(CONFIG.rawDir, f);
+      if (!fs.existsSync(fp)) continue;
+      try {
+        const saved = JSON.parse(fs.readFileSync(fp, 'utf8'));
+        const authEntry = saved.find(e => e.url?.includes('auth2/token') && e.body?.access_token);
+        if (authEntry) {
+          token = authEntry.body.access_token;
+          log('Using token from ' + f + ': ' + token.slice(0, 30) + '...');
+          break;
+        }
+      } catch (_) {}
+    }
+  }
+
+  if (!token) {
+    log('ERROR: No auth token found. Run scraper.js first, or pass --token <token>');
     process.exit(1);
   }
-  const token = authResp.body.access_token;
-  log('Token acquired: ' + token.slice(0, 30) + '...');
 
   // ── Step 2: Fetch detection schema (settings) ───────────────────────────
   log('Fetching detection schema...');
