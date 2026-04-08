@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { Layout, Card, Button, Typography, Space, InputNumber, Divider, Tag, App } from 'antd';
 import { ShoppingCartOutlined } from '@ant-design/icons';
+import DOMPurify from 'dompurify';
 import { getProduct } from '../services/api';
 import { addToCart } from '../store/slices/cartSlice';
 import AppHeader from '../components/AppHeader';
@@ -172,7 +173,7 @@ export default function ProductDetail() {
                       overflowWrap: 'break-word',
                       lineHeight: '1.6'
                     }}
-                    dangerouslySetInnerHTML={{ __html: product.description }}
+                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(product.description) }}
                   />
                 </div>
 

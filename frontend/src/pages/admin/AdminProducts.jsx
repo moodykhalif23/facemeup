@@ -307,7 +307,12 @@ export default function AdminProducts() {
           rowKey="sku"
           loading={loading}
           size="small"
-          pagination={{ pageSize: 20 }}
+          pagination={{
+            pageSize: 20,
+            showSizeChanger: true,
+            pageSizeOptions: ['20', '50', '100'],
+            showTotal: (total) => `${total} product${total !== 1 ? 's' : ''}`,
+          }}
           tableLayout="fixed"
           scroll={{ x: 'max-content' }}
           style={{ background: 'transparent' }}

@@ -28,6 +28,25 @@ class AnalyzeRequest(BaseModel):
     # All pose captures submitted during the session (up to 5)
     capture_images: list[str] | None = None
 
+    @field_validator("image_base64")
+    @classmethod
+    def validate_image(cls, v: str) -> str:
+        # Strip data URI prefix (data:image/jpeg;base64,...)
+        if "," in v:
+            v = v.split(",", 1)[1]
+        # Must be valid base64
+        try:
+            raw = base64.b64decode(v, validate=True)
+        except Exception:
+            raise ValueError("image_base64 is not valid base64")
+        # Reject obviously corrupt or empty payloads
+        if len(raw) < 1024:
+            raise ValueError("image_base64 is too small to be a valid image")
+        # 15 MB hard cap — protects the server from OOM during PIL decode
+        if len(raw) > 15 * 1024 * 1024:
+            raise ValueError("image_base64 exceeds 15 MB limit")
+        return v
+
 
 class SkinProfile(BaseModel):
     skin_type: str
