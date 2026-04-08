@@ -11,7 +11,6 @@
 const https = require('https');
 const fs = require('fs');
 const path = require('path');
-// Playwright lives in the skill dir; fall back to agents dir if not found locally
 let chromium;
 try {
   ({ chromium } = require('playwright'));
@@ -72,7 +71,6 @@ function apiRequest(method, urlPath, token, formData) {
   });
 }
 
-const apiGet  = (p, tok) => apiRequest('GET',  p, tok);
 const apiPost = (p, tok, form) => apiRequest('POST', p, tok, form);
 
 
