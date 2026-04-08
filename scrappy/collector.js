@@ -11,7 +11,13 @@
 const https = require('https');
 const fs = require('fs');
 const path = require('path');
-const { chromium } = require('playwright');
+// Playwright lives in the skill dir; fall back to agents dir if not found locally
+let chromium;
+try {
+  ({ chromium } = require('playwright'));
+} catch (_) {
+  ({ chromium } = require('C:\\Users\\Sozuri\\.claude\\skills\\playwright\\node_modules\\playwright'));
+}
 
 const CONFIG = {
   base: 'zm.yiyuan.ai',
@@ -33,16 +39,23 @@ if (!fs.existsSync(CONFIG.rawDir)) fs.mkdirSync(CONFIG.rawDir, { recursive: true
 
 function log(msg) { console.log('[' + new Date().toISOString().substring(11, 19) + '] ' + msg); }
 
-function apiGet(path, token) {
+function apiRequest(method, urlPath, token, formData) {
+  const body = formData
+    ? Object.entries(formData).map(([k, v]) => encodeURIComponent(k) + '=' + encodeURIComponent(v)).join('&')
+    : null;
+
   return new Promise((resolve, reject) => {
     const opts = {
       hostname: CONFIG.base,
-      path: path,
-      method: 'GET',
+      path: urlPath,
+      method: method,
       headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        ...(token ? { 'access_token': token, 'locale': 'en', 'language': 'en' } : {}),
+        'Accept': 'application/json, text/plain, */*',
+        'Content-Type': formData ? 'application/x-www-form-urlencoded;charset=UTF-8' : 'application/json',
+        'locale': 'en',
+        'language': 'en',
+        ...(token ? { 'access_token': token } : {}),
+        ...(body ? { 'Content-Length': Buffer.byteLength(body) } : {}),
       },
     };
     const req = https.request(opts, (res) => {
@@ -54,9 +67,13 @@ function apiGet(path, token) {
       });
     });
     req.on('error', reject);
+    if (body) req.write(body);
     req.end();
   });
 }
+
+const apiGet  = (p, tok) => apiRequest('GET',  p, tok);
+const apiPost = (p, tok, form) => apiRequest('POST', p, tok, form);
 
 
 /**
@@ -232,7 +249,7 @@ async function getFreshToken() {
 
   // ── Step 2: Fetch detection schema (settings) ───────────────────────────
   log('Fetching detection schema...');
-  const settingsResp = await apiGet('/skinMgrSrv/settings/get', token);
+  const settingsResp = await apiPost('/skinMgrSrv/settings/get', token, {});
   if (settingsResp.body?.list) {
     fs.writeFileSync(path.join(CONFIG.rawDir, 'api-settings.json'),
       JSON.stringify(settingsResp.body, null, 2), 'utf8');
@@ -241,7 +258,8 @@ async function getFreshToken() {
 
   // ── Step 3: Fetch copywriting (all conditions, all levels) ─────────────
   log('Fetching surface copywriting...');
-  const surfaceResp = await apiGet('/skinMgrSrv/settings/articleList?type=layer&page=1&pageSize=200', token);
+  const surfaceResp = await apiPost('/skinMgrSrv/settings/articleList', token,
+    { type: 'layer', page: 1, pageSize: 200 });
   if (surfaceResp.body?.list) {
     fs.writeFileSync(path.join(CONFIG.rawDir, 'api-surface-copywriting.json'),
       JSON.stringify(surfaceResp.body, null, 2), 'utf8');
@@ -249,7 +267,8 @@ async function getFreshToken() {
   }
 
   log('Fetching deep copywriting...');
-  const deepResp = await apiGet('/skinMgrSrv/settings/articleList?type=deep&page=1&pageSize=200', token);
+  const deepResp = await apiPost('/skinMgrSrv/settings/articleList', token,
+    { type: 'deep', page: 1, pageSize: 200 });
   if (deepResp.body?.list) {
     fs.writeFileSync(path.join(CONFIG.rawDir, 'api-deep-copywriting.json'),
       JSON.stringify(deepResp.body, null, 2), 'utf8');
@@ -257,6 +276,12 @@ async function getFreshToken() {
   }
 
   // ── Step 4: Fetch records with full analysis ────────────────────────────
+  // Date range: last 90 days to now
+  const now = new Date();
+  const past = new Date(now - 90 * 24 * 3600 * 1000);
+  const fmt = d => d.toISOString().slice(0, 16).replace('T', ' ');
+  const dateRange = { st: fmt(past), ed: fmt(now) };
+
   log('Fetching records (limit=' + LIMIT + ', starting page=' + START_PAGE + ')...');
   const allRecords = [];
   const allScores = [];
@@ -267,10 +292,10 @@ async function getFreshToken() {
     const batchSize = Math.min(CONFIG.pageSize, LIMIT - fetched);
     log('  Fetching page ' + page + ' (size=' + batchSize + ')...');
 
-    const resp = await apiGet(
-      '/skinMgrSrv/record/list?page=' + page + '&pageSize=' + batchSize + '&status=2',
-      token
-    );
+    const resp = await apiPost('/skinMgrSrv/record/list', token, {
+      code: -1, page, pageSize: batchSize, weidu: 'all',
+      st: dateRange.st, ed: dateRange.ed,
+    });
 
     if (resp.body?.code !== 0) {
       log('ERROR fetching records: ' + JSON.stringify(resp.body));
