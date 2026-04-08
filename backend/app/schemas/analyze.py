@@ -21,6 +21,9 @@ class FaceLandmark(BaseModel):
     z: float = 0.0
 
 
+_MAX_IMAGE_BYTES = 10 * 1024 * 1024  # 10 MB decoded
+
+
 class AnalyzeRequest(BaseModel):
     image_base64: str
     questionnaire: Questionnaire | None = None
@@ -31,20 +34,33 @@ class AnalyzeRequest(BaseModel):
     @field_validator("image_base64")
     @classmethod
     def validate_image(cls, v: str) -> str:
-        # Strip data URI prefix (data:image/jpeg;base64,...)
         if "," in v:
             v = v.split(",", 1)[1]
-        # Must be valid base64
         try:
             raw = base64.b64decode(v, validate=True)
         except Exception:
             raise ValueError("image_base64 is not valid base64")
-        # Reject obviously corrupt or empty payloads
         if len(raw) < 1024:
             raise ValueError("image_base64 is too small to be a valid image")
-        # 15 MB hard cap — protects the server from OOM during PIL decode
-        if len(raw) > 15 * 1024 * 1024:
-            raise ValueError("image_base64 exceeds 15 MB limit")
+        if len(raw) > _MAX_IMAGE_BYTES:
+            raise ValueError(
+                f"Image too large ({len(raw) // 1024} KB). Maximum is {_MAX_IMAGE_BYTES // 1024} KB."
+            )
+        return v
+
+    @field_validator("capture_images")
+    @classmethod
+    def validate_captures(cls, v: list[str] | None) -> list[str] | None:
+        if v is None:
+            return v
+        if len(v) > 5:
+            raise ValueError("capture_images: maximum 5 captures per session")
+        for i, img in enumerate(v):
+            raw = img.split(",", 1)[1] if "," in img else img
+            try:
+                base64.b64decode(raw, validate=True)
+            except Exception:
+                raise ValueError(f"capture_images[{i}] is not valid base64")
         return v
 
 

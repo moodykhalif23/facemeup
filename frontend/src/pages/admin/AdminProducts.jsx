@@ -280,7 +280,7 @@ export default function AdminProducts() {
         <Space>
           <Popconfirm
             title="Delete all &amp; re-sync from WooCommerce?"
-            description="This wipes all 106 local products and replaces them with a fresh pull from drrashel.co.ke. Images will be included."
+            description={`This wipes all ${products.length} local products and replaces them with a fresh pull from drrashel.co.ke. Images will be included.`}
             onConfirm={handleDeleteAndResync}
             okText="Delete & Re-sync"
             okButtonProps={{ danger: true }}

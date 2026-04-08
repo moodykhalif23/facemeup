@@ -16,6 +16,7 @@
     "@mediapipe/camera_utils": "^0.3.1675466862",
     "@mediapipe/face_mesh": "^0.4.1633559619",
     "@reduxjs/toolkit": "^2.2.0",
+    "dompurify": "^3.2.4",
     "antd": "^5.15.0",
     "axios": "^1.6.0",
     "echarts": "^6.0.0",
