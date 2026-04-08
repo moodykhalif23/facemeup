@@ -434,6 +434,29 @@ def create_real_datasets(label_index: dict, config: dict):
     print(f"  Val    : {len(val_items)}")
     print(f"  Test   : {len(test_items)}")
 
+    # ── ML-003: Inverse-frequency sample weights ─────────────────────────
+    # Addresses 68% Normal/None-detected imbalance. Weight each training
+    # sample by total / (n_classes * class_count) so rare classes
+    # (Dry, Oily, Sensitive) receive proportionally higher gradient signal.
+    from collections import Counter
+    skin_counts = Counter(it["skin_type"] for it in train_items)
+    total_train = len(train_items)
+    n_skin_classes = len(SKIN_TYPES)
+    skin_weight = {
+        s: total_train / (n_skin_classes * max(c, 1))
+        for s, c in skin_counts.items()
+    }
+    # Normalise so mean weight ≈ 1 (avoids inflating effective LR)
+    mean_w = sum(skin_weight[it["skin_type"]] for it in train_items) / total_train
+    train_sample_weights = np.array(
+        [skin_weight[it["skin_type"]] / mean_w for it in train_items],
+        dtype=np.float32,
+    )
+    print(f"\n  Class weights (skin type, normalised):")
+    for s, c in sorted(skin_counts.items()):
+        w = skin_weight[s] / mean_w
+        print(f"    {s:<14} {c:>5} samples  → weight {w:.3f}")
+
     def make_label_vector(skin_idx: int, cond_idx: int) -> np.ndarray:
         """Multi-hot vector: skin type + condition both flagged."""
         v = np.zeros(NUM_CLASSES, dtype=np.float32)
@@ -446,36 +469,18 @@ def create_real_datasets(label_index: dict, config: dict):
         img = tf.image.decode_jpeg(raw, channels=3,
                                    try_recover_truncated=True,
                                    acceptable_fraction=0.5)
-        img = tf.image.resize(img, [IMG_SIZE, IMG_SIZE])
+        # Use LANCZOS5 to match inference _preprocess_image resize method
+        img = tf.image.resize(img, [IMG_SIZE, IMG_SIZE],
+                              method=tf.image.ResizeMethod.LANCZOS5)
         img = tf.cast(img, tf.float32) / 255.0
+        # Match inference contrast enhancement (1.2x) so training/inference
+        # see the same distribution — eliminates preprocessing mismatch (ML-002)
+        img = tf.image.adjust_contrast(img, contrast_factor=1.2)
+        img = tf.clip_by_value(img, 0.0, 1.0)
         return img
 
     IMG_SIZE = config["model"]["input_size"]
     BATCH    = config["dataset"]["batch_size"]
-
-    def build_ds(items_list, augment: bool):
-        paths  = [str(it["path"]) for it in items_list]
-        labels = np.array([
-            make_label_vector(it["skin_idx"], it["cond_idx"])
-            for it in items_list
-        ], dtype=np.float32)
-
-        path_ds  = tf.data.Dataset.from_tensor_slices(paths)
-        label_ds = tf.data.Dataset.from_tensor_slices(labels)
-
-        img_ds = path_ds.map(
-            lambda p: load_image(p),
-            num_parallel_calls=tf.data.AUTOTUNE
-        )
-        ds = tf.data.Dataset.zip((img_ds, label_ds))
-
-        if augment:
-            ds = ds.map(_augment_fn, num_parallel_calls=tf.data.AUTOTUNE)
-
-        ds = ds.shuffle(min(1000, len(items_list)))
-        ds = ds.batch(BATCH)
-        ds = ds.prefetch(tf.data.AUTOTUNE)
-        return ds
 
     aug_cfg = config["dataset"]["augmentation"]
 
@@ -490,7 +495,42 @@ def create_real_datasets(label_index: dict, config: dict):
         img = tf.clip_by_value(img, 0.0, 1.0)
         return img, label
 
-    train_ds = build_ds(train_items, augment=True)
+    def build_ds(items_list, augment: bool, sample_weights: np.ndarray | None = None):
+        paths  = [str(it["path"]) for it in items_list]
+        labels = np.array([
+            make_label_vector(it["skin_idx"], it["cond_idx"])
+            for it in items_list
+        ], dtype=np.float32)
+
+        path_ds  = tf.data.Dataset.from_tensor_slices(paths)
+        label_ds = tf.data.Dataset.from_tensor_slices(labels)
+
+        img_ds = path_ds.map(
+            lambda p: load_image(p),
+            num_parallel_calls=tf.data.AUTOTUNE
+        )
+
+        if sample_weights is not None:
+            weight_ds = tf.data.Dataset.from_tensor_slices(sample_weights)
+            ds = tf.data.Dataset.zip((img_ds, label_ds, weight_ds))
+        else:
+            ds = tf.data.Dataset.zip((img_ds, label_ds))
+
+        if augment:
+            if sample_weights is not None:
+                ds = ds.map(
+                    lambda img, lbl, w: (*_augment_fn(img, lbl), w),
+                    num_parallel_calls=tf.data.AUTOTUNE,
+                )
+            else:
+                ds = ds.map(_augment_fn, num_parallel_calls=tf.data.AUTOTUNE)
+
+        ds = ds.shuffle(min(1000, len(items_list)))
+        ds = ds.batch(BATCH)
+        ds = ds.prefetch(tf.data.AUTOTUNE)
+        return ds
+
+    train_ds = build_ds(train_items, augment=True,  sample_weights=train_sample_weights)
     val_ds   = build_ds(val_items,   augment=False)
     test_ds  = build_ds(test_items,  augment=False)
 
@@ -707,12 +747,44 @@ def export_saved_model(model):
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
+def _load_extra_labels(csv_path: Path) -> dict:
+    """Load extra labeled images from a CSV (e.g. feedback_export output)."""
+    if not csv_path.exists():
+        print(f"  ⚠ --extra-labels file not found: {csv_path}")
+        return {}
+
+    extra: dict = {}
+    with open(csv_path, newline="", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        for i, row in enumerate(reader):
+            img_path = Path(row.get("image_path", ""))
+            if not img_path.exists():
+                continue
+            skin_type = row.get("skin_type", "")
+            condition = row.get("condition", "None detected")
+            if skin_type not in SKIN_TYPES or condition not in CONDITIONS:
+                continue
+            extra[f"extra_{i}_{img_path.stem}"] = {
+                "path":      img_path,
+                "skin_type": skin_type,
+                "condition": condition,
+                "skin_idx":  SKIN_TYPES.index(skin_type),
+                "cond_idx":  CONDITIONS.index(condition),
+                "source":    row.get("source", "extra"),
+                "questionnaire": json.loads(row.get("questionnaire") or "{}"),
+            }
+    print(f"  ✓ Loaded {len(extra)} extra labels from {csv_path}")
+    return extra
+
+
 def main():
     parser = argparse.ArgumentParser(description="Skincare ML Training Pipeline")
     parser.add_argument("--skip-download", action="store_true",
                         help="Skip download if HAM10000 already present")
     parser.add_argument("--phase", type=int, choices=[1, 2, 12], default=12,
                         help="Training phase(s): 1, 2, or 12 (both). Default=12")
+    parser.add_argument("--extra-labels", type=str, default=None,
+                        help="Path to extra labels CSV (e.g. from ml/feedback_export.py)")
     args = parser.parse_args()
 
     print("\n" + "█" * 70)
@@ -741,6 +813,10 @@ def main():
 
     # ── Step 2: Label index ───────────────────────────────────────────────
     label_index = build_label_index(meta_path, all_imgs)
+    if args.extra_labels:
+        extra = _load_extra_labels(Path(args.extra_labels))
+        label_index.update(extra)
+        print(f"  ✓ Total after extra labels: {len(label_index)}")
     if len(label_index) < 100:
         print("✗ Too few labeled images to train. Check download.")
         sys.exit(1)

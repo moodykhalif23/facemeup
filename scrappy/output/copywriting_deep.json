@@ -1,0 +1,155 @@
+{
+  "_description": "Deep-layer detection advice per condition per severity level.",
+  "conditions": {
+    "acne": {
+      "service_name": "UV acne",
+      "levels": {
+        "1": {
+          "level": 1,
+          "introduction": "Pay attention to sun protection, correct use of skin care products, do not use cosmetics indiscriminately, pay attention to cleanliness, remove makeup to be clean, apply hydrating masks, and develop good work and rest habits on weekdays. Daily diet to reduce the intake of spicy and stimulating, high-sugar food. Eat more vegetables and fruits.",
+          "advice": "Your skin deep hair follicle clear, irregular work and rest plus the bad stimulation of the outside air and other factors, more and more people have skin problems, acne, occlusion, acne, etc.. Daily care should pay attention to cleanliness and hydration, you can use mild and non-stimulating skin care products and masks, to give the skin to replenish sufficient nutrients and vitality."
+        },
+        "2": {
+          "level": 2,
+          "introduction": "Pay attention to sun protection and avoid directly UV radiation to stimulate sebaceous secretion. Cleanse thoroughly, use makeup or sunscreen, isolation and other products should be used after the makeup remover products. Pay attention to hydration, accelerate skin metabolism, and maintain good habits to prevent endocrine disorders from aggravating skin problems.",
+          "advice": "There is mild acne in the deeper layers of the skin. There are a large number of bacteria, fungi, and viruses distributed on the surface of the skin that together constitute the microbiota of the skin. They are mainly parasitic in the superficial part of the stratum corneum, the funnel part of the mouth of the hair follicle sebaceous glands, but once the mutation occurs, it promotes abnormal development of the sebaceous glands, while abnormal keratinization of the hair follicle sebaceous glands ducts causes duct blockage, sebum discharge disorders, and endocrine disorders, which affect the normal metabolism, all of which can cause acne growth."
+        },
+        "3": {
+          "level": 3,
+          "introduction": "Daily cleansing should be clean and transparent, pay attention to sun protection, more vitamin B food and vitaman E food intake, skin care can be appropriate cleaning, hydration products. You should also maintain a good routine to prevent endocrine disruptions from aggravating skin problems.",
+          "advice": "The main causes of acne are inadequate cleaning, spicy diet, excessive hormone secretion, endocrine disorders, irregular work and rest, etc.. Together with the large number of bacteria, fungi and viruses distributed on the skin surface, they constitute the microbiota of the skin. They mainly parasitize in the superficial part of the stratum corneum, the funnel part of the hair follicle sebaceous gland mouth, the sweat duct mouth and the epidermal lipid membrane. They feed on the debris or lipids of keratinocytes and can inhibit the growth of other harmful bacteria, but once the mutation occurs, they promote the development of sebaceous glands and produce a large amount of sebum. At the same time, abnormal keratinization of the follicular sebaceous gland ducts causes blockage of the ducts and obstruction of sebum drainage, resulting in deep facial acne."
+        },
+        "4": {
+          "level": 4,
+          "introduction": "Sunlight exposure can exacerbate the growth of acne, so sunscreen can prevent the physiological concentration of squalene peroxidation caused by UV light. Maintain a good lifestyle, eat a light diet, avoid spicy and greasy foods, and avoid hairy products(#stimulating food) such as beef and lamb. Eat more vegetables and fruits, exercise moderately, and strengthen the body's immunity. Increase your own metabolism.",
+          "advice": "The main primary factor for acne is excessive sebum secretion due to incomplete facial skin cleansing, inadequate makeup removal, and increased sebaceous gland activity. Oxidized squalene can promote the release of inflammatory cytokines from epidermal cells, thus accelerating and aggravating the occurrence of acne within the follicle, while Malassezia can cause local inflammation and promote the secretion of free fatty acids by the body, making the inflammation within the follicle acne more pronounced."
+        },
+        "5": {
+          "level": 5,
+          "introduction": "Daily care to strengthen sun protection, you can use deep cleansing and hydrating products and masks to ensure adequate moisture and nutrition for the skin. Eat less spicy and stimulating food. Eat more vegetables and fruits to keep your digestive function normal. Avoid using cosmetics and foundations with a lot of oil and keep your face clean. Use mild cleansing products to avoid damaging the skin barrier.",
+          "advice": "There is heavy acne deep in the skin, abnormal secretion of sebaceous glands, enlarged skin pores, and blocked hair follicles causing acne. The pores are in a closed and hypoxic state, which is very likely to cause anaerobic bacteria and Propionibacterium acne to proliferate and cross-infection to cause inflammation. Decomposing sebum and destroying the sebaceous glands of the hair follicles cause a large number of pimples to form in the hair follicles, which triggers the release of inflammatory factors and leads to an aggravated inflammatory response."
+        }
+      }
+    },
+    "collagen": {
+      "service_name": "Collagen fiber",
+      "levels": {
+        "1": {
+          "level": 1,
+          "introduction": "#The skin is full and elastic, collagen fibers are the main component of the dermis, accounting for 95%-98% of the total fiber mass of the dermis, which is tough and has strong tensile strength. It plays a supporting role for the skin. In daily life due to age, work strain, solar radiation and other factors will lead to collagen loss, skin metabolism is slow, and then cause skin sagging(relaxation), sagging, wrinkles, dry skin aging phenomenon. Choose skin care products with deep hydration type, antioxidant and free radical scavenging to maintain skin vitality.",
+          "advice": "Starting from \"prevention\", daily attention to sun protection to slow down collagen loss and degeneration is a very necessary and effective method. The regular diet and exercise can improve the metabolism of skin cells to replenish and repair collagen by itself."
+        },
+        "2": {
+          "level": 2,
+          "introduction": "The collagen fibers are rich in collagen, amino acids and glycine, which makes the skin full and firm. With the mild loss of collagen fibers. The skin's own water-locking function is then reduced, and the skin's water content is not enough, it will become dry, saggy, and then start to appear fine lines. You can use deep hydration skin care products and masks to give your skin enough vitality and nutrients in time.",
+          "advice": "Pay attention to sun protection, strengthen daily hydration and moisturizing work, regulate emotions, maintain good habits, eat less high-calorie, fried, spicy and other stimulating foods, and avoid staying up late. Supplement collagen and vitamin C, vitamin E, with anti-aging antioxidant products."
+        },
+        "3": {
+          "level": 3,
+          "introduction": "With the collagen fiber loss moderatly, the regular mesh structure of collagen and elastic fibers in the dermis gradually disintegrates, and the skin collapses. The lack of skin elasticity causes fine lines to deepen and crow's feet to begin to appear. Daily care should strengthen sun protection, you can also use skin care products containing vitamin C, vitamin E, green tea extract, white tea extract and other ingredients to achieve antioxidant, free radical scavenging effect.",
+          "advice": "#Strengthen sun protection, avoid direct UV rays, and focus on hydration and moisturizing. Eat less spicy and stimulating, puffed food and carbonated drinks, and eat foods rich in collagen and vitamin C. Maintain a good lifestyle and use products that contain peptides and vitamin A alcohol(retinol) to promote collagen synthesis and increase skin elasticity."
+        },
+        "4": {
+          "level": 4,
+          "introduction": "Heavy loss of collagen fibers, decreased protein synthesis rate, decreased activity or loss of fibroblasts in the dermis, reduced and broken collagen fibers, resulting in reduced skin elasticity, which can lead to real wrinkles such as wrinkles, marionette lines and crow's feet. Skin care products and masks containing anti-aging and antioxidant ingredients can be used.",
+          "advice": "Strengthen skin hydration and sun protection to prevent pigmentation caused by ultraviolet rays, maintain a good state of mind, apply face masks regularly, avoid spicy stimuli such as smoking, alcohol, frying, exercise regularly to accelerate body metabolism, and maintain good work and rest habits. You can eat pig skin, pig feet, fish and other anti-aging food."
+        },
+        "5": {
+          "level": 5,
+          "introduction": "Severe breakage of collagen fibers, reduced elasticity and damaged fracture of collagen and elastic fibers can lead to collapse of the natural support architecture that supports the skin. The number of collagen fibers synthesized decreases and thins, and the dermis becomes less supportive of the epidermis. The skin begins to sag appearing wrinkles, bags under the eyes, the jawline becomes blurred, and the neck becomes saggy. Skin care products containing antioxidant and anti-aging ingredients such as polyphenols and fullerenes can be used, as well as ingredients to promote collagen and hyaluronic acid synthesis, such as fibroblast growth factor, collagen peptides (hydrolyzed collagen) niacinamide, ginseng extract, etc..",
+          "advice": "Enhance skin hydration and moisturization, pay attention to sun protection, avoid direct UV radiation. You can apply mask regularly. Pay attention to a balanced diet and consume more fruits and vegetables containing antioxidants, such as carrots, tomatoes, grapes, etc.. You can drink red wine and tea in moderation to protect the collagen in the skin. Strengthen exercise, maintain a good state of mind, and keep good work and rest habits. You can consume collagen-rich foods such as pork skin, bird's nest and fish gelatin."
+        }
+      }
+    },
+    "pigment": {
+      "service_name": "Pigmentation",
+      "levels": {
+        "1": {
+          "level": 1,
+          "introduction": "Your skin is currently free of visible pigmentation, but you still need to continue to do a good job of hydration and moisturizing. Pay attention to sun protection on a daily basis, and go out to apply sunscreen or use sunscreen cosmetics to block UV rays to prevent the possibility of spots appearing. You can use a hydrating mask to give your complexion enough nutrients and vitality.",
+          "advice": "Avoid direct sunlight, usually maintain a good state of mind, adequate sleep, moderate exercise, and eat more fresh fruits and vegetables to promote blood circulation and metabolism throughout the body."
+        },
+        "2": {
+          "level": 2,
+          "introduction": "A small amount of skin pigmentation. Hyperpigmentation is a deepening of skin color due to increased pigmentation from various causes. The most common cause is sun exposure, but it can also be due to genetics, metabolism, endocrine, etc. The first step to improve melanin is to do a good job of sun protection and hydration, regular skin care, with the use of deep hydration and whitening products to assist metabolism and inhibit the synthesis of melanin.",
+          "advice": "Pay attention to sun protection, keep a happy mood, develop good habits, avoid skin-harming behaviors, and protect the skin barrier. Do not use poor quality cosmetics that are harmful to the skin. Do regular treatments to increase skin moisturization and radiance."
+        },
+        "3": {
+          "level": 3,
+          "introduction": "Mild pigmentation of the skin. Hyperpigmentation is the darkening of skin color or the appearance of spots, patches or plaques that are darker than normal skin color due to sunlight, genetics, metabolism and other factors. You should do a good job of strict sun protection and hydration to avoid prolonged sun exposure and strong radiation light sources to accelerate melanin synthesis, resulting in darker skin tone. You can use products containing arbutin, soybean/green tea extract and other ingredients to antioxidant and inhibit the synthesis of melanin.",
+          "advice": "Control your emotions, healthy eating habits and do not use poor quality, skin damaging cosmetics. To prevent the possibility of spot deepening. Take proper supplement of vitamin C, vitamin E and eat more fresh fruits and vegetables."
+        },
+        "4": {
+          "level": 4,
+          "introduction": "The skin has visible pigmentation. Hyperpigmentation is mostly due to capillary dilation caused by sensitivity, trauma, inflammation and other factors as well as stimulating the activity of tyrosinase, leading to melanin accumulation. It is important to take good care of the skin, strengthen sun protection and hydration, avoid excessive damage to the skin, protect the skin barrier, and choose skin care products and masks that contain clotting acid, niacinamide and other ingredients to achieve the effect of antioxidant, inhibit vasodilation and inhibit melanin synthesis.",
+          "advice": "Do strict sun protection and avoid prolonged activities under strong sunlight. Pay attention to your diet, take appropriate supplements of vitamin C, vitamin E, eat more fresh fruits and vegetables, avoid spicy and stimulating foods, and ensure sufficient sleep."
+        },
+        "5": {
+          "level": 5,
+          "introduction": "Facial skin has severe pigmentation, and the most basic perception to improve pigmentation is sun protection and metabolizing melanin. Usually do a good job of sun protection, use skin care products that are suitable for you, and do not use poor quality, skin damaging cosmetics. You can choose products containing Centella asiatica, arbutin, and transaminic acid to lighten the dullness of your skin and give it a natural brightness.",
+          "advice": "Take vitamin C and vitamin E as appropriate, pay attention to sun protection, avoid prolonged sun exposure, drink more water, maintain a good mood and adequate sleep, eat more high-protein and high-vitamin foods, and strengthen exercise to enhance skin metabolism."
+        }
+      }
+    },
+    "sensitive": {
+      "service_name": "PL Sensitivity",
+      "levels": {
+        "1": {
+          "level": 1,
+          "introduction": "Facial skin pores are delicate and elastic, not easily sensitive to external stimuli, basically no easy problems, you can choose a mild non-stimulating hydration and moisturizing products to maintain the skin PH balance.",
+          "advice": "Pay attention to sun protection, take good daily care, protect the skin barrier and do not use poor quality, skin damaging cosmetics. Work and rest regularly to keep your skin in its current condition."
+        },
+        "2": {
+          "level": 2,
+          "introduction": "Smooth and delicate skin, but the skin surface is dehydrated and dry, the skin stratum corneum is thin, the immunity is low, and capillaries are vaguely visible. The skin is prone to localized redness due to external stimuli. It is recommended to use gentle hydration and repair products to increase the skin barrier and tolerance.",
+          "advice": "Pay attention to sun protection, strengthen hydration and repair keratin to avoid causing skin allergies. Do not use strong cleansing products. Pay attention to sun protection and avoid stimulation by UV rays."
+        },
+        "3": {
+          "level": 3,
+          "introduction": "Thin facial stratum corneum, local skin red blood phenomenon, poor water locking ability, skin care will be accompanied by a slight tingling, itchy, easily affected by external factors. The skin is prone to dryness and peeling fine lines or acne. Deep hydration, calming and repair products can be used to increase the thickness of the skin's stratum corneum.",
+          "advice": "Pay attention to daily sun protection, wash your face no more than 2 times a day, avoid cleaning your face with too hot water, choose mild skin care products to avoid causing secondary stimulation, and you can regularly carry out deep hydration projects to give your skin enough nutrients."
+        },
+        "4": {
+          "level": 4,
+          "introduction": "The face has poor immunity and repair ability, and is prone to redness, swelling, heat, itching and pain when severe. The face has fine scales, easy to grow red spots, and large areas of peeling skin. It is recommended to use hydrating and repairing products to enhance the skin barrier function and improve the skin repairing ability.",
+          "advice": "Avoid allergens, quit smoking and drink less alcohol. Increase the intake of high protein, vitamin B, E calcium, develop good habits of work and rest, regulate the mood of the mind and keep a happy mood."
+        },
+        "5": {
+          "level": 5,
+          "introduction": "Tight, shiny skin, thin stratum corneum, and dilated subcutaneous capillaries cause redness. Symptoms are more pronounced and severe under internal and external stimulating factors. Prone to recurrent allergies causing skin inflammation, redness, swelling, heat and pain. Professional care is available, and products for repairing sensitive skin can be used.",
+          "advice": "Pay attention to sun protection, increase the intake of high protein, vitamin B and calcium E, prohibit the use of efficacious products to prevent aggravation of worsening skin conditions, and avoid eating fish, shrimp, crab, cattle, sheep and other foods that can easily cause allergies.\n"
+        }
+      }
+    },
+    "uv_spot": {
+      "service_name": "UV spot",
+      "levels": {
+        "1": {
+          "level": 1,
+          "introduction": "There are no visible UV spots on the deeper layers of the skin, but among all the exogenous factors that cause skin aging, UV is the biggest culprit, and skin aging is even directly called \"photoaging\". UV radiation to our skin can easily cause pigmentation increase, which is manifested by darkening of the skin and the appearance of spots. Patients who have spots in their own, after being exposed to UV radiation, the color of the original spots will deepen, and even grow many new spots. It is important to do a good job of sunscreen and hydration on a daily basis and use products containing arbutin and other ingredients to inhibit melanin synthesis.",
+          "advice": "Do protect yourself from the sun, wear a hat, mask or sunscreen when you go out, avoid prolonged activities in strong sunlight, pay attention to your diet, develop good habits, and exercise in moderation to promote your whole body metabolism."
+        },
+        "2": {
+          "level": 2,
+          "introduction": "There are mild ultraviolet spots in the deep layer of the skin. Ultraviolet rays are the main factor in the formation of spots, which stimulate the pigment cells under the skin to be active on the one hand, and damage the metabolism of the normal generation of skin cells on the other hand. Skin without reasonable sun protection, daily over-cleaning, wrong use of spot whitening products to damage the skin, and the use of pigment-containing drops when the skin is traumatized can all cause pigmentation. Products containing soybean and green tea extracts can be used to inhibit melanin synthesis and antioxidant.",
+          "advice": "Pay attention to sun protection, do a good job of daily hydration and moisturizing, pay attention to diet and intake of foods with antioxidant ingredients, such as vitamin C, vitamin E, vitamin B3, carotene, etc. can reduce sun damage."
+        },
+        "3": {
+          "level": 3,
+          "introduction": "There are moderate UV spots in the deeper layers of the skin. UVC is a short-wave ultraviolet ray with a wavelength of 180-280mm, which can stimulate the subcutaneous pigment mother cell activity, leading to a large number of mellanin pigment, and at the same time affect and damage the normal metabolism of skin cells, so that melanin can not be smoothly discharged and remain in the skin, causing a series of skin darkening, resulting in darkening of the skin, long spots, and later metabolism presents the epidermis to form irregular size spots. Strengthen the daily skin hydration care, give the skin sufficient nutrients.",
+          "advice": "Do a good job of daily sun protection, avoid sun exposure, ensure sufficient sleep, appropriate exercise, eat more vitamin C-rich food, you can properly consume milk, carrots, tomatoes and other foods with whitening properties, less spicy stimulation, to avoid pigmentation."
+        },
+        "4": {
+          "level": 4,
+          "introduction": "Skin deep with heavy UV spots, UVB is medium wave ultraviolet ray wavelength 280-320mm, can reach the basal layer, mainly will sunburn, sun red skin. The skin is exposed to strong UVB rays, which causes cellular hypoxia, cell membrane oxidation, skin metabolic balance is disrupted, the supply of nutrients needed by the skin tends to slow down, pigment mother cell activity is enhanced, melanin particles keep growing and spots are formed. Strengthen the daily skin hydration, can be combined with the use of products containing niacinamide ingredients anti-glycation, inhibit melanin synthesis.",
+          "advice": "Pay attention to sun protection, go out should shade or apply sunscreen, usually drink more water, eliminate toxins outside the body, regular rest, avoid spicy and stimulating food, eliminate bad cosmetics, adjust the mindset, relieve stress, can eat some vitamin C and vitamin E every day to help lighten melanin."
+        },
+        "5": {
+          "level": 5,
+          "introduction": "Skin deep with serious ultraviolet spots, ultraviolet UVA320-400mm long-wave ultraviolet light, a large number of daylight, especially in the summer daylight can be 1000 times more than UVB, and has a deep penetrating power, can penetrate the epidermis to reach the dermis, so that the skin immune function is reduced, the dermis collagen reduction, cell renewal slowed, ultraviolet radiation to promote melanocyte stimulation hormone and endothelin After ultraviolet radiation, it promotes the secretion of hormones and endothelin by melanocytes, and the activation of tyrosine increases pigmentation. Pay attention to hydration while using products containing ceramides, licorice, photoglycyrrhizidine and other ingredients, anti-inflammatory, inhibit melanin synthesis and repair the skin barrier.",
+          "advice": "Do a good job of daily deep cleansing and hydration, and avoid damaging the skin barrier. You can choose to use oil-based makeup remover products to avoid makeup residue blocking pores. Exfoliate regularly to unclog pores. A mask with deep cleansing effect can cleanse the skin to remove clogged substances and shrink pores."
+        }
+      }
+    }
+  }
+}

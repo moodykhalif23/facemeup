@@ -1,0 +1,21 @@
+{
+  "_description": "Device algorithm configuration",
+  "_source": "Config → content settings on zm.yiyuan.ai",
+  "data_show_type": null,
+  "age_mode": null,
+  "age_type": null,
+  "color_show_type": null,
+  "water_mode": null,
+  "chart_types": {
+    "1": "column_chart",
+    "2": "rose_chart"
+  },
+  "age_modes": {
+    "0": "reference_customer_age",
+    "1": "AI_prediction_algorithm"
+  },
+  "water_modes": {
+    "0": "algorithm_only",
+    "1": "water_pen_sensor"
+  }
+}

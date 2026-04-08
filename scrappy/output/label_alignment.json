@@ -1,0 +1,104 @@
+{
+  "_description": "Maps Bitmoji API field names to our ML model output labels",
+  "_note": "Use this to align training labels with device output labels",
+  "skin_types": {
+    "Oily": {
+      "bitmoji_indicator": "sebum.score < 50 OR skin_type.score < 50",
+      "conditions_typical": [
+        "Acne",
+        "Blackheads",
+        "Enlarged Pores",
+        "UV Acne"
+      ]
+    },
+    "Dry": {
+      "bitmoji_indicator": "ext_water.score < 50",
+      "conditions_typical": [
+        "Wrinkles",
+        "Dark Spots",
+        "Sensitivity"
+      ]
+    },
+    "Combination": {
+      "bitmoji_indicator": "sebum.score 50-65 AND ext_water.score 50-65",
+      "conditions_typical": [
+        "Blackheads",
+        "Pores",
+        "Oiliness"
+      ]
+    },
+    "Normal": {
+      "bitmoji_indicator": "all scores > 65",
+      "conditions_typical": []
+    },
+    "Sensitive": {
+      "bitmoji_indicator": "sensitive.level >= 3",
+      "conditions_typical": [
+        "Sensitivity",
+        "Redness"
+      ]
+    }
+  },
+  "condition_map": {
+    "acne": {
+      "bitmoji_field": "pockmark",
+      "our_label": "Acne",
+      "threshold_level": 2
+    },
+    "blackhead": {
+      "bitmoji_field": "blackhead",
+      "our_label": "Blackheads",
+      "threshold_level": 2
+    },
+    "dark_spot": {
+      "bitmoji_field": "spot",
+      "our_label": "Dark Spots",
+      "threshold_level": 2
+    },
+    "pore": {
+      "bitmoji_field": "pore",
+      "our_label": "Enlarged Pores",
+      "threshold_level": 2
+    },
+    "wrinkle": {
+      "bitmoji_field": "wrinkle",
+      "our_label": "Wrinkles",
+      "threshold_level": 2
+    },
+    "oiliness": {
+      "bitmoji_field": "sebum",
+      "our_label": "Oiliness",
+      "threshold_level": 2
+    },
+    "sensitivity": {
+      "bitmoji_field": "sensitive",
+      "our_label": "Sensitivity",
+      "threshold_level": 2
+    },
+    "pigment": {
+      "bitmoji_field": "pigment",
+      "our_label": "Pigmentation",
+      "threshold_level": 2
+    },
+    "uv_acne": {
+      "bitmoji_field": "acne",
+      "our_label": "UV Acne",
+      "threshold_level": 2
+    },
+    "collagen": {
+      "bitmoji_field": "collagen",
+      "our_label": "Collagen",
+      "threshold_level": 2
+    },
+    "dark_circle": {
+      "bitmoji_field": "dark_circle",
+      "our_label": "Dark Circles",
+      "threshold_level": 2
+    },
+    "moisture": {
+      "bitmoji_field": "ext_water",
+      "our_label": "Dryness",
+      "threshold_level": 2
+    }
+  }
+}

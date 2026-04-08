@@ -1,0 +1,74 @@
+{
+  "_description": "Maps detected skin conditions to recommended product effect categories.",
+  "_source": "Config → product efficacy on zm.yiyuan.ai",
+  "mappings": {
+    "Sebum": [
+      "cleansing",
+      "oil_control",
+      "water_oil_balance"
+    ],
+    "Acne": [
+      "repair",
+      "acne_treatment",
+      "fade_acne_marks"
+    ],
+    "Pigmentation": [
+      "lightening",
+      "sunscreen"
+    ],
+    "Wrinkles": [
+      "firming",
+      "anti_wrinkle",
+      "anti_aging",
+      "antioxidant"
+    ],
+    "Pores": [
+      "cleansing",
+      "pore_minimizing"
+    ],
+    "Blackheads": [
+      "cleansing",
+      "pore_minimizing"
+    ],
+    "Skin Tone": [
+      "brightening",
+      "sunscreen",
+      "rejuvenation",
+      "antioxidant"
+    ],
+    "Moisture": [
+      "hydration",
+      "moisturizing",
+      "water_locking"
+    ],
+    "Sensitivity": [
+      "repair",
+      "soothing"
+    ],
+    "UV Spots": [
+      "lightening",
+      "sunscreen"
+    ],
+    "Dark Spots": [
+      "lightening",
+      "sunscreen",
+      "detoxification",
+      "brightening"
+    ],
+    "UV Acne": [
+      "cleansing",
+      "repair",
+      "detoxification"
+    ],
+    "Dark Circles": [
+      "repair",
+      "brightening",
+      "firming"
+    ],
+    "Collagen": [
+      "firming",
+      "anti_aging",
+      "collagen_boosting"
+    ]
+  }
+}

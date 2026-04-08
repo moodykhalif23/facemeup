@@ -1,0 +1,258 @@
+{
+  "_description": "Bitmoji device detection items. score=0-100 (higher=healthier), level=1-5 (higher=worse).",
+  "items": [
+    {
+      "typename": "acne",
+      "label": "UV Acne",
+      "our_label": "Acne",
+      "type": "deep",
+      "score_range": [
+        0,
+        100
+      ],
+      "level_range": [
+        1,
+        5
+      ],
+      "current_rate": "0",
+      "rate_label": "-",
+      "api_category": "acne"
+    },
+    {
+      "typename": "blackhead",
+      "label": "Blackhead",
+      "our_label": "Blackheads",
+      "type": "surface",
+      "score_range": [
+        0,
+        100
+      ],
+      "level_range": [
+        1,
+        5
+      ],
+      "current_rate": "0",
+      "rate_label": "-",
+      "api_category": "blackhead"
+    },
+    {
+      "typename": "collagen",
+      "label": "Collagen Fiber",
+      "our_label": "Collagen",
+      "type": "deep",
+      "score_range": [
+        0,
+        100
+      ],
+      "level_range": [
+        1,
+        5
+      ],
+      "current_rate": "0",
+      "rate_label": "-",
+      "api_category": "collagen"
+    },
+    {
+      "typename": "color",
+      "label": "Skin Color",
+      "our_label": "Skin Tone",
+      "type": "surface",
+      "score_range": [
+        0,
+        100
+      ],
+      "level_range": [
+        1,
+        6
+      ],
+      "note": "ITA-based Fitzpatrick-like scale",
+      "current_rate": "0",
+      "rate_label": "-",
+      "api_category": "color"
+    },
+    {
+      "typename": "dark_circle",
+      "label": "Dark Eye Circles",
+      "our_label": "Dark Circles",
+      "type": "surface",
+      "score_range": [
+        0,
+        100
+      ],
+      "level_range": [
+        1,
+        5
+      ],
+      "current_rate": "0",
+      "rate_label": "-",
+      "api_category": "dark_circle"
+    },
+    {
+      "typename": "ext_water",
+      "label": "Moisture",
+      "our_label": "Moisture",
+      "type": "surface",
+      "score_range": [
+        0,
+        100
+      ],
+      "level_range": [
+        1,
+        5
+      ],
+      "current_rate": "0",
+      "rate_label": "-",
+      "api_category": "ext_water"
+    },
+    {
+      "typename": "pigment",
+      "label": "Pigmentation",
+      "our_label": "Pigmentation",
+      "type": "deep",
+      "score_range": [
+        0,
+        100
+      ],
+      "level_range": [
+        1,
+        5
+      ],
+      "current_rate": "0",
+      "rate_label": "-",
+      "api_category": "pigment"
+    },
+    {
+      "typename": "pockmark",
+      "label": "Acne Marks",
+      "our_label": "Pimples/Scars",
+      "type": "surface",
+      "score_range": [
+        0,
+        100
+      ],
+      "level_range": [
+        1,
+        5
+      ],
+      "current_rate": "0",
+      "rate_label": "-",
+      "api_category": "pockmark"
+    },
+    {
+      "typename": "pore",
+      "label": "Pores",
+      "our_label": "Enlarged Pores",
+      "type": "surface",
+      "score_range": [
+        0,
+        100
+      ],
+      "level_range": [
+        1,
+        5
+      ],
+      "current_rate": "0",
+      "rate_label": "-",
+      "api_category": "pore"
+    },
+    {
+      "typename": "sebum",
+      "label": "Sebum",
+      "our_label": "Oiliness",
+      "type": "surface",
+      "score_range": [
+        0,
+        100
+      ],
+      "level_range": [
+        1,
+        5
+      ]
+    },
+    {
+      "typename": "sensitive",
+      "label": "PL Sensitivity",
+      "our_label": "Sensitivity",
+      "type": "surface",
+      "score_range": [
+        0,
+        100
+      ],
+      "level_range": [
+        1,
+        5
+      ],
+      "current_rate": "0",
+      "rate_label": "-",
+      "api_category": "sensitive"
+    },
+    {
+      "typename": "skin_type",
+      "label": "Skin Type",
+      "our_label": "Sebum/Skin Type",
+      "type": "surface",
+      "score_range": [
+        0,
+        100
+      ],
+      "level_range": [
+        1,
+        5
+      ],
+      "current_rate": "0",
+      "rate_label": "-",
+      "api_category": "skin_type"
+    },
+    {
+      "typename": "spot",
+      "label": "Dark Spots",
+      "our_label": "Dark Spots",
+      "type": "surface",
+      "score_range": [
+        0,
+        100
+      ],
+      "level_range": [
+        1,
+        5
+      ],
+      "current_rate": "0",
+      "rate_label": "-",
+      "api_category": "spot"
+    },
+    {
+      "typename": "uv_spot",
+      "label": "UV Spots",
+      "our_label": "UV Spots",
+      "type": "deep",
+      "score_range": [
+        0,
+        100
+      ],
+      "level_range": [
+        1,
+        5
+      ],
+      "current_rate": "0",
+      "rate_label": "-",
+      "api_category": "uv_spot"
+    },
+    {
+      "typename": "wrinkle",
+      "label": "Wrinkles",
+      "our_label": "Wrinkles",
+      "type": "surface",
+      "score_range": [
+        0,
+        100
+      ],
+      "level_range": [
+        1,
+        5
+      ],
+      "current_rate": "0",
+      "rate_label": "-",
+      "api_category": "wrinkle"
+    }
+  ]
+}

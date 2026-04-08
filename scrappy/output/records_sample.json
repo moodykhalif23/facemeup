@@ -1,0 +1,2709 @@
+{
+  "_description": "Sample of analyzed records with scores and derived labels",
+  "_count": 50,
+  "records": [
+    {
+      "id": 6717121,
+      "result_id": "beefb06d8af1bda239e36efc5d18796e",
+      "device": "S28B6103",
+      "timestamp": "2026-04-07 22:09:33",
+      "status": 2,
+      "analysis_keys": [
+        "code",
+        "error_detect_types",
+        "filename",
+        "detect_types",
+        "age",
+        "features",
+        "face_shape",
+        "lip_shape",
+        "color",
+        "brow_shape",
+        "appearance",
+        "spot",
+        "pockmark",
+        "uv_spot",
+        "face_ratio",
+        "aging_simu",
+        "sensitive",
+        "texture",
+        "acne",
+        "collagen",
+        "wrinkle",
+        "dark_circle",
+        "blackhead",
+        "pore",
+        "skin_type",
+        "filename_brown",
+        "filename_woods",
+        "filename_blue",
+        "filename_red",
+        "filename_uv",
+        "original_images",
+        "filename_negative",
+        "filename_positive",
+        "id",
+        "recognition",
+        "pigment",
+        "ext_water",
+        "layer_beat",
+        "deep_beat",
+        "final_result"
+      ],
+      "scores": {
+        "uv_acne": {
+          "score": 77,
+          "level": 2,
+          "count": 44
+        },
+        "blackhead": {
+          "score": 6,
+          "level": 5,
+          "count": 282
+        },
+        "collagen": {
+          "score": 26,
+          "level": 4,
+          "count": null
+        },
+        "skin_tone": {
+          "score": 25,
+          "level": 4,
+          "ita": 27.958118438720703,
+          "result": "xiaomai"
+        },
+        "dark_circles": {
+          "score": 78,
+          "level": 2,
+          "count": null
+        },
+        "moisture": {
+          "score": 26,
+          "level": 1,
+          "count": null
+        },
+        "pigmentation": {
+          "score": 36,
+          "level": 4,
+          "count": null
+        },
+        "pimples": {
+          "score": 60,
+          "level": 3,
+          "count": 15
+        },
+        "pores": {
+          "score": 33,
+          "level": 4,
+          "count": 1038
+        },
+        "sebum": {
+          "score": 86,
+          "level": 1,
+          "count": null
+        },
+        "sensitivity": {
+          "score": 96,
+          "level": 1,
+          "count": null
+        },
+        "spots": {
+          "score": 44,
+          "level": 3,
+          "count": 38
+        },
+        "uv_spots": {
+          "score": 36,
+          "level": 4,
+          "count": 45
+        },
+        "wrinkles": {
+          "score": 15,
+          "level": 5,
+          "count": 1259
+        },
+        "face_score": 70,
+        "age_estimate": 41
+      },
+      "derived_skin_type": "Dry",
+      "derived_conditions": [
+        "blackhead",
+        "pimples",
+        "pores",
+        "spots",
+        "uv_spots",
+        "pigmentation",
+        "wrinkles",
+        "moisture"
+      ]
+    },
+    {
+      "id": 6715578,
+      "result_id": "24d8f812bc749754337687ac7c396fc6",
+      "device": "S28B6103",
+      "timestamp": "2026-04-07 19:18:38",
+      "status": 2,
+      "analysis_keys": [
+        "code",
+        "error_detect_types",
+        "filename",
+        "detect_types",
+        "age",
+        "features",
+        "face_shape",
+        "color",
+        "appearance",
+        "brow_shape",
+        "lip_shape",
+        "uv_spot",
+        "acne",
+        "spot",
+        "sensitive",
+        "face_ratio",
+        "aging_simu",
+        "pockmark",
+        "blackhead",
+        "collagen",
+        "texture",
+        "wrinkle",
+        "dark_circle",
+        "pore",
+        "skin_type",
+        "filename_brown",
+        "filename_woods",
+        "filename_blue",
+        "filename_uv",
+        "filename_red",
+        "original_images",
+        "filename_negative",
+        "filename_positive",
+        "id",
+        "recognition",
+        "pigment",
+        "ext_water",
+        "layer_beat",
+        "deep_beat",
+        "final_result"
+      ],
+      "scores": {
+        "uv_acne": {
+          "score": 93,
+          "level": 1,
+          "count": 12
+        },
+        "blackhead": {
+          "score": 98,
+          "level": 1,
+          "count": 0
+        },
+        "collagen": {
+          "score": 20,
+          "level": 5,
+          "count": null
+        },
+        "skin_tone": {
+          "score": 21,
+          "level": 4,
+          "ita": 22.468605041503906,
+          "result": "xiaomai"
+        },
+        "dark_circles": {
+          "score": 50,
+          "level": 3,
+          "count": null
+        },
+        "moisture": {
+          "score": 38,
+          "level": 4,
+          "count": null
+        },
+        "pigmentation": {
+          "score": 52,
+          "level": 3,
+          "count": null
+        },
+        "pimples": {
+          "score": 64,
+          "level": 2,
+          "count": 13
+        },
+        "pores": {
+          "score": 16,
+          "level": 5,
+          "count": 1372
+        },
+        "sebum": {
+          "score": 17,
+          "level": 5,
+          "count": null
+        },
+        "sensitivity": {
+          "score": 76,
+          "level": 2,
+          "count": null
+        },
+        "spots": {
+          "score": 72,
+          "level": 2,
+          "count": 24
+        },
+        "uv_spots": {
+          "score": 60,
+          "level": 3,
+          "count": 28
+        },
+        "wrinkles": {
+          "score": 7,
+          "level": 5,
+          "count": 2036
+        },
+        "face_score": 72,
+        "age_estimate": 29
+      },
+      "derived_skin_type": "Oily",
+      "derived_conditions": [
+        "pimples",
+        "pores",
+        "uv_spots",
+        "pigmentation",
+        "wrinkles",
+        "dark_circles",
+        "moisture",
+        "sebum"
+      ]
+    },
+    {
+      "id": 6707515,
+      "result_id": "1ade5b318e030c1fcd7ec0e0a2820e22",
+      "device": "S28B6103",
+      "timestamp": "2026-04-06 18:54:05",
+      "status": 2,
+      "analysis_keys": [
+        "code",
+        "error_detect_types",
+        "filename",
+        "detect_types",
+        "age",
+        "features",
+        "lip_shape",
+        "face_shape",
+        "brow_shape",
+        "color",
+        "appearance",
+        "acne",
+        "spot",
+        "face_ratio",
+        "pockmark",
+        "sensitive",
+        "uv_spot",
+        "texture",
+        "wrinkle",
+        "collagen",
+        "aging_simu",
+        "dark_circle",
+        "blackhead",
+        "pore",
+        "skin_type",
+        "filename_brown",
+        "filename_woods",
+        "filename_blue",
+        "filename_uv",
+        "filename_red",
+        "original_images",
+        "filename_negative",
+        "filename_positive",
+        "id",
+        "recognition",
+        "pigment",
+        "ext_water",
+        "layer_beat",
+        "deep_beat",
+        "final_result"
+      ],
+      "scores": {
+        "uv_acne": {
+          "score": 98,
+          "level": 1,
+          "count": 2
+        },
+        "blackhead": {
+          "score": 99,
+          "level": 1,
+          "count": 2
+        },
+        "collagen": {
+          "score": 42,
+          "level": 3,
+          "count": null
+        },
+        "skin_tone": {
+          "score": 23,
+          "level": 4,
+          "ita": 23.984617233276367,
+          "result": "xiaomai"
+        },
+        "dark_circles": {
+          "score": 48,
+          "level": 3,
+          "count": null
+        },
+        "moisture": {
+          "score": 26,
+          "level": 1,
+          "count": null
+        },
+        "pigmentation": {
+          "score": 39,
+          "level": 4,
+          "count": null
+        },
+        "pimples": {
+          "score": 56,
+          "level": 3,
+          "count": 17
+        },
+        "pores": {
+          "score": 18,
+          "level": 5,
+          "count": 1380
+        },
+        "sebum": {
+          "score": 83,
+          "level": 1,
+          "count": null
+        },
+        "sensitivity": {
+          "score": 63,
+          "level": 2,
+          "count": null
+        },
+        "spots": {
+          "score": 50,
+          "level": 3,
+          "count": 35
+        },
+        "uv_spots": {
+          "score": 42,
+          "level": 3,
+          "count": 40
+        },
+        "wrinkles": {
+          "score": 21,
+          "level": 4,
+          "count": 3132
+        },
+        "face_score": 74,
+        "age_estimate": 39
+      },
+      "derived_skin_type": "Dry",
+      "derived_conditions": [
+        "pimples",
+        "pores",
+        "spots",
+        "uv_spots",
+        "pigmentation",
+        "wrinkles",
+        "dark_circles",
+        "sensitivity",
+        "moisture"
+      ]
+    },
+    {
+      "id": 6706043,
+      "result_id": "251247562a5aa0f144af17cc3f8ae768",
+      "device": "S28B6103",
+      "timestamp": "2026-04-06 16:46:52",
+      "status": 2,
+      "analysis_keys": [
+        "code",
+        "error_detect_types",
+        "filename",
+        "detect_types",
+        "age",
+        "features",
+        "lip_shape",
+        "face_shape",
+        "color",
+        "appearance",
+        "brow_shape",
+        "spot",
+        "uv_spot",
+        "pockmark",
+        "acne",
+        "face_ratio",
+        "sensitive",
+        "aging_simu",
+        "collagen",
+        "wrinkle",
+        "texture",
+        "dark_circle",
+        "blackhead",
+        "pore",
+        "skin_type",
+        "filename_brown",
+        "filename_woods",
+        "filename_blue",
+        "filename_uv",
+        "filename_red",
+        "original_images",
+        "filename_negative",
+        "filename_positive",
+        "id",
+        "recognition",
+        "pigment",
+        "ext_water",
+        "layer_beat",
+        "deep_beat",
+        "final_result"
+      ],
+      "scores": {
+        "uv_acne": {
+          "score": 71,
+          "level": 2,
+          "count": 59
+        },
+        "blackhead": {
+          "score": 28,
+          "level": 4,
+          "count": 216
+        },
+        "collagen": {
+          "score": 30,
+          "level": 4,
+          "count": null
+        },
+        "skin_tone": {
+          "score": 21,
+          "level": 4,
+          "ita": 11.731496810913086,
+          "result": "anchen"
+        },
+        "dark_circles": {
+          "score": 61,
+          "level": 2,
+          "count": null
+        },
+        "moisture": {
+          "score": 35,
+          "level": 3,
+          "count": null
+        },
+        "pigmentation": {
+          "score": 40,
+          "level": 4,
+          "count": null
+        },
+        "pimples": {
+          "score": 92,
+          "level": 1,
+          "count": 3
+        },
+        "pores": {
+          "score": 14,
+          "level": 5,
+          "count": 1422
+        },
+        "sebum": {
+          "score": 46,
+          "level": 3,
+          "count": null
+        },
+        "sensitivity": {
+          "score": 94,
+          "level": 1,
+          "count": null
+        },
+        "spots": {
+          "score": 52,
+          "level": 3,
+          "count": 34
+        },
+        "uv_spots": {
+          "score": 42,
+          "level": 3,
+          "count": 40
+        },
+        "wrinkles": {
+          "score": 5,
+          "level": 5,
+          "count": 2652
+        },
+        "face_score": 75,
+        "age_estimate": 39
+      },
+      "derived_skin_type": "Oily",
+      "derived_conditions": [
+        "blackhead",
+        "pores",
+        "spots",
+        "uv_spots",
+        "pigmentation",
+        "wrinkles",
+        "dark_circles",
+        "moisture",
+        "sebum"
+      ]
+    },
+    {
+      "id": 6693970,
+      "result_id": "eda8d34e2353811826372e2727b1f9ff",
+      "device": "S28B6103",
+      "timestamp": "2026-04-04 22:40:10",
+      "status": 2,
+      "analysis_keys": [
+        "code",
+        "error_detect_types",
+        "filename",
+        "detect_types",
+        "age",
+        "features",
+        "face_shape",
+        "lip_shape",
+        "appearance",
+        "brow_shape",
+        "color",
+        "uv_spot",
+        "pockmark",
+        "acne",
+        "face_ratio",
+        "spot",
+        "sensitive",
+        "aging_simu",
+        "texture",
+        "wrinkle",
+        "collagen",
+        "dark_circle",
+        "blackhead",
+        "pore",
+        "skin_type",
+        "filename_brown",
+        "filename_woods",
+        "filename_red",
+        "filename_uv",
+        "filename_blue",
+        "original_images",
+        "filename_negative",
+        "filename_positive",
+        "id",
+        "recognition",
+        "pigment",
+        "ext_water",
+        "layer_beat",
+        "deep_beat",
+        "final_result"
+      ],
+      "scores": {
+        "uv_acne": {
+          "score": 90,
+          "level": 1,
+          "count": 18
+        },
+        "blackhead": {
+          "score": 35,
+          "level": 4,
+          "count": 163
+        },
+        "collagen": {
+          "score": 52,
+          "level": 3,
+          "count": null
+        },
+        "skin_tone": {
+          "score": 37,
+          "level": 4,
+          "ita": 33.41602325439453,
+          "result": "xiaomai"
+        },
+        "dark_circles": {
+          "score": 34,
+          "level": 4,
+          "count": null
+        },
+        "moisture": {
+          "score": 35,
+          "level": 3,
+          "count": null
+        },
+        "pigmentation": {
+          "score": 46,
+          "level": 3,
+          "count": null
+        },
+        "pimples": {
+          "score": 86,
+          "level": 1,
+          "count": 5
+        },
+        "pores": {
+          "score": 33,
+          "level": 4,
+          "count": 1055
+        },
+        "sebum": {
+          "score": 46,
+          "level": 3,
+          "count": null
+        },
+        "sensitivity": {
+          "score": 94,
+          "level": 1,
+          "count": null
+        },
+        "spots": {
+          "score": 52,
+          "level": 3,
+          "count": 34
+        },
+        "uv_spots": {
+          "score": 47,
+          "level": 3,
+          "count": 37
+        },
+        "wrinkles": {
+          "score": 45,
+          "level": 3,
+          "count": 1180
+        },
+        "face_score": 70,
+        "age_estimate": 33
+      },
+      "derived_skin_type": "Oily",
+      "derived_conditions": [
+        "blackhead",
+        "pores",
+        "spots",
+        "uv_spots",
+        "pigmentation",
+        "wrinkles",
+        "dark_circles",
+        "moisture",
+        "sebum"
+      ]
+    },
+    {
+      "id": 6693762,
+      "result_id": "c0c807fda9e8dc4451b088d3e11f65a3",
+      "device": "S28B6103",
+      "timestamp": "2026-04-04 22:12:29",
+      "status": 2,
+      "analysis_keys": [
+        "code",
+        "error_detect_types",
+        "filename",
+        "detect_types",
+        "age",
+        "features",
+        "lip_shape",
+        "face_shape",
+        "appearance",
+        "color",
+        "brow_shape",
+        "spot",
+        "pockmark",
+        "acne",
+        "uv_spot",
+        "aging_simu",
+        "sensitive",
+        "face_ratio",
+        "collagen",
+        "texture",
+        "wrinkle",
+        "dark_circle",
+        "blackhead",
+        "pore",
+        "skin_type",
+        "filename_brown",
+        "filename_woods",
+        "filename_blue",
+        "filename_uv",
+        "filename_red",
+        "original_images",
+        "filename_negative",
+        "filename_positive",
+        "id",
+        "recognition",
+        "pigment",
+        "ext_water",
+        "layer_beat",
+        "deep_beat",
+        "final_result"
+      ],
+      "scores": {
+        "uv_acne": {
+          "score": 87,
+          "level": 1,
+          "count": 24
+        },
+        "blackhead": {
+          "score": 23,
+          "level": 4,
+          "count": 231
+        },
+        "collagen": {
+          "score": 28,
+          "level": 4,
+          "count": null
+        },
+        "skin_tone": {
+          "score": 21,
+          "level": 4,
+          "ita": 21.75042152404785,
+          "result": "anchen"
+        },
+        "dark_circles": {
+          "score": 49,
+          "level": 3,
+          "count": null
+        },
+        "moisture": {
+          "score": 26,
+          "level": 1,
+          "count": null
+        },
+        "pigmentation": {
+          "score": 42,
+          "level": 3,
+          "count": null
+        },
+        "pimples": {
+          "score": 95,
+          "level": 1,
+          "count": 2
+        },
+        "pores": {
+          "score": 57,
+          "level": 3,
+          "count": 565
+        },
+        "sebum": {
+          "score": 82,
+          "level": 1,
+          "count": null
+        },
+        "sensitivity": {
+          "score": 94,
+          "level": 1,
+          "count": null
+        },
+        "spots": {
+          "score": 56,
+          "level": 3,
+          "count": 32
+        },
+        "uv_spots": {
+          "score": 42,
+          "level": 3,
+          "count": 40
+        },
+        "wrinkles": {
+          "score": 39,
+          "level": 4,
+          "count": 1353
+        },
+        "face_score": 70,
+        "age_estimate": 60
+      },
+      "derived_skin_type": "Dry",
+      "derived_conditions": [
+        "blackhead",
+        "pores",
+        "spots",
+        "uv_spots",
+        "pigmentation",
+        "wrinkles",
+        "dark_circles",
+        "moisture"
+      ]
+    },
+    {
+      "id": 6693551,
+      "result_id": "f4df1926aa422510817166229cadb74d",
+      "device": "S28B6103",
+      "timestamp": "2026-04-04 21:48:24",
+      "status": 2,
+      "analysis_keys": [
+        "code",
+        "error_detect_types",
+        "filename",
+        "detect_types",
+        "age",
+        "features",
+        "face_shape",
+        "lip_shape",
+        "color",
+        "brow_shape",
+        "appearance",
+        "spot",
+        "pockmark",
+        "acne",
+        "aging_simu",
+        "face_ratio",
+        "uv_spot",
+        "sensitive",
+        "texture",
+        "collagen",
+        "blackhead",
+        "wrinkle",
+        "dark_circle",
+        "pore",
+        "skin_type",
+        "filename_uv",
+        "filename_brown",
+        "filename_blue",
+        "filename_woods",
+        "filename_red",
+        "original_images",
+        "filename_negative",
+        "filename_positive",
+        "id",
+        "recognition",
+        "pigment",
+        "ext_water",
+        "layer_beat",
+        "deep_beat",
+        "final_result"
+      ],
+      "scores": {
+        "uv_acne": {
+          "score": 89,
+          "level": 1,
+          "count": 21
+        },
+        "blackhead": {
+          "score": 98,
+          "level": 1,
+          "count": 0
+        },
+        "collagen": {
+          "score": 29,
+          "level": 4,
+          "count": null
+        },
+        "skin_tone": {
+          "score": 23,
+          "level": 4,
+          "ita": 26.425025939941406,
+          "result": "xiaomai"
+        },
+        "dark_circles": {
+          "score": 69,
+          "level": 2,
+          "count": null
+        },
+        "moisture": {
+          "score": 39,
+          "level": 4,
+          "count": null
+        },
+        "pigmentation": {
+          "score": 43,
+          "level": 3,
+          "count": null
+        },
+        "pimples": {
+          "score": 20,
+          "level": 5,
+          "count": 35
+        },
+        "pores": {
+          "score": 96,
+          "level": 1,
+          "count": 47
+        },
+        "sebum": {
+          "score": 15,
+          "level": 5,
+          "count": null
+        },
+        "sensitivity": {
+          "score": 51,
+          "level": 3,
+          "count": null
+        },
+        "spots": {
+          "score": 56,
+          "level": 3,
+          "count": 32
+        },
+        "uv_spots": {
+          "score": 43,
+          "level": 3,
+          "count": 40
+        },
+        "wrinkles": {
+          "score": 14,
+          "level": 5,
+          "count": 3054
+        },
+        "face_score": 76,
+        "age_estimate": 37
+      },
+      "derived_skin_type": "Sensitive",
+      "derived_conditions": [
+        "pimples",
+        "spots",
+        "uv_spots",
+        "pigmentation",
+        "wrinkles",
+        "dark_circles",
+        "sensitivity",
+        "moisture",
+        "sebum"
+      ]
+    },
+    {
+      "id": 6693254,
+      "result_id": "20b4e2b1f5f51f89af96beb637c9c418",
+      "device": "S28B6103",
+      "timestamp": "2026-04-04 21:15:54",
+      "status": 2,
+      "analysis_keys": [
+        "code",
+        "error_detect_types",
+        "filename",
+        "detect_types",
+        "age",
+        "features",
+        "lip_shape",
+        "face_shape",
+        "color",
+        "appearance",
+        "brow_shape",
+        "acne",
+        "pockmark",
+        "spot",
+        "uv_spot",
+        "face_ratio",
+        "aging_simu",
+        "sensitive",
+        "collagen",
+        "texture",
+        "wrinkle",
+        "dark_circle",
+        "pore",
+        "blackhead",
+        "skin_type",
+        "filename_brown",
+        "filename_woods",
+        "filename_blue",
+        "filename_uv",
+        "filename_red",
+        "original_images",
+        "filename_negative",
+        "filename_positive",
+        "id",
+        "recognition",
+        "pigment",
+        "ext_water",
+        "layer_beat",
+        "deep_beat",
+        "final_result"
+      ],
+      "scores": {
+        "uv_acne": {
+          "score": 98,
+          "level": 1,
+          "count": 2
+        },
+        "blackhead": {
+          "score": 15,
+          "level": 5,
+          "count": 255
+        },
+        "collagen": {
+          "score": 31,
+          "level": 4,
+          "count": null
+        },
+        "skin_tone": {
+          "score": 21,
+          "level": 4,
+          "ita": 13.502902030944824,
+          "result": "anchen"
+        },
+        "dark_circles": {
+          "score": 53,
+          "level": 3,
+          "count": null
+        },
+        "moisture": {
+          "score": 38,
+          "level": 4,
+          "count": null
+        },
+        "pigmentation": {
+          "score": 64,
+          "level": 2,
+          "count": null
+        },
+        "pimples": {
+          "score": 92,
+          "level": 1,
+          "count": 3
+        },
+        "pores": {
+          "score": 13,
+          "level": 5,
+          "count": 1460
+        },
+        "sebum": {
+          "score": 15,
+          "level": 5,
+          "count": null
+        },
+        "sensitivity": {
+          "score": 96,
+          "level": 1,
+          "count": null
+        },
+        "spots": {
+          "score": 92,
+          "level": 1,
+          "count": 8
+        },
+        "uv_spots": {
+          "score": 77,
+          "level": 2,
+          "count": 9
+        },
+        "wrinkles": {
+          "score": 5,
+          "level": 5,
+          "count": 2719
+        },
+        "face_score": 79,
+        "age_estimate": 41
+      },
+      "derived_skin_type": "Oily",
+      "derived_conditions": [
+        "blackhead",
+        "pores",
+        "pigmentation",
+        "wrinkles",
+        "dark_circles",
+        "moisture",
+        "sebum"
+      ]
+    },
+    {
+      "id": 6692926,
+      "result_id": "0491aea399d5f28b83003ef75c1a252b",
+      "device": "S28B6103",
+      "timestamp": "2026-04-04 20:47:10",
+      "status": 2,
+      "analysis_keys": [
+        "code",
+        "error_detect_types",
+        "filename",
+        "detect_types",
+        "age",
+        "features",
+        "lip_shape",
+        "face_shape",
+        "color",
+        "appearance",
+        "brow_shape",
+        "acne",
+        "pockmark",
+        "uv_spot",
+        "aging_simu",
+        "face_ratio",
+        "spot",
+        "sensitive",
+        "wrinkle",
+        "collagen",
+        "texture",
+        "dark_circle",
+        "blackhead",
+        "pore",
+        "skin_type",
+        "filename_brown",
+        "filename_woods",
+        "filename_uv",
+        "filename_blue",
+        "filename_red",
+        "original_images",
+        "filename_negative",
+        "filename_positive",
+        "id",
+        "recognition",
+        "pigment",
+        "ext_water",
+        "layer_beat",
+        "deep_beat",
+        "final_result"
+      ],
+      "scores": {
+        "uv_acne": {
+          "score": 72,
+          "level": 2,
+          "count": 57
+        },
+        "blackhead": {
+          "score": 46,
+          "level": 3,
+          "count": 135
+        },
+        "collagen": {
+          "score": 46,
+          "level": 3,
+          "count": null
+        },
+        "skin_tone": {
+          "score": 21,
+          "level": 4,
+          "ita": 17.917165756225586,
+          "result": "xiaomai"
+        },
+        "dark_circles": {
+          "score": 68,
+          "level": 2,
+          "count": null
+        },
+        "moisture": {
+          "score": 39,
+          "level": 4,
+          "count": null
+        },
+        "pigmentation": {
+          "score": 62,
+          "level": 2,
+          "count": null
+        },
+        "pimples": {
+          "score": 97,
+          "level": 1,
+          "count": 0
+        },
+        "pores": {
+          "score": 99,
+          "level": 1,
+          "count": 11
+        },
+        "sebum": {
+          "score": 38,
+          "level": 4,
+          "count": null
+        },
+        "sensitivity": {
+          "score": 94,
+          "level": 1,
+          "count": null
+        },
+        "spots": {
+          "score": 90,
+          "level": 1,
+          "count": 10
+        },
+        "uv_spots": {
+          "score": 66,
+          "level": 2,
+          "count": 13
+        },
+        "wrinkles": {
+          "score": 51,
+          "level": 3,
+          "count": 923
+        },
+        "face_score": 71,
+        "age_estimate": 39
+      },
+      "derived_skin_type": "Oily",
+      "derived_conditions": [
+        "blackhead",
+        "uv_spots",
+        "pigmentation",
+        "wrinkles",
+        "dark_circles",
+        "moisture",
+        "sebum"
+      ]
+    },
+    {
+      "id": 6692619,
+      "result_id": "b3fcf6fb088cfc6b12700e1dfa081a8d",
+      "device": "S28B6103",
+      "timestamp": "2026-04-04 20:20:39",
+      "status": 2,
+      "analysis_keys": [
+        "code",
+        "error_detect_types",
+        "filename",
+        "detect_types",
+        "age",
+        "features",
+        "lip_shape",
+        "face_shape",
+        "brow_shape",
+        "color",
+        "appearance",
+        "spot",
+        "uv_spot",
+        "acne",
+        "sensitive",
+        "aging_simu",
+        "face_ratio",
+        "pockmark",
+        "wrinkle",
+        "texture",
+        "collagen",
+        "blackhead",
+        "dark_circle",
+        "pore",
+        "skin_type",
+        "filename_brown",
+        "filename_woods",
+        "filename_blue",
+        "filename_uv",
+        "filename_red",
+        "original_images",
+        "filename_negative",
+        "filename_positive",
+        "id",
+        "recognition",
+        "pigment",
+        "ext_water",
+        "layer_beat",
+        "deep_beat",
+        "final_result"
+      ],
+      "scores": {
+        "uv_acne": {
+          "score": 88,
+          "level": 1,
+          "count": 23
+        },
+        "blackhead": {
+          "score": 33,
+          "level": 4,
+          "count": 201
+        },
+        "collagen": {
+          "score": 40,
+          "level": 4,
+          "count": null
+        },
+        "skin_tone": {
+          "score": 21,
+          "level": 4,
+          "ita": 9.628762245178223,
+          "result": "anchen"
+        },
+        "dark_circles": {
+          "score": 61,
+          "level": 2,
+          "count": null
+        },
+        "moisture": {
+          "score": 39,
+          "level": 4,
+          "count": null
+        },
+        "pigmentation": {
+          "score": 58,
+          "level": 3,
+          "count": null
+        },
+        "pimples": {
+          "score": 82,
+          "level": 1,
+          "count": 6
+        },
+        "pores": {
+          "score": 16,
+          "level": 5,
+          "count": 1388
+        },
+        "sebum": {
+          "score": 13,
+          "level": 5,
+          "count": null
+        },
+        "sensitivity": {
+          "score": 95,
+          "level": 1,
+          "count": null
+        },
+        "spots": {
+          "score": 83,
+          "level": 1,
+          "count": 17
+        },
+        "uv_spots": {
+          "score": 74,
+          "level": 2,
+          "count": 19
+        },
+        "wrinkles": {
+          "score": 10,
+          "level": 5,
+          "count": 2052
+        },
+        "face_score": 81,
+        "age_estimate": 35
+      },
+      "derived_skin_type": "Oily",
+      "derived_conditions": [
+        "blackhead",
+        "pores",
+        "pigmentation",
+        "wrinkles",
+        "dark_circles",
+        "moisture",
+        "sebum"
+      ]
+    },
+    {
+      "id": 6680852,
+      "result_id": "f5570adfa843ff95bd87fb17ddf2ff6c",
+      "device": "S28B6103",
+      "timestamp": "2026-04-03 17:36:16",
+      "status": 2,
+      "analysis_keys": [
+        "code",
+        "error_detect_types",
+        "filename",
+        "detect_types",
+        "age",
+        "features",
+        "lip_shape",
+        "face_shape",
+        "color",
+        "appearance",
+        "brow_shape",
+        "acne",
+        "pockmark",
+        "spot",
+        "uv_spot",
+        "sensitive",
+        "face_ratio",
+        "aging_simu",
+        "collagen",
+        "texture",
+        "wrinkle",
+        "dark_circle",
+        "blackhead",
+        "pore",
+        "skin_type",
+        "filename_brown",
+        "filename_woods",
+        "filename_blue",
+        "filename_uv",
+        "filename_red",
+        "original_images",
+        "filename_negative",
+        "filename_positive",
+        "id",
+        "recognition",
+        "pigment",
+        "ext_water",
+        "layer_beat",
+        "deep_beat",
+        "final_result"
+      ],
+      "scores": {
+        "uv_acne": {
+          "score": 72,
+          "level": 2,
+          "count": 56
+        },
+        "blackhead": {
+          "score": 97,
+          "level": 1,
+          "count": 6
+        },
+        "collagen": {
+          "score": 52,
+          "level": 3,
+          "count": null
+        },
+        "skin_tone": {
+          "score": 42,
+          "level": 3,
+          "ita": 35.70849609375,
+          "result": "xiaomai"
+        },
+        "dark_circles": {
+          "score": 36,
+          "level": 4,
+          "count": null
+        },
+        "moisture": {
+          "score": 26,
+          "level": 1,
+          "count": null
+        },
+        "pigmentation": {
+          "score": 32,
+          "level": 4,
+          "count": null
+        },
+        "pimples": {
+          "score": 56,
+          "level": 3,
+          "count": 17
+        },
+        "pores": {
+          "score": 31,
+          "level": 4,
+          "count": 1089
+        },
+        "sebum": {
+          "score": 88,
+          "level": 1,
+          "count": null
+        },
+        "sensitivity": {
+          "score": 94,
+          "level": 1,
+          "count": null
+        },
+        "spots": {
+          "score": 25,
+          "level": 4,
+          "count": 61
+        },
+        "uv_spots": {
+          "score": 18,
+          "level": 5,
+          "count": 77
+        },
+        "wrinkles": {
+          "score": 44,
+          "level": 3,
+          "count": 2466
+        },
+        "face_score": 68,
+        "age_estimate": 27
+      },
+      "derived_skin_type": "Dry",
+      "derived_conditions": [
+        "pimples",
+        "pores",
+        "spots",
+        "uv_spots",
+        "pigmentation",
+        "wrinkles",
+        "dark_circles",
+        "moisture"
+      ]
+    },
+    {
+      "id": 6673013,
+      "result_id": "1d5d72e425868fd0dac3c0faa159e9f3",
+      "device": "S28B6103",
+      "timestamp": "2026-04-02 18:26:57",
+      "status": 2,
+      "analysis_keys": [
+        "code",
+        "error_detect_types",
+        "filename",
+        "detect_types",
+        "age",
+        "features",
+        "lip_shape",
+        "face_shape",
+        "brow_shape",
+        "color",
+        "appearance",
+        "spot",
+        "acne",
+        "pockmark",
+        "aging_simu",
+        "uv_spot",
+        "sensitive",
+        "face_ratio",
+        "texture",
+        "blackhead",
+        "collagen",
+        "wrinkle",
+        "dark_circle",
+        "pore",
+        "skin_type",
+        "filename_brown",
+        "filename_woods",
+        "filename_blue",
+        "filename_uv",
+        "filename_red",
+        "original_images",
+        "filename_negative",
+        "filename_positive",
+        "id",
+        "recognition",
+        "pigment",
+        "ext_water",
+        "layer_beat",
+        "deep_beat",
+        "final_result"
+      ],
+      "scores": {
+        "uv_acne": {
+          "score": 48,
+          "level": 3,
+          "count": 122
+        },
+        "blackhead": {
+          "score": 98,
+          "level": 1,
+          "count": 0
+        },
+        "collagen": {
+          "score": 17,
+          "level": 5,
+          "count": null
+        },
+        "skin_tone": {
+          "score": 21,
+          "level": 4,
+          "ita": 13.503913879394531,
+          "result": "anchen"
+        },
+        "dark_circles": {
+          "score": 99,
+          "level": 1,
+          "count": null
+        },
+        "moisture": {
+          "score": 38,
+          "level": 4,
+          "count": null
+        },
+        "pigmentation": {
+          "score": 41,
+          "level": 3,
+          "count": null
+        },
+        "pimples": {
+          "score": 95,
+          "level": 1,
+          "count": 2
+        },
+        "pores": {
+          "score": 21,
+          "level": 4,
+          "count": 1321
+        },
+        "sebum": {
+          "score": 17,
+          "level": 5,
+          "count": null
+        },
+        "sensitivity": {
+          "score": 95,
+          "level": 1,
+          "count": null
+        },
+        "spots": {
+          "score": 54,
+          "level": 3,
+          "count": 33
+        },
+        "uv_spots": {
+          "score": 46,
+          "level": 3,
+          "count": 38
+        },
+        "wrinkles": {
+          "score": 21,
+          "level": 4,
+          "count": 2091
+        },
+        "face_score": 74,
+        "age_estimate": 45
+      },
+      "derived_skin_type": "Oily",
+      "derived_conditions": [
+        "uv_acne",
+        "pores",
+        "spots",
+        "uv_spots",
+        "pigmentation",
+        "wrinkles",
+        "moisture",
+        "sebum"
+      ]
+    },
+    {
+      "id": 6672580,
+      "result_id": "2c6e6ed5dcfd37a09d0b0b1ea2b2a8a1",
+      "device": "S28B6103",
+      "timestamp": "2026-04-02 17:48:49",
+      "status": 2,
+      "analysis_keys": [
+        "code",
+        "error_detect_types",
+        "filename",
+        "detect_types",
+        "age",
+        "features",
+        "face_shape",
+        "lip_shape",
+        "appearance",
+        "color",
+        "brow_shape",
+        "pockmark",
+        "sensitive",
+        "uv_spot",
+        "aging_simu",
+        "acne",
+        "spot",
+        "face_ratio",
+        "wrinkle",
+        "collagen",
+        "texture",
+        "blackhead",
+        "dark_circle",
+        "pore",
+        "skin_type",
+        "filename_brown",
+        "filename_woods",
+        "filename_blue",
+        "filename_uv",
+        "filename_red",
+        "original_images",
+        "filename_negative",
+        "filename_positive",
+        "id",
+        "recognition",
+        "pigment",
+        "ext_water",
+        "layer_beat",
+        "deep_beat",
+        "final_result"
+      ],
+      "scores": {
+        "uv_acne": {
+          "score": 68,
+          "level": 2,
+          "count": 67
+        },
+        "blackhead": {
+          "score": 19,
+          "level": 5,
+          "count": 243
+        },
+        "collagen": {
+          "score": 20,
+          "level": 5,
+          "count": null
+        },
+        "skin_tone": {
+          "score": 21,
+          "level": 4,
+          "ita": 23.901533126831055,
+          "result": "anchen"
+        },
+        "dark_circles": {
+          "score": 60,
+          "level": 3,
+          "count": null
+        },
+        "moisture": {
+          "score": 39,
+          "level": 4,
+          "count": null
+        },
+        "pigmentation": {
+          "score": 28,
+          "level": 4,
+          "count": null
+        },
+        "pimples": {
+          "score": 95,
+          "level": 1,
+          "count": 2
+        },
+        "pores": {
+          "score": 3,
+          "level": 5,
+          "count": 1736
+        },
+        "sebum": {
+          "score": 18,
+          "level": 5,
+          "count": null
+        },
+        "sensitivity": {
+          "score": 70,
+          "level": 2,
+          "count": null
+        },
+        "spots": {
+          "score": 33,
+          "level": 4,
+          "count": 49
+        },
+        "uv_spots": {
+          "score": 26,
+          "level": 4,
+          "count": 59
+        },
+        "wrinkles": {
+          "score": 6,
+          "level": 5,
+          "count": 2642
+        },
+        "face_score": 72,
+        "age_estimate": 48
+      },
+      "derived_skin_type": "Oily",
+      "derived_conditions": [
+        "uv_acne",
+        "blackhead",
+        "pores",
+        "spots",
+        "uv_spots",
+        "pigmentation",
+        "wrinkles",
+        "dark_circles",
+        "moisture",
+        "sebum"
+      ]
+    },
+    {
+      "id": 6668093,
+      "result_id": "3acc9adf40307b7db4051c5d7f4b3605",
+      "device": "S28B6103",
+      "timestamp": "2026-04-02 00:21:48",
+      "status": 2,
+      "analysis_keys": [
+        "code",
+        "error_detect_types",
+        "filename",
+        "detect_types",
+        "age",
+        "features",
+        "lip_shape",
+        "face_shape",
+        "color",
+        "brow_shape",
+        "appearance",
+        "pockmark",
+        "spot",
+        "acne",
+        "uv_spot",
+        "aging_simu",
+        "sensitive",
+        "face_ratio",
+        "blackhead",
+        "collagen",
+        "texture",
+        "wrinkle",
+        "dark_circle",
+        "pore",
+        "skin_type",
+        "filename_brown",
+        "filename_woods",
+        "filename_blue",
+        "filename_uv",
+        "filename_red",
+        "original_images",
+        "filename_negative",
+        "filename_positive",
+        "id",
+        "recognition",
+        "pigment",
+        "ext_water",
+        "layer_beat",
+        "deep_beat",
+        "final_result"
+      ],
+      "scores": {
+        "uv_acne": {
+          "score": 62,
+          "level": 2,
+          "count": 81
+        },
+        "blackhead": {
+          "score": 99,
+          "level": 1,
+          "count": 0
+        },
+        "collagen": {
+          "score": 32,
+          "level": 4,
+          "count": null
+        },
+        "skin_tone": {
+          "score": 21,
+          "level": 4,
+          "ita": 20.272911071777344,
+          "result": "anchen"
+        },
+        "dark_circles": {
+          "score": 42,
+          "level": 3,
+          "count": null
+        },
+        "moisture": {
+          "score": 32,
+          "level": 3,
+          "count": null
+        },
+        "pigmentation": {
+          "score": 42,
+          "level": 3,
+          "count": null
+        },
+        "pimples": {
+          "score": 86,
+          "level": 1,
+          "count": 5
+        },
+        "pores": {
+          "score": 23,
+          "level": 4,
+          "count": 1190
+        },
+        "sebum": {
+          "score": 47,
+          "level": 3,
+          "count": null
+        },
+        "sensitivity": {
+          "score": 96,
+          "level": 1,
+          "count": null
+        },
+        "spots": {
+          "score": 56,
+          "level": 3,
+          "count": 32
+        },
+        "uv_spots": {
+          "score": 43,
+          "level": 3,
+          "count": 39
+        },
+        "wrinkles": {
+          "score": 44,
+          "level": 3,
+          "count": 1872
+        },
+        "face_score": 74,
+        "age_estimate": 44
+      },
+      "derived_skin_type": "Oily",
+      "derived_conditions": [
+        "uv_acne",
+        "pores",
+        "spots",
+        "uv_spots",
+        "pigmentation",
+        "wrinkles",
+        "dark_circles",
+        "moisture",
+        "sebum"
+      ]
+    },
+    {
+      "id": 6668018,
+      "result_id": "8583023377eeb220ec406792c938da03",
+      "device": "S28B6103",
+      "timestamp": "2026-04-02 00:03:28",
+      "status": 2,
+      "analysis_keys": [
+        "code",
+        "error_detect_types",
+        "filename",
+        "detect_types",
+        "age",
+        "features",
+        "lip_shape",
+        "face_shape",
+        "color",
+        "brow_shape",
+        "appearance",
+        "spot",
+        "acne",
+        "pockmark",
+        "aging_simu",
+        "sensitive",
+        "uv_spot",
+        "face_ratio",
+        "texture",
+        "collagen",
+        "blackhead",
+        "wrinkle",
+        "dark_circle",
+        "pore",
+        "skin_type",
+        "filename_brown",
+        "filename_woods",
+        "filename_blue",
+        "filename_uv",
+        "filename_red",
+        "original_images",
+        "filename_negative",
+        "filename_positive",
+        "id",
+        "recognition",
+        "pigment",
+        "ext_water",
+        "layer_beat",
+        "deep_beat",
+        "final_result"
+      ],
+      "scores": {
+        "uv_acne": {
+          "score": 77,
+          "level": 2,
+          "count": 45
+        },
+        "blackhead": {
+          "score": 97,
+          "level": 1,
+          "count": 0
+        },
+        "collagen": {
+          "score": 31,
+          "level": 4,
+          "count": null
+        },
+        "skin_tone": {
+          "score": 35,
+          "level": 4,
+          "ita": 32.55916976928711,
+          "result": "xiaomai"
+        },
+        "dark_circles": {
+          "score": 72,
+          "level": 2,
+          "count": null
+        },
+        "moisture": {
+          "score": 27,
+          "level": 1,
+          "count": null
+        },
+        "pigmentation": {
+          "score": 29,
+          "level": 4,
+          "count": null
+        },
+        "pimples": {
+          "score": 95,
+          "level": 1,
+          "count": 2
+        },
+        "pores": {
+          "score": 27,
+          "level": 4,
+          "count": 1134
+        },
+        "sebum": {
+          "score": 85,
+          "level": 1,
+          "count": null
+        },
+        "sensitivity": {
+          "score": 96,
+          "level": 1,
+          "count": null
+        },
+        "spots": {
+          "score": 25,
+          "level": 4,
+          "count": 61
+        },
+        "uv_spots": {
+          "score": 20,
+          "level": 5,
+          "count": 72
+        },
+        "wrinkles": {
+          "score": 7,
+          "level": 5,
+          "count": 2169
+        },
+        "face_score": 71,
+        "age_estimate": 31
+      },
+      "derived_skin_type": "Dry",
+      "derived_conditions": [
+        "pores",
+        "spots",
+        "uv_spots",
+        "pigmentation",
+        "wrinkles",
+        "moisture"
+      ]
+    },
+    {
+      "id": 6667866,
+      "result_id": "41f647bab791832095989bfa3097fefb",
+      "device": "S28B6103",
+      "timestamp": "2026-04-01 23:29:08",
+      "status": 2,
+      "analysis_keys": [
+        "code",
+        "error_detect_types",
+        "filename",
+        "detect_types",
+        "age",
+        "features",
+        "face_shape",
+        "lip_shape",
+        "appearance",
+        "color",
+        "brow_shape",
+        "pockmark",
+        "uv_spot",
+        "sensitive",
+        "face_ratio",
+        "acne",
+        "spot",
+        "aging_simu",
+        "collagen",
+        "texture",
+        "wrinkle",
+        "dark_circle",
+        "blackhead",
+        "pore",
+        "skin_type",
+        "filename_brown",
+        "filename_woods",
+        "filename_blue",
+        "filename_uv",
+        "filename_red",
+        "original_images",
+        "filename_negative",
+        "filename_positive",
+        "id",
+        "recognition",
+        "pigment",
+        "ext_water",
+        "layer_beat",
+        "deep_beat",
+        "final_result"
+      ],
+      "scores": {
+        "uv_acne": {
+          "score": 64,
+          "level": 2,
+          "count": 77
+        },
+        "blackhead": {
+          "score": 98,
+          "level": 1,
+          "count": 4
+        },
+        "collagen": {
+          "score": 43,
+          "level": 3,
+          "count": null
+        },
+        "skin_tone": {
+          "score": 23,
+          "level": 4,
+          "ita": 25.244754791259766,
+          "result": "xiaomai"
+        },
+        "dark_circles": {
+          "score": 97,
+          "level": 1,
+          "count": null
+        },
+        "moisture": {
+          "score": 27,
+          "level": 1,
+          "count": null
+        },
+        "pigmentation": {
+          "score": 28,
+          "level": 4,
+          "count": null
+        },
+        "pimples": {
+          "score": 89,
+          "level": 1,
+          "count": 4
+        },
+        "pores": {
+          "score": 20,
+          "level": 5,
+          "count": 1345
+        },
+        "sebum": {
+          "score": 88,
+          "level": 1,
+          "count": null
+        },
+        "sensitivity": {
+          "score": 95,
+          "level": 1,
+          "count": null
+        },
+        "spots": {
+          "score": 31,
+          "level": 4,
+          "count": 53
+        },
+        "uv_spots": {
+          "score": 27,
+          "level": 4,
+          "count": 59
+        },
+        "wrinkles": {
+          "score": 48,
+          "level": 3,
+          "count": 1620
+        },
+        "face_score": 76,
+        "age_estimate": 31
+      },
+      "derived_skin_type": "Dry",
+      "derived_conditions": [
+        "uv_acne",
+        "pores",
+        "spots",
+        "uv_spots",
+        "pigmentation",
+        "wrinkles",
+        "moisture"
+      ]
+    },
+    {
+      "id": 6663931,
+      "result_id": "6351649ee7449ae2540e5d37cc8b035a",
+      "device": "S28B6103",
+      "timestamp": "2026-04-01 16:35:07",
+      "status": 2,
+      "analysis_keys": [
+        "code",
+        "error_detect_types",
+        "filename",
+        "detect_types",
+        "age",
+        "features",
+        "face_shape",
+        "color",
+        "appearance",
+        "brow_shape",
+        "lip_shape",
+        "pockmark",
+        "aging_simu",
+        "spot",
+        "uv_spot",
+        "acne",
+        "sensitive",
+        "face_ratio",
+        "texture",
+        "collagen",
+        "wrinkle",
+        "dark_circle",
+        "blackhead",
+        "pore",
+        "skin_type",
+        "filename_brown",
+        "filename_woods",
+        "filename_blue",
+        "filename_uv",
+        "filename_red",
+        "original_images",
+        "filename_negative",
+        "filename_positive",
+        "id",
+        "recognition",
+        "pigment",
+        "ext_water",
+        "layer_beat",
+        "deep_beat",
+        "final_result"
+      ],
+      "scores": {
+        "uv_acne": {
+          "score": 61,
+          "level": 2,
+          "count": 85
+        },
+        "blackhead": {
+          "score": 33,
+          "level": 4,
+          "count": 201
+        },
+        "collagen": {
+          "score": 40,
+          "level": 4,
+          "count": null
+        },
+        "skin_tone": {
+          "score": 25,
+          "level": 4,
+          "ita": 27.180646896362305,
+          "result": "xiaomai"
+        },
+        "dark_circles": {
+          "score": 69,
+          "level": 2,
+          "count": null
+        },
+        "moisture": {
+          "score": 28,
+          "level": 1,
+          "count": null
+        },
+        "pigmentation": {
+          "score": 40,
+          "level": 4,
+          "count": null
+        },
+        "pimples": {
+          "score": 95,
+          "level": 1,
+          "count": 2
+        },
+        "pores": {
+          "score": 9,
+          "level": 5,
+          "count": 1601
+        },
+        "sebum": {
+          "score": 86,
+          "level": 1,
+          "count": null
+        },
+        "sensitivity": {
+          "score": 95,
+          "level": 1,
+          "count": null
+        },
+        "spots": {
+          "score": 50,
+          "level": 3,
+          "count": 35
+        },
+        "uv_spots": {
+          "score": 36,
+          "level": 4,
+          "count": 44
+        },
+        "wrinkles": {
+          "score": 48,
+          "level": 3,
+          "count": 2352
+        },
+        "face_score": 70,
+        "age_estimate": 33
+      },
+      "derived_skin_type": "Dry",
+      "derived_conditions": [
+        "uv_acne",
+        "blackhead",
+        "pores",
+        "spots",
+        "uv_spots",
+        "pigmentation",
+        "wrinkles",
+        "dark_circles",
+        "moisture"
+      ]
+    },
+    {
+      "id": 6659903,
+      "result_id": "f1f53f95e0c416e9de44c6ebc218bcdd",
+      "device": "S28B6103",
+      "timestamp": "2026-03-31 23:13:22",
+      "status": 2,
+      "analysis_keys": [
+        "code",
+        "error_detect_types",
+        "filename",
+        "detect_types",
+        "age",
+        "features",
+        "lip_shape",
+        "face_shape",
+        "color",
+        "appearance",
+        "brow_shape",
+        "pockmark",
+        "aging_simu",
+        "sensitive",
+        "acne",
+        "spot",
+        "face_ratio",
+        "texture",
+        "uv_spot",
+        "wrinkle",
+        "collagen",
+        "dark_circle",
+        "blackhead",
+        "pore",
+        "skin_type",
+        "filename_brown",
+        "filename_woods",
+        "filename_blue",
+        "filename_uv",
+        "filename_red",
+        "original_images",
+        "filename_negative",
+        "filename_positive",
+        "id",
+        "recognition",
+        "pigment",
+        "ext_water",
+        "layer_beat",
+        "deep_beat",
+        "final_result"
+      ],
+      "scores": {
+        "uv_acne": {
+          "score": 93,
+          "level": 1,
+          "count": 13
+        },
+        "blackhead": {
+          "score": 66,
+          "level": 2,
+          "count": 85
+        },
+        "collagen": {
+          "score": 48,
+          "level": 3,
+          "count": null
+        },
+        "skin_tone": {
+          "score": 21,
+          "level": 4,
+          "ita": 18.079633712768555,
+          "result": "xiaomai"
+        },
+        "dark_circles": {
+          "score": 46,
+          "level": 3,
+          "count": null
+        },
+        "moisture": {
+          "score": 36,
+          "level": 4,
+          "count": null
+        },
+        "pigmentation": {
+          "score": 56,
+          "level": 3,
+          "count": null
+        },
+        "pimples": {
+          "score": 60,
+          "level": 3,
+          "count": 15
+        },
+        "pores": {
+          "score": 14,
+          "level": 5,
+          "count": 1448
+        },
+        "sebum": {
+          "score": 17,
+          "level": 5,
+          "count": null
+        },
+        "sensitivity": {
+          "score": 68,
+          "level": 2,
+          "count": null
+        },
+        "spots": {
+          "score": 80,
+          "level": 2,
+          "count": 20
+        },
+        "uv_spots": {
+          "score": 67,
+          "level": 2,
+          "count": 23
+        },
+        "wrinkles": {
+          "score": 53,
+          "level": 3,
+          "count": 2514
+        },
+        "face_score": 74,
+        "age_estimate": 26
+      },
+      "derived_skin_type": "Oily",
+      "derived_conditions": [
+        "blackhead",
+        "pimples",
+        "pores",
+        "uv_spots",
+        "pigmentation",
+        "wrinkles",
+        "dark_circles",
+        "sensitivity",
+        "moisture",
+        "sebum"
+      ]
+    },
+    {
+      "id": 6651541,
+      "result_id": "6b22042e8b8d36a26bf5698529ca0ffd",
+      "device": "S28B6103",
+      "timestamp": "2026-03-30 22:53:04",
+      "status": 2,
+      "analysis_keys": [
+        "code",
+        "error_detect_types",
+        "filename",
+        "detect_types",
+        "age",
+        "features",
+        "lip_shape",
+        "face_shape",
+        "brow_shape",
+        "appearance",
+        "color",
+        "pockmark",
+        "acne",
+        "spot",
+        "aging_simu",
+        "sensitive",
+        "face_ratio",
+        "uv_spot",
+        "collagen",
+        "texture",
+        "wrinkle",
+        "blackhead",
+        "dark_circle",
+        "pore",
+        "skin_type",
+        "filename_brown",
+        "filename_woods",
+        "filename_blue",
+        "filename_uv",
+        "filename_red",
+        "original_images",
+        "filename_negative",
+        "filename_positive",
+        "id",
+        "recognition",
+        "pigment",
+        "ext_water",
+        "layer_beat",
+        "deep_beat",
+        "final_result"
+      ],
+      "scores": {
+        "uv_acne": {
+          "score": 73,
+          "level": 2,
+          "count": 54
+        },
+        "blackhead": {
+          "score": 30,
+          "level": 4,
+          "count": 210
+        },
+        "collagen": {
+          "score": 28,
+          "level": 4,
+          "count": null
+        },
+        "skin_tone": {
+          "score": 23,
+          "level": 4,
+          "ita": 24.042192459106445,
+          "result": "anchen"
+        },
+        "dark_circles": {
+          "score": 42,
+          "level": 3,
+          "count": null
+        },
+        "moisture": {
+          "score": 28,
+          "level": 1,
+          "count": null
+        },
+        "pigmentation": {
+          "score": 31,
+          "level": 4,
+          "count": null
+        },
+        "pimples": {
+          "score": 76,
+          "level": 2,
+          "count": 8
+        },
+        "pores": {
+          "score": 12,
+          "level": 5,
+          "count": 1472
+        },
+        "sebum": {
+          "score": 83,
+          "level": 1,
+          "count": null
+        },
+        "sensitivity": {
+          "score": 96,
+          "level": 1,
+          "count": null
+        },
+        "spots": {
+          "score": 37,
+          "level": 4,
+          "count": 43
+        },
+        "uv_spots": {
+          "score": 27,
+          "level": 4,
+          "count": 55
+        },
+        "wrinkles": {
+          "score": 7,
+          "level": 5,
+          "count": 2688
+        },
+        "face_score": 76,
+        "age_estimate": 42
+      },
+      "derived_skin_type": "Dry",
+      "derived_conditions": [
+        "blackhead",
+        "pores",
+        "spots",
+        "uv_spots",
+        "pigmentation",
+        "wrinkles",
+        "dark_circles",
+        "moisture"
+      ]
+    },
+    {
+      "id": 6651290,
+      "result_id": "554f0396ee6acb7dd6ff38361761c5ec",
+      "device": "S28B6103",
+      "timestamp": "2026-03-30 22:13:39",
+      "status": 2,
+      "analysis_keys": [
+        "code",
+        "error_detect_types",
+        "filename",
+        "detect_types",
+        "age",
+        "features",
+        "lip_shape",
+        "face_shape",
+        "brow_shape",
+        "appearance",
+        "color",
+        "acne",
+        "sensitive",
+        "uv_spot",
+        "pockmark",
+        "spot",
+        "aging_simu",
+        "face_ratio",
+        "collagen",
+        "texture",
+        "wrinkle",
+        "dark_circle",
+        "pore",
+        "blackhead",
+        "skin_type",
+        "filename_brown",
+        "filename_woods",
+        "filename_blue",
+        "filename_red",
+        "filename_uv",
+        "original_images",
+        "filename_negative",
+        "filename_positive",
+        "id",
+        "recognition",
+        "pigment",
+        "ext_water",
+        "layer_beat",
+        "deep_beat",
+        "final_result"
+      ],
+      "scores": {
+        "uv_acne": {
+          "score": 74,
+          "level": 2,
+          "count": 52
+        },
+        "blackhead": {
+          "score": 99,
+          "level": 1,
+          "count": 2
+        },
+        "collagen": {
+          "score": 30,
+          "level": 4,
+          "count": null
+        },
+        "skin_tone": {
+          "score": 21,
+          "level": 4,
+          "ita": 18.337059020996094,
+          "result": "xiaomai"
+        },
+        "dark_circles": {
+          "score": 99,
+          "level": 1,
+          "count": null
+        },
+        "moisture": {
+          "score": 39,
+          "level": 4,
+          "count": null
+        },
+        "pigmentation": {
+          "score": 37,
+          "level": 4,
+          "count": null
+        },
+        "pimples": {
+          "score": 89,
+          "level": 1,
+          "count": 4
+        },
+        "pores": {
+          "score": 12,
+          "level": 5,
+          "count": 1461
+        },
+        "sebum": {
+          "score": 18,
+          "level": 5,
+          "count": null
+        },
+        "sensitivity": {
+          "score": 95,
+          "level": 1,
+          "count": null
+        },
+        "spots": {
+          "score": 48,
+          "level": 3,
+          "count": 36
+        },
+        "uv_spots": {
+          "score": 41,
+          "level": 3,
+          "count": 41
+        },
+        "wrinkles": {
+          "score": 12,
+          "level": 5,
+          "count": 2640
+        },
+        "face_score": 74,
+        "age_estimate": 38
+      },
+      "derived_skin_type": "Oily",
+      "derived_conditions": [
+        "pores",
+        "spots",
+        "uv_spots",
+        "pigmentation",
+        "wrinkles",
+        "moisture",
+        "sebum"
+      ]
+    }
+  ]
+}

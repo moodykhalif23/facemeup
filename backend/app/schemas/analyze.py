@@ -1,4 +1,6 @@
-from pydantic import BaseModel, Field
+import base64
+
+from pydantic import BaseModel, Field, field_validator
 
 
 class Questionnaire(BaseModel):

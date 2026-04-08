@@ -41,13 +41,10 @@ def _preprocess_image(image_base64: str, landmarks: Optional[List[Dict]] = None)
     raw = base64.b64decode(image_base64)
     image = Image.open(io.BytesIO(raw)).convert("RGB")
     
+    # Contrast 1.2x — must match train_pipeline.py load_image preprocessing (ML-002)
     enhancer = ImageEnhance.Contrast(image)
     image = enhancer.enhance(1.2)
-    
-    # Increase sharpness for better detail detection
-    enhancer = ImageEnhance.Sharpness(image)
-    image = enhancer.enhance(1.3)
-    
+
     # Resize to model input size
     image = image.resize((settings.model_input_size, settings.model_input_size), Image.Resampling.LANCZOS)
     
@@ -230,6 +227,15 @@ def run_skin_inference(
     face_quality_score = None
     if landmarks:
         face_quality_score = face_processor.get_face_quality_score(landmarks)
+        # ML-006: Reject captures where the face is too small or off-centre.
+        # Threshold 0.20 is permissive — only blocks very poor quality captures
+        # (face barely visible or completely off-frame).
+        min_quality = 0.20
+        if face_quality_score < min_quality:
+            return (
+                _questionnaire_profile(questionnaire),
+                f"low_quality_face:{face_quality_score:.2f}",
+            )
 
     try:
         import tensorflow as tf
@@ -288,15 +294,6 @@ def run_skin_inference(
             and float(score) >= threshold
             and condition_labels[i] != "None detected"
         ]
-
-        # Always honour questionnaire-stated concerns — user knows their skin.
-        # If the model missed them (low score), add them anyway.
-        if questionnaire:
-            raw_concerns = questionnaire.get("concerns") or []
-            for c in raw_concerns:
-                mapped = _CONCERN_MAP.get(c)
-                if mapped and mapped not in conditions:
-                    conditions.append(mapped)
 
         if not conditions:
             conditions = ["None detected"]

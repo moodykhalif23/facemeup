@@ -1,0 +1,245 @@
+{
+  "_description": "Surface-layer detection advice per condition per severity level (1=mild, 5=severe).",
+  "conditions": {
+    "blackhead": {
+      "service_name": "Blackhead",
+      "levels": {
+        "1": {
+          "level": 1,
+          "introduction": "Blackheads are the result of the oxidation of sebum inside the hair follicle opening by air and dust, mainly related to the high secretion of hormones. Daily life should pay attention to cleanliness and skin care, which can inhibit the formation of blackheads, reduce the sugar intake, and drink less sugary drinks such as milk tea and cola.",
+          "advice": "Pay attention to sun protection, moderate clean skin, keep the local skin clean and dry, you can use moisturizing skin care products, eat a light diet do not eat food with too high a salt content; eat more fresh fruits and vegetables, do not eat spicy and stimulating food. Reduce their own stress, appropriate to increase exercise, and develop good habits of work and rest."
+        },
+        "2": {
+          "level": 2,
+          "introduction": "The T-zone of the face is a high incidence of blackheads, as the sebaceous glands are active and secrete more oil that needs to be drained out through the skin pores. If not cleaned properly or too much sebum is secreted, a mixture of old keratin that is shed but not metabolized in time clogs the opening of the hair follicle. After being oxidized at one end in contact with the outside world, blackheads are formed.",
+          "advice": "Change your diet, take more beans, mushrooms, or dark green vegetables to replenish vitamin B and alkaline food, which can effectively inhibit oil production and reduce the growth of blackheads. Reduce the sugar intake, do a good job of moderate cleaning, avoid hand squeezing, you can use a cleaning mask once a week, with the use of acid products that can have unclogged pores, inhibit the production of blackheads."
+        },
+        "3": {
+          "level": 3,
+          "introduction": "Blackheads are the product of oxidation after the skin secretes excess sebum and old keratin mix. Usually, you should develop the habit of regular exfoliation and professional deep cleansing treatment every week, which can help remove skin dirt and grease, thus reducing the blackhead generation.",
+          "advice": "Daily care to remove makeup thoroughly, if makeup removal is not complete, not only will clog the pores, resulting in large pores, in addition to causing large pores, will also allow the growth of blackheads, pay attention to sun protection, often do care, avoid hand squeezing blackheads, can choose hydration and moisturizing, anti-oxidant effect of skin care products to slow the formation of blackheads."
+        },
+        "4": {
+          "level": 4,
+          "introduction": "Skin with visible blackheads are formed due to the keratinization and narrowing of the openings of sebaceous glands and the increased secretion of sebum contents, but they cannot be discharged effectively and smoothly from the follicular pores and accumulate inside the hair follicles, which are related to endocrine and dietary, as well as local cleanliness and hygiene factors of the skin.",
+          "advice": "Regular deep cleansing of the skin, and to avoid exposure to the sun, you can use a weekly cleansing mask, with the use of acid products that can gently adjust the keratin, unclogging the pores, do not squeeze by hand, easily lead to bacterial infection. Diet should not eat sweet, greasy, spicy and stimulating food, can eat vitamin-rich fruits and vegetables to reduce skin oil secretion."
+        },
+        "5": {
+          "level": 5,
+          "introduction": "Skin with more blackheads is due to the usual lack of cleanliness resulting in secretions that cannot be excreted properly. Pay attention to the cleanliness and hygiene of the skin surface to avoid the accumulation of oil and dirt. Usually, you should reduce sugar intake and use acid products that can gently regulate the keratin and unclog pores to control oil and inhibit blackheads.",
+          "advice": "Daily care requires thorough cleansing of the skin and the use of makeup or sunscreen, isolation and other products should be used after the use of makeup removal products. Pay attention to hydration, accelerate skin metabolism, pay attention to sun protection, avoid direct ultraviolet radiation to stimulate sebaceous secretion. Maintain good habits of life and rest to prevent endocrine disorders aggravate skin problems."
+        }
+      }
+    },
+    "color": {
+      "service_name": "Skin color",
+      "levels": {
+        "1": {
+          "level": 1,
+          "introduction": "Uneven skin tone is the result of melanin production in melanocytes and the transfer of melanin vesicles along the dendrites of melanocytes to the surrounding keratin-forming cells, where the melanin moves through the layers of cellular metabolism to the epidermis of the skin, affecting skin color.",
+          "advice": "Daily travel should pay strict attention to sun protection, go out and remember to apply sunscreen, UV radiation, wind and rain erosion is most likely to cause damage to skin cells, and this damage is one of the important reasons for uneven skin tone."
+        },
+        "2": {
+          "level": 2,
+          "introduction": "The skin will form a lot of melanin in the dermis under the UV radiation, after metabolism, the skin cells layer by layer push up, melanin also pushed up, piled up on the epidermis layer, fast metabolism, melanin will fall off, slow metabolism, it will be piled up to the epidermis layer, some places piled up more, some places less, some thick and some thin, it formed the uneven skin tone.",
+          "advice": "Pay attention to timely hydration of the skin to maintain the balance of water and oil; avoid staying up late, ensure sufficient sleep time, pay attention to good sun protection measures when you go out, and clean in time after returning home; you can also eat winter melon, peas, potatoes, white radish and other foods to improve skin tone."
+        },
+        "3": {
+          "level": 3,
+          "introduction": "Uneven skin tone, especially dull skin around the mouth, excessive melanin deposition, skin cells are easily oxidized by ultraviolet radiation, oxidation of the skin's stratum corneum makes the skin tone look lusterless, and harmful substances that produce lipid peroxide also cause damage to the dermis, making the skin dull and pigmented, easily causing discoloration.",
+          "advice": "Skin dehydration leads to water-oil imbalance, it will make the skin tone uneven, so in order to make the face complexion, look more fair and translucent, pay attention to do a good job of hydration. Pay attention to sun protection, supplement vitamin E , vitamin C eat more fresh vegetables and fruits, can use cleansing, detoxification, hydration to brighten the skin tone products."
+        },
+        "4": {
+          "level": 4,
+          "introduction": "Melanin is a protein found in the basal layer of everyone's skin. The oxidation of the skin's stratum corneum is a major cause of a dull complexion and is usually a factor in the formation of stratum corneum oxidation, along with the formation of pigments that oxidize with UV exposure, resulting in an overall yellowish complexion.",
+          "advice": "Daily life can eat vitamin C-rich vegetables and fruits, fruits inside the trace elements and vitamins can improve skin problems, less high-fat and spicy food. Skin care using hydrating and brightening products to lighten melanin. Pay attention to sun protection when you travel, and use hydrating and brightening products."
+        },
+        "5": {
+          "level": 5,
+          "introduction": "Melanocytes produce melanin granules and transport melanin to basal cells and echinocytes. Melanocytes produce more melanin granules, which affect the content of melanin in basal cells and echinocytes, and ultraviolet light can also prompt melanocytes to divide and proliferate and increase in number, and the more melanocytes there are, the darker the skin color.",
+          "advice": "Pay attention to sun protection when you go out and use face washes and masks containing fruit acids to regulate your skin tone. You can choose some facial cleansers and masks that are rich in vitamin A and C. For example, lemon, kiwi fruit and strawberry are rich in vitamin C, which is a beneficial food for skin whitening. You can choose face cleansers or masks that contain these fruits."
+        }
+      }
+    },
+    "dark_circle": {
+      "service_name": "Dark Eye Circles",
+      "levels": {
+        "1": {
+          "level": 1,
+          "introduction": "There are currently no visible dark circles under the eyes. Dark circles are mainly manifested by the darkening of the skin under the eyes, usually without other accompanying symptoms. Daily use of hydrating eye creams, attention to rest and good habits can effectively prevent dark circles.",
+          "advice": "Please try to maintain a good work and rest schedule, avoid staying up late smoking and drinking, and do a good job of applying eye cream and sun protection. Do proper eye care and massage to promote blood circulation in the eyes."
+        },
+        "2": {
+          "level": 2,
+          "introduction": "Currently, you have mild dark circles under your eyes. Due to the thin and fragile skin under the eyes, the metabolism of the eye skin slows down with age and excessive eye fatigue, resulting in the formation of dark circles. It is important to get enough sleep and apply eye creams or eye masks for daily eye care.",
+          "advice": "Pay attention to rest, good daily care and sun protection. Avoid excessive eye use, eat a light diet, drink more water, and massage the eye area and face with eye cream to promote blood circulation."
+        },
+        "3": {
+          "level": 3,
+          "introduction": "Moderate dark circles under the face. Dark circles are often caused by staying up late, lack of sleep, and overexertion. The eyelids do not get rest, causing the tissue under the skin of the eye circle to expand and fill with blood vessels, which leads to blood stasis and stagnation of dull black shadows under the eye circle. The first thing to do is to avoid staying up too late and using your eyes excessively. You can massage your eye area and face with an eye cream to promote blood circulation.",
+          "advice": "Keep your eyes relaxed, you can take care of your eye skin by using eye creams and eye masks. Exercise moderately to promote blood circulation throughout the body. Apply eye cream regularly. Do protect yourself from the sun, go out with an umbrella, wear sunglasses, etc."
+        },
+        "4": {
+          "level": 4,
+          "introduction": "There are obvious dark circles under the face. Dark circles are caused by poor blood circulation in the eyes, common causes are staying up late, lack of sleep or congenital dark circles, etc. Usually you should pay attention to rest, you can use eye creams, eye masks and other soft eye care products to maintain the eye skin, delay aging pigmentation.",
+          "advice": "Daily attention needs to be paid to sun protection, avoiding excessive use of the eyes, ensuring sufficient sleep and drinking more water. It can be used with warm eye masks and other products to warm up the eyes, massage around the eyes and face to promote blood circulation."
+        },
+        "5": {
+          "level": 5,
+          "introduction": "Severe dark circles under the face. Dark circles are commonly caused by staying up late, lack of sleep, endocrine or other diseases, etc. Due to the weak subcutaneous tissue around the eyes, pigmentation easily occurs. You should avoid staying up late and using your eyes excessively, and you can use eye creams or eye masks with them.",
+          "advice": "Daily care to pay attention to sun protection, to eliminate the force of eye rubbing, lying down to sleep and other bad habits, in addition, you can also use hot compress eye mask or eye massage device to massage the eyes to improve eye blood circulation. Ensure sufficient sleep to reduce eye fatigue."
+        }
+      }
+    },
+    "pockmark": {
+      "service_name": "Acne",
+      "levels": {
+        "1": {
+          "level": 1,
+          "introduction": "Skin without obvious acne, usually pay attention to the use of astringent effect make-up after deep pore cleansing, which helps to shrink pores, regular monthly exfoliation treatment can effectively export pore dirt, regular use of moisturizing and hydrating mask can prevent pores continue to expand.",
+          "advice": "D+D43:E59ular diet and rest, reduce sugar intake, eat less fried food, eat more vegetables and fruits. You can exercise properly to promote blood circulation and speed up cell metabolism. Maintain the skin hydrated state."
+        },
+        "2": {
+          "level": 2,
+          "introduction": "Long-term water and oil imbalance, the skin will appear dull, and then cause acne, when sebum discharge is blocked, sebum and keratinocyte accumulation, the formation of keratin plugs, clogging hair follicles to form acne pimples.",
+          "advice": "Pay attention to sun protection, consume multivitamins and fresh fruits and vegetables, and eat less sweet, stimulating and spicy foods. Cleanse pores regularly and use mild cleansing products. Exercise in moderation to strengthen the skin's metabolism and breathing. Use products that repair, detoxify and inhibit the spread of bacteria."
+        },
+        "3": {
+          "level": 3,
+          "introduction": "When sebum discharge is blocked, microorganisms multiply, leading to increased inflammation and the formation of acne. If not taken care of in time, inflammation will also lead to necrosis of red blood cells iron up pigmentation to form acne marks, so that the elastic fibers and collagen fibers in the dermis form acne pits.",
+          "advice": "Avoid direct ultraviolet radiation, eat as light a diet as possible, drink more water, eat more vegetables and fruits, and eat less oily, sweet, spicy foods, and foods containing caffeine, such as strong tea, coffee, chocolate, etc. These foods tend to stimulate sebum and endocrine imbalance. These foods tend to stimulate sebum and endocrine imbalance, worsening acne. Keep your stomach and intestines open, your mood relaxed, and your rest and relaxation regular. Daily care can use water and oil balance, efficient hydration and repair products."
+        },
+        "4": {
+          "level": 4,
+          "introduction": "A large number of neutrophils accumulate in the sebaceous glands of hair follicles and the follicles are severely clogged, creating a closed, oxygen-deficient environment that leads to the proliferation of anaerobic bacteria and Propionibacterium acnes and cross-infection. The concentration of Propionibacterium acnes also increases triggering acne and inflammation, forming facial acne.",
+          "advice": "Pay attention to sun protection UV rays can stimulate acne to worsen. Keep a happy mood, get enough sleep, avoid rising liver fire, develop the habit of waking up early every day to have a bowel movement, exercise more, and work and rest normally. Prohibit direct hand contact with acne to avoid bacterial cross-infection. You can use restorative, detoxifying and highly effective hydrating products."
+        },
+        "5": {
+          "level": 5,
+          "introduction": "Inflammation to a certain extent results in red inflammatory papules pustules, lesions, and sebum distribution on the skin surface, stimulating local infection by condition-causing bacteria, which may in turn develop into cysts or form nodules in severe cases.",
+          "advice": "Do not squeeze red inflammatory pimples, pay attention to sun protection, consume multivitamins and fresh fruits and vegetables, and eat less sweet, stimulating and spicy foods. Cleanse your pores regularly and use gentle anti-inflammatory and repairing products. Do deep hydration to regulate the skin's water-oil balance."
+        }
+      }
+    },
+    "pore": {
+      "service_name": "Pores",
+      "levels": {
+        "1": {
+          "level": 1,
+          "introduction": "The skin is relatively delicate, the lines are fine, due to the season, the environment, food and hormonal secretion in the body, the skin condition will have slight changes, regular and appropriate daily cleaning of pores, using mild cleaning products. Exercise in moderation to strengthen skin metabolism and breathing.",
+          "advice": "Daily care pay attention to sun protection, more hydration and moisturizing to maintain a healthy skin condition. Change the diet, eat more fruits and vegetables and other body needs to replenish trace elements, choose mild non-stimulating, moisturizing products to maintain the skin hydrated and delicate state."
+        },
+        "2": {
+          "level": 2,
+          "introduction": "The T-zone of the face oil secretion, when the excess oil accumulation in the hair follicles, did not remove in time, the accumulation of time will support the large pores, daily care can use deep clear cleanser, hydration and moisturizing, shrink pores products.",
+          "advice": "Pay attention to sun protection, keep regular rest , reduce work stress, eat a balanced diet, try to eat less spicy and fried food, you can eat more vegetables, apples, bananas, grapes, etc.; and appropriate protein, such as milk, soy products; you can also supplement some vitamin c, vitamin e. Let the skin full, moist."
+        },
+        "3": {
+          "level": 3,
+          "introduction": "Unclean skin is easy to cause pore blockage, metabolism is blocked causing local pore expansion, sebum, dust and cosmetic residues mixed and formed keratin, hard texture is not easy to clean, so that the pores expand, pore blockage.",
+          "advice": "Pay attention to facial cleanliness, remove makeup thoroughly and cleanly, use products that regulate water and oil balance, and eat a light diet to reduce the intake of spicy and stimulating, high-sugar foods. The basic skincare method is to ensure enough sleep."
+        },
+        "4": {
+          "level": 4,
+          "introduction": "Usually pay attention to the use of astringent effect make-up after deep pore cleansing, which helps to shrink pores, regular monthly exfoliation treatment can effectively export pore dirt, regular use of moisturizing and hydrating mask can prevent pores continue to expand.",
+          "advice": "Usually pay attention to good cleaning, remove makeup to clean, eat less spicy and greasy food, eat more vegetables and fruits to supplement vitamins. You can use astringent products such as witch hazel."
+        },
+        "5": {
+          "level": 5,
+          "introduction": "Clogged pores lead to dull, yellow and shiny skin, and the skin's breathing is obstructed, leading to bacterial growth. Oil and dirt cannot be removed and tend to accumulate and produce skin inflammation. Daily care for deep skin care and descaling is very effective in shrinking pores.",
+          "advice": "Do a good job of daily deep cleansing and hydration, and avoid damaging the skin barrier. You can choose to use oil-based makeup remover products to avoid makeup residue blocking pores. Exfoliate regularly to unclog pores. A mask with deep cleansing effect can cleanse the skin to remove clogged substances and shrink pores."
+        }
+      }
+    },
+    "skin_type": {
+      "service_name": "Sebum",
+      "levels": {
+        "dry": {
+          "level": null,
+          "introduction": "Dry skin has low sebum secretion, no greasy feeling, inconspicuous pores, skin feels tight after washing, sensitive to external stimuli such as climate and temperature changes, and becomes partially dry or oily with the change of seasons and health conditions. Daily care can use mild hydrating products and masks to strengthen the degree of skin hydration.",
+          "advice": "Daily care pay attention to gentle cleansing of the skin, choose appropriate skin care products and cosmetics, strengthen surface and deep hydration, travel should pay strict attention to sun protection, drink more water, develop good habits of rest and exercise, can do appropriate facial massage, promote the metabolism of the skin, help maintain smooth and tender skin."
+        },
+        "mid_dry": {
+          "level": null,
+          "introduction": "Combination dry skin, sebum secretion is too little or lack of, will appear thin skin stratum corneum, resulting in dry skin, flaking, lack of luster, easy aging and other problems. Daily need to do a good job of hydration, oil replenishment, you can use a mild non-irritating, moisturizing products to increase skin nutrients and vitality.",
+          "advice": "You can use mild products to cleanse the skin, pay attention to sun protection in daily care, strengthen the skin hydration and moisturizing work, avoid smoking, alcohol and spicy food stimulation, ensure sufficient sleep, can be appropriate exercise, and promote the metabolism of the whole body."
+        },
+        "mid_oil": {
+          "level": null,
+          "introduction": "Combination oily skin, sebum secretion is prone to oily skin, roughness, dull skin tone, acne and other problems. When the facial moisture is not enough, it will overdraw the skin's moisture and the skin will automatically secrete oil to protect the facial moisture, moisturizing and hydrating is the fundamental of oil control.",
+          "advice": "Daily cleansing should be thorough, pay attention to sun protection, eat more vitamin B, E food, skin care can be appropriate use of cleansing, hydrating products. Remove the dead cells from the epidermis and remove the dirt from the pores. Pay attention to hydration and moisturizing."
+        },
+        "mix": {
+          "level": null,
+          "introduction": "Combination skin is a skin type with a mixture of oily and dry skin, which has both oily skin and dry skin characteristics, excessive sebum secretion in the T-zone and less sebum in the U-zone, daily care first to do a good job of hydration and moisturizing the skin to stop excessive oil secretion, cheeks with moisturizing products, good protection.",
+          "advice": "Daily attention to hydration and sun protection, gentle cleansing of the skin, clean makeup removal, balanced skin care, The T-zone of the face need to inhibit sebum secretion, cheeks and other dry areas need to replenish water. Pay attention to rest, develop good habits, eat a light diet, drink more water, and eat less fried and puffed food."
+        },
+        "oil": {
+          "level": null,
+          "introduction": "Oily skin, excessive sebum secretion clogs pores and causes acne and enlarged pores, so it is especially important to keep the skin clean and inhibit excessive sebum secretion. Although oily skin has a lot of oil, most of it is dehydrated, so you should pay attention to hydration and moisturization while removing oil.",
+          "advice": "Daily care requires deep cleaning of the oil on the skin. Washing your face with deep cleansing products can delay the slippery feeling of oily skin. Dietary factors can affect the secretion of sebaceous glands, so you should not eat sweet, greasy, spicy and stimulating foods, and you can eat vitamin-rich fruits and vegetables to reduce skin oil secretion."
+        }
+      }
+    },
+    "spot": {
+      "service_name": "Pigmentation",
+      "levels": {
+        "1": {
+          "level": 1,
+          "introduction": "Your skin has some discoloration, but daily care should still do a good job of hydration and sun protection, regular skin management, hydration products or masks can be used to replenish the skin with sufficient nutrients and vitality.",
+          "advice": "Pay attention to sun protection, avoid direct sunlight, and develop good living habits. It is recommended to keep a good state of mind and get enough sleep in general, and you can exercise moderately to promote blood circulation throughout the body. Strengthen the skin metabolism."
+        },
+        "2": {
+          "level": 2,
+          "introduction": "Your skin has a small amount of discoloration. The main reason for the formation of discoloration is the ultraviolet radiation from the sun, which causes the epidermis to produce more melanin particles, which form spots under photosynthesis. Daily care should start with sun protection, pay attention to hydration and moisturization to prevent excessive skin pigmentation.",
+          "advice": "Do a good daily care, pay attention to sun protection, usually keep a reasonable sleep and relaxed mood. You can appropriately supplement vitamin C, vitamin E and other products that can both inhibit melanin and enhance the elasticity of blood vessels."
+        },
+        "3": {
+          "level": 3,
+          "introduction": "You have slightly visible skin discoloration. Do a good job of sun protection on weekdays to prevent the possibility of deepening spots. Protect your skin barrier, avoid skin damaging behaviors, and take good daily care with spot lightening and whitening products to metabolize, fade or block melanin deposits. Blood circulation can be promoted by massaging the face.",
+          "advice": "Pay attention to sun protection, to adjust the habits of diet, to reduce the intake of fat, should eat more vitamin-rich foods, such as vegetables and fruits, etc., because fruits are rich in vitamin c and vitamin e, can effectively prevent pigmentation."
+        },
+        "4": {
+          "level": 4,
+          "introduction": "Your skin has more visible discoloration. The main causes of pigmentation include sun exposure, endocrine disorders, heredity, your own stress and the body's metabolism. Therefore, you should do a good job of strict sun protection in your daily care and take care not to use poor quality cosmetics that are harmful to your skin.",
+          "advice": "Pay attention to hydration and moisturizing, eat a light diet, eat more vegetables and fruits, avoid spicy and other stimulating foods, and keep a reasonable sleep and a relaxed mood. Do a good job of sun protection to prevent the possibility of spot deepening."
+        },
+        "5": {
+          "level": 5,
+          "introduction": "You have severe skin discoloration. The most basic perception of the way to improve blemishes is sun protection, spot lightening (metabolizing melanin) and whitening. Use glucocorticoids correctly and carefully. You can use spot lightening and whitening products to metabolize, fade or block the deposition or production of melanin. Avoid the use of quick-acting, potentially hormone-containing whitening cosmetics.",
+          "advice": "Pay attention to sun protection, avoid prolonged direct sunlight, ensure sufficient sleep, drink more water and eat more fruits and vegetables, and also choose foods or nutrients that supplement collagen, vitamin C and vitamin E. Exercise properly to promote blood circulation throughout the body."
+        }
+      }
+    },
+    "wrinkle": {
+      "service_name": "Wrinkles",
+      "levels": {
+        "1": {
+          "level": 1,
+          "introduction": "Your facial skin is lustrous and delicate, due to ageing, emotional stress, lack of sleep, sebum secretion imbalance, while the lack of moisturizing factors in the stratum corneum, the lack of moisturizing factors and dryness, so that the skin is not lustrous, the skin due to temporary dehydration and the appearance of fine wrinkles, the formation of a small amount of facial fine lines. ",
+          "advice": "Pay attention to sun protection, regulate your emotions, get enough sleep, drink more water, keep your skin at a moderate moisture level, avoid washing your face with water that is too hot, and use hydrating, moisturizing and anti-aging products."
+        },
+        "2": {
+          "level": 2,
+          "introduction": "You have mild wrinkles, the skin is exposed for a long time, influenced by the external environment, ultraviolet radiation to produce reactive oxygen radicals, destroy the cell membrane tissue collagen, active substances, oxidation cells, resulting in capillary aging after atrophy, vascular reduction of water and nutrient deficiency, daily skin care is not in place, resulting in fine pseudo and fine true wrinkles, resulting in longer and deeper facial lines, more obvious when the facial expression action.",
+          "advice": "Pay attention to sun protection, control facial expressions with large movements, avoid long-term excessive smoking and drinking, keep the body in good nutritional condition, daily replenishment of water, can use antioxidant products, appropriate massage to increase the oxygen and moisture content of the skin, reduce salt intake."
+        },
+        "3": {
+          "level": 3,
+          "introduction": "You have moderate wrinkles, the reticular layer contains a large number of collagen fiber bundles and elastic fiber bundles, and the loss of collagen causes aging. Due to the natural aging of the skin, ultraviolet rays, free radicals, unreasonable skin care and other factors cause a large reduction of reticular fibrous protein, resulting in its fragility, nutrient supply is not available, fiber breakage, loss, wrinkles, resulting in the formation of wrinkles under different degrees of the face.",
+          "advice": "Control facial expressions with large movements, avoid long-term excessive smoking and alcohol consumption, keep the body in good nutritional condition, pay attention to sun protection, daily replenishment of water, can use antioxidant products, appropriate massage to increase the skin oxygen and moisture, reduce the intake of sugar."
+        },
+        "4": {
+          "level": 4,
+          "introduction": "You have heavy wrinkles, dry skin stratum corneum, reduced subcutaneous fat, severe water loss, and gradual loss of elasticity followed by sagging of the skin. Skin crests and furrows will continue to deepen and skin wrinkles will appear.",
+          "advice": "Strict sun protection, good healthy eating habits, reasonable rest and relaxation, strengthening daily skin care steps, more facial massage, supplementing collagen, enhancing skin oxygenation and metabolism, and using efficient hydration and antioxidant products."
+        },
+        "5": {
+          "level": 5,
+          "introduction": "Your wrinkles are serious, your skin is dehydrated for a long time, your facial muscles are tense, free radicals destroy collagen and active substances in normal tissues, leading to a gradual decrease in collagen, hardening and thickening of reticular pillars, loss of elasticity and thinning, as well as leading to fracture of dermal fibers, fat atrophy, and causing true skin wrinkles.",
+          "advice": "Keep a happy mood, pay attention to sun protection, develop good healthy eating habits, reasonable rest, strengthen daily skin care steps, do more facial massage, supplement collagen, enhance skin oxygenation and metabolism, you can use efficient hydration, antioxidant products."
+        }
+      }
+    }
+  }
+}
