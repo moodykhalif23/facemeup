@@ -10,8 +10,15 @@ Base = declarative_base()
 
 
 def get_db():
+    """
+    Yield a DB session.
+    Automatically rolls back on any exception so partial writes never persist (BE-013).
+    """
     db = SessionLocal()
     try:
         yield db
+    except Exception:
+        db.rollback()
+        raise
     finally:
         db.close()

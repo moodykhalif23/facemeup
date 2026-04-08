@@ -1,9 +1,11 @@
 from datetime import datetime, timedelta
 from uuid import uuid4
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Request, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
+
+from app.main import limiter
 
 from app.core.config import settings
 from app.core.database import get_db
@@ -73,7 +75,8 @@ def signup(payload: SignupRequest, db: Session = Depends(get_db)) -> UserRespons
 
 
 @router.post("/login", response_model=TokenResponse)
-def login(payload: LoginRequest, db: Session = Depends(get_db)) -> TokenResponse:
+@limiter.limit("5/minute")
+def login(request: Request, payload: LoginRequest, db: Session = Depends(get_db)) -> TokenResponse:
     user = db.execute(select(User).where(User.email == payload.email)).scalar_one_or_none()
     if not user or not verify_password(payload.password, user.password_hash):
         raise AppError(status_code=401, code="invalid_credentials", message="Invalid email or password")

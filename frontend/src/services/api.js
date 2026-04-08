@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { store } from '../store';
+import { logout } from '../store/slices/authSlice';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
 
@@ -11,12 +12,12 @@ const api = axios.create({
   },
 });
 
+// Request interceptor — attach JWT
 api.interceptors.request.use(
   (config) => {
     try {
       const state = store.getState();
       const token = state.auth?.token;
-      
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
@@ -26,6 +27,21 @@ api.interceptors.request.use(
     return config;
   },
   (error) => Promise.reject(error)
+);
+
+// Response interceptor — on 401 clear auth and redirect to login (FE-001)
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      // Avoid redirect loop on the login page itself
+      if (!window.location.pathname.startsWith('/login')) {
+        store.dispatch(logout());
+        window.location.href = '/login';
+      }
+    }
+    return Promise.reject(error);
+  }
 );
 
 // Auth

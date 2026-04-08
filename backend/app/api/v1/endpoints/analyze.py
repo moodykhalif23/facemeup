@@ -1,7 +1,9 @@
+import asyncio
 import base64
 import io
 import logging
-from fastapi import APIRouter, Depends, HTTPException
+from concurrent.futures import ThreadPoolExecutor
+from fastapi import APIRouter, Depends, HTTPException, Request
 from PIL import Image
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
@@ -9,6 +11,7 @@ from sqlalchemy.orm import Session
 from app.core.config import settings
 from app.core.database import get_db
 from app.core.deps import get_current_user
+from app.main import limiter
 from app.models.profile import SkinProfileHistory
 from app.models.user import User
 from app.schemas.analyze import AnalyzeRequest, AnalyzeResponse
@@ -18,6 +21,8 @@ from app.services.profile_service import append_profile
 
 logger = logging.getLogger(__name__)
 
+# Dedicated thread pool for TF inference — keeps async event loop unblocked
+_inference_pool = ThreadPoolExecutor(max_workers=2, thread_name_prefix="inference")
 
 router = APIRouter()
 
@@ -74,7 +79,9 @@ def submit_feedback(
 
 
 @router.post("", response_model=AnalyzeResponse)
-def analyze(
+@limiter.limit("10/hour")
+async def analyze(
+    request: Request,
     payload: AnalyzeRequest,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
@@ -83,9 +90,15 @@ def analyze(
     landmarks = None
     if payload.landmarks:
         landmarks = [{"x": lm.x, "y": lm.y, "z": lm.z} for lm in payload.landmarks]
-    
+
     questionnaire = payload.questionnaire.model_dump() if payload.questionnaire else None
-    profile, mode = run_skin_inference(payload.image_base64, landmarks, questionnaire)
+
+    # Run TF inference in a thread pool — keeps the async event loop unblocked (BE-005)
+    loop = asyncio.get_event_loop()
+    profile, mode = await loop.run_in_executor(
+        _inference_pool,
+        lambda: run_skin_inference(payload.image_base64, landmarks, questionnaire),
+    )
     thumbnail = _make_report_thumbnail(payload.image_base64)
 
     # Thumbnail all pose captures for storage (skip if identical to main image)

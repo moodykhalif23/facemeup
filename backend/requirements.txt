@@ -20,6 +20,7 @@ woocommerce>=3.0.0
 opencv-python-headless>=4.8.0
 
 apscheduler>=3.10.0
+slowapi>=0.1.9
 
 # ML Training Dependencies
 tensorflow-datasets>=4.9.0

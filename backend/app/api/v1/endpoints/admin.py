@@ -1,7 +1,7 @@
 import json
-from datetime import datetime, timezone
+from datetime import datetime, timezone, UTC
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy import select, func, delete
 from sqlalchemy.orm import Session
 
@@ -81,10 +81,19 @@ def get_stats(
 def list_users(
     db: Session = Depends(get_db),
     _: User = Depends(require_roles("admin")),
+    skip: int = Query(0, ge=0),
+    limit: int = Query(50, ge=1, le=200),
 ) -> dict:
-    """Return all users."""
-    rows = db.execute(select(User).order_by(User.created_at.desc())).scalars().all()
+    """Return users with pagination (skip/limit)."""
+    total = db.execute(select(func.count()).select_from(User).where(User.deleted_at.is_(None))).scalar_one()
+    rows = db.execute(
+        select(User).where(User.deleted_at.is_(None))
+        .order_by(User.created_at.desc()).offset(skip).limit(limit)
+    ).scalars().all()
     return {
+        "total": total,
+        "skip": skip,
+        "limit": limit,
         "users": [
             {
                 "id": u.id,
@@ -94,7 +103,7 @@ def list_users(
                 "created_at": u.created_at.isoformat(),
             }
             for u in rows
-        ]
+        ],
     }
 
 
@@ -127,23 +136,22 @@ def delete_user(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_roles("admin")),
 ) -> dict:
-    """Delete a user and their associated data."""
+    """Soft-delete a user — sets deleted_at, preserving all associated data."""
     if user_id == current_user.id:
         raise AppError(400, "self_delete", "Cannot delete your own account")
 
-    user = db.execute(select(User).where(User.id == user_id)).scalar_one_or_none()
+    user = db.execute(
+        select(User).where(User.id == user_id, User.deleted_at.is_(None))
+    ).scalar_one_or_none()
     if not user:
         raise AppError(404, "not_found", "User not found")
 
-    # Remove dependent rows first to avoid FK constraint violations
+    # Revoke all active refresh tokens
     db.execute(delete(RefreshToken).where(RefreshToken.user_id == user_id))
-    db.execute(delete(SkinProfileHistory).where(SkinProfileHistory.user_id == user_id))
-    db.execute(delete(LoyaltyLedger).where(LoyaltyLedger.user_id == user_id))
-    db.execute(delete(Order).where(Order.user_id == user_id))
 
-    db.delete(user)
+    user.deleted_at = datetime.now(UTC).replace(tzinfo=None)
     db.commit()
-    return {"deleted": user_id}
+    return {"deleted": user_id, "soft": True}
 
 
 # Reports
@@ -152,11 +160,20 @@ def delete_user(
 def list_reports(
     db: Session = Depends(get_db),
     _: User = Depends(require_roles("admin")),
+    skip: int = Query(0, ge=0),
+    limit: int = Query(50, ge=1, le=200),
 ) -> dict:
+    total = db.execute(
+        select(func.count()).select_from(SkinProfileHistory)
+        .where(SkinProfileHistory.deleted_at.is_(None))
+    ).scalar_one()
     rows = db.execute(
         select(SkinProfileHistory, User)
         .join(User, User.id == SkinProfileHistory.user_id)
+        .where(SkinProfileHistory.deleted_at.is_(None))
         .order_by(SkinProfileHistory.created_at.desc())
+        .offset(skip)
+        .limit(limit)
     ).all()
 
     reports = []
@@ -178,7 +195,7 @@ def list_reports(
             "capture_images": json.loads(record.capture_images_json) if record.capture_images_json else None,
         })
 
-    return {"reports": reports}
+    return {"total": total, "skip": skip, "limit": limit, "reports": reports}
 
 
 @router.delete("/reports/{report_id}")
@@ -187,13 +204,13 @@ def delete_report(
     db: Session = Depends(get_db),
     _: User = Depends(require_roles("admin")),
 ) -> dict:
-    """Delete a single skin analysis report by ID."""
+    """Soft-delete a single skin analysis report."""
     record = db.get(SkinProfileHistory, report_id)
-    if not record:
+    if not record or record.deleted_at is not None:
         raise AppError(404, "not_found", "Report not found")
-    db.delete(record)
+    record.deleted_at = datetime.now(UTC).replace(tzinfo=None)
     db.commit()
-    return {"deleted": report_id}
+    return {"deleted": report_id, "soft": True}
 
 
 @router.get("/reports/{user_id}")
@@ -223,12 +240,17 @@ def get_user_reports(
 def list_all_orders(
     db: Session = Depends(get_db),
     _: User = Depends(require_roles("admin")),
+    skip: int = Query(0, ge=0),
+    limit: int = Query(50, ge=1, le=200),
 ) -> dict:
-    """Return every order with user email and computed total."""
+    """Return orders with pagination (skip/limit)."""
+    total = db.execute(select(func.count()).select_from(Order)).scalar_one()
     rows = db.execute(
         select(Order, User.email)
         .join(User, User.id == Order.user_id)
         .order_by(Order.created_at.desc())
+        .offset(skip)
+        .limit(limit)
     ).all()
 
     orders = []
@@ -252,7 +274,7 @@ def list_all_orders(
             "created_at": order.created_at.isoformat(),
         })
 
-    return {"orders": orders}
+    return {"total": total, "skip": skip, "limit": limit, "orders": orders}
 
 
 @router.put("/orders/{order_id}/status")
@@ -297,6 +319,21 @@ def sync_training_assets(
         }
     except Exception as exc:
         raise AppError(500, "training_sync_failed", f"Training sync failed: {exc}")
+
+# Model management
+
+@router.post("/model/reload")
+def reload_model(
+    _: User = Depends(require_roles("admin")),
+) -> dict:
+    """
+    Force the inference service to reload the SavedModel from disk.
+    Call this after deploying a new model without restarting the container.
+    """
+    from app.services.inference import _load_model
+    _load_model.cache_clear()
+    return {"reloaded": True, "message": "Model cache cleared — next request will reload from disk"}
+
 
 # Cache management
 

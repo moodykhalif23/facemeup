@@ -23,3 +23,4 @@ class SkinProfileHistory(Base):
     user_feedback: Mapped[str | None] = mapped_column(String(16), nullable=True)
     capture_images_json: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    deleted_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True, index=True)

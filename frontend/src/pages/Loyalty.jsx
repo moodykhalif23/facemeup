@@ -17,6 +17,7 @@ const { Title, Text, Paragraph } = Typography;
 export default function Loyalty() {
   const [loading, setLoading] = useState(false);
   const [loyaltyData, setLoyaltyData] = useState(null);
+  const [fetchError, setFetchError] = useState(null);
   const { user } = useSelector((state) => state.auth);
   const { message } = App.useApp();
 
@@ -26,24 +27,14 @@ export default function Loyalty() {
 
   const fetchLoyalty = async () => {
     setLoading(true);
+    setFetchError(null);
     try {
       const response = await getLoyalty(user?.id);
       setLoyaltyData(response.data);
     } catch (error) {
-      setLoyaltyData({
-        points: 850,
-        tier: 'Gold',
-        next_tier: 'Platinum',
-        points_to_next_tier: 150,
-        lifetime_points: 2450,
-        rewards: [
-          { id: 1, name: '10% Off Next Purchase', points_required: 500, description: 'Get 10% discount on your next order', available: true },
-          { id: 2, name: 'Free Shipping', points_required: 300, description: 'Free shipping on your next order', available: true },
-          { id: 3, name: 'Free Sample Product', points_required: 750, description: 'Get a free sample of any product', available: true },
-          { id: 4, name: '20% Off Next Purchase', points_required: 1000, description: 'Get 20% discount on your next order', available: false },
-          { id: 5, name: 'Premium Gift Set', points_required: 1500, description: 'Exclusive premium skincare gift set', available: false }
-        ]
-      });
+      const msg = error.response?.data?.error?.message || 'Could not load loyalty data. Please try again.';
+      setFetchError(msg);
+      message.error(msg);
     } finally {
       setLoading(false);
     }
@@ -69,12 +60,37 @@ export default function Loyalty() {
     return colors[tier] || colors.Bronze;
   };
 
-  if (loading || !loyaltyData) {
+  if (loading) {
     return (
       <Layout style={{ minHeight: '100vh', background: 'var(--background)' }}>
         <AppHeader title="Loyalty Rewards" showBack />
         <Content style={{ padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <Spin size="large" />
+        </Content>
+      </Layout>
+    );
+  }
+
+  if (fetchError || !loyaltyData) {
+    return (
+      <Layout style={{ minHeight: '100vh', background: 'var(--background)' }}>
+        <AppHeader title="Loyalty Rewards" showBack />
+        <Content style={{ padding: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Card style={{ textAlign: 'center', borderRadius: 4, border: '1px solid var(--border)', background: 'var(--card)' }}>
+            <GiftOutlined style={{ fontSize: 40, color: 'var(--muted-foreground)', marginBottom: 12 }} />
+            <Title level={5} style={{ color: 'var(--card-foreground)', marginBottom: 8 }}>
+              Could not load loyalty data
+            </Title>
+            <Text style={{ color: 'var(--muted-foreground)', display: 'block', marginBottom: 16 }}>
+              {fetchError || 'Please try again.'}
+            </Text>
+            <button
+              onClick={fetchLoyalty}
+              style={{ padding: '8px 20px', borderRadius: 4, background: 'var(--primary)', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 14 }}
+            >
+              Retry
+            </button>
+          </Card>
         </Content>
       </Layout>
     );
