@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { useEffect, useState } from 'react';
-import { Layout, Card, Typography, Row, Col } from 'antd';
+import { Layout, Card, Typography, Row, Col, Grid } from 'antd';
 import {
   CameraOutlined,
   HistoryOutlined,
@@ -11,15 +11,18 @@ import {
   SettingOutlined,
   FileTextOutlined,
 } from '@ant-design/icons';
+import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import AppHeader from '../components/AppHeader';
 
 const { Content } = Layout;
 const { Title, Text } = Typography;
+const { useBreakpoint } = Grid;
 
 export default function Home() {
   const navigate = useNavigate();
   const { items } = useSelector((state) => state.cart);
   const { user } = useSelector((state) => state.auth);
+  const screens = useBreakpoint();
   const [greeting, setGreeting] = useState('');
 
   useEffect(() => {
@@ -97,17 +100,43 @@ export default function Home() {
       <Content style={{ padding: '20px' }}>
         <div style={{ maxWidth: 1200, margin: '0 auto' }}>
           <div style={{ marginBottom: 32, paddingTop: 8 }}>
-            <Title level={2} style={{
-              margin: '0 0 6px 0',
-              color: 'var(--card-foreground)',
-              fontSize: 26,
-              fontWeight: 600,
-            }}>
-              {greeting || 'Welcome'}
-            </Title>
-            <Text style={{ fontSize: 14, color: 'var(--muted-foreground)' }}>
-              Analyze your skin and discover personalized skincare solutions
-            </Text>
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: screens.md ? 'row' : 'column',
+                alignItems: 'center',
+                gap: screens.md ? 20 : 12,
+                textAlign: screens.md ? 'left' : 'center',
+              }}
+            >
+              <div style={{ width: screens.md ? 190 : 150, flexShrink: 0 }}>
+                <DotLottieReact
+                  src="/animations/Welcome home.lottie"
+                  loop
+                  autoplay
+                  renderConfig={{ autoResize: true }}
+                  style={{
+                    width: '100%',
+                    height: screens.md ? 190 : 150,
+                    display: 'block',
+                  }}
+                />
+              </div>
+
+              <div>
+                <Title level={2} style={{
+                  margin: '0 0 6px 0',
+                  color: 'var(--card-foreground)',
+                  fontSize: screens.md ? 26 : 22,
+                  fontWeight: 600,
+                }}>
+                  {greeting || 'Welcome'}
+                </Title>
+                <Text style={{ fontSize: screens.md ? 14 : 13, color: 'var(--muted-foreground)' }}>
+                  Analyze your skin and discover personalized skincare solutions
+                </Text>
+              </div>
+            </div>
           </div>
 
           <Row gutter={[12, 12]}>
