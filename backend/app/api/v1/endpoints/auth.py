@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, Request, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.main import limiter
+from app.core.limiter import limiter
 
 from app.core.config import settings
 from app.core.database import get_db
