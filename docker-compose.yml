@@ -7,7 +7,7 @@ services:
     env_file:
       - ./backend/.env
     ports:
-      - "8011:8000"    
+      - "8011:8000"
     volumes:
       - ./backend:/app
     depends_on:
@@ -16,35 +16,6 @@ services:
       redis:
         condition: service_healthy
     command: sh -c "alembic upgrade head && uvicorn app.main:app --reload --host 0.0.0.0 --port 8000"
-    networks:
-      - skincare
-
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-      args:
-        VITE_API_URL: https://skincareapp.duckdns.org/api/v1
-    container_name: skincare-frontend
-    restart: unless-stopped
-    networks:
-      - skincare
-
-  caddy:
-    image: caddy:2-alpine
-    container_name: skincare-caddy
-    restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
-      - "443:443/udp"    # HTTP/3
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      - caddy_data:/data          # TLS certificates 
-      - caddy_config:/config
-    depends_on:
-      - api
-      - frontend
     networks:
       - skincare
 
@@ -86,5 +57,3 @@ networks:
 
 volumes:
   pg_data:
-  caddy_data:
-  caddy_config:
