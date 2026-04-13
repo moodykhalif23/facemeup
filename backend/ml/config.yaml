@@ -79,8 +79,13 @@ architecture:
   output_activation: "sigmoid"
 
 loss:
-  # binary_crossentropy required for multi-label (sigmoid) output
-  function: "binary_crossentropy"
+  # BinaryFocalCrossentropy for multi-label (sigmoid) output.
+  # gamma=2.0 downweights easy majority-class examples (Normal/None detected)
+  # and focuses learning on rare conditions (Redness, Wrinkles, Dehydration).
+  # label_smoothing=0.05 reduces overconfident sigmoid outputs.
+  function: "binary_focal_crossentropy"
+  gamma: 2.0
+  label_smoothing: 0.05
 
 metrics:
   - "accuracy"

@@ -436,26 +436,45 @@ def create_real_datasets(label_index: dict, config: dict):
 
     # ── ML-003: Inverse-frequency sample weights ─────────────────────────
     # Addresses 68% Normal/None-detected imbalance. Weight each training
-    # sample by total / (n_classes * class_count) so rare classes
-    # (Dry, Oily, Sensitive) receive proportionally higher gradient signal.
+    # sample by the geometric mean of its skin-type weight and condition
+    # weight so rare classes (Dry, Oily, Sensitive, Redness, Wrinkles)
+    # receive proportionally higher gradient signal.
     from collections import Counter
     skin_counts = Counter(it["skin_type"] for it in train_items)
+    cond_counts = Counter(it["condition"] for it in train_items)
     total_train = len(train_items)
+
     n_skin_classes = len(SKIN_TYPES)
+    n_cond_classes = len(CONDITIONS)
+
     skin_weight = {
         s: total_train / (n_skin_classes * max(c, 1))
         for s, c in skin_counts.items()
     }
-    # Normalise so mean weight ≈ 1 (avoids inflating effective LR)
-    mean_w = sum(skin_weight[it["skin_type"]] for it in train_items) / total_train
-    train_sample_weights = np.array(
-        [skin_weight[it["skin_type"]] / mean_w for it in train_items],
+    cond_weight = {
+        c: total_train / (n_cond_classes * max(cnt, 1))
+        for c, cnt in cond_counts.items()
+    }
+
+    # Geometric mean of skin and condition weights, then normalise
+    raw_weights = np.array(
+        [
+            float(np.sqrt(skin_weight[it["skin_type"]] * cond_weight[it["condition"]]))
+            for it in train_items
+        ],
         dtype=np.float32,
     )
+    mean_w = raw_weights.mean()
+    train_sample_weights = raw_weights / mean_w
+
     print(f"\n  Class weights (skin type, normalised):")
     for s, c in sorted(skin_counts.items()):
         w = skin_weight[s] / mean_w
         print(f"    {s:<14} {c:>5} samples  → weight {w:.3f}")
+    print(f"\n  Class weights (condition, normalised):")
+    for c, cnt in sorted(cond_counts.items()):
+        w = cond_weight[c] / mean_w
+        print(f"    {c:<22} {cnt:>5} samples  → weight {w:.3f}")
 
     def make_label_vector(skin_idx: int, cond_idx: int) -> np.ndarray:
         """Multi-hot vector: skin type + condition both flagged."""
@@ -581,9 +600,18 @@ def build_model(config: dict, phase: int):
     train_cfg = config["training"][f"phase{phase}"]
     optimizer = keras.optimizers.Adam(learning_rate=train_cfg["learning_rate"])
 
+    # Focal loss reduces the gradient contribution from easy (majority-class)
+    # examples and focuses training on hard, rare-class samples.
+    # gamma=2.0: standard focal scaling; label_smoothing=0.05 reduces overconfidence.
+    focal_loss = keras.losses.BinaryFocalCrossentropy(
+        gamma=2.0,
+        label_smoothing=0.05,
+        from_logits=False,
+    )
+
     model.compile(
         optimizer=optimizer,
-        loss=keras.losses.BinaryCrossentropy(),
+        loss=focal_loss,
         metrics=[
             keras.metrics.BinaryAccuracy(name="accuracy"),
             keras.metrics.Precision(name="precision"),

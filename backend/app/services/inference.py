@@ -119,7 +119,7 @@ def _derive_skin_type_from_new_fields(q: Dict) -> str:
         scores["Sensitive"] += 1
 
     best = max(scores, key=lambda k: scores[k])
-    return best if scores[best] > 0 else "Combination"
+    return best if scores[best] > 0 else "Normal"
 
 
 def _questionnaire_profile(questionnaire: Optional[Dict]) -> SkinProfile:
@@ -127,13 +127,17 @@ def _questionnaire_profile(questionnaire: Optional[Dict]) -> SkinProfile:
     q = questionnaire or {}
     skin_feel = (q.get("skin_feel") or "").lower()
     skin_type = _SKIN_FEEL_MAP.get(skin_feel) if skin_feel else _derive_skin_type_from_new_fields(q)
-    skin_type = skin_type or "Combination"
+    skin_type = skin_type or "Normal"  # neutral default; Combination was misleading
     raw_concerns = q.get("concerns") or []
     conditions = list({_CONCERN_MAP[c] for c in raw_concerns if c in _CONCERN_MAP})
     if not conditions:
         conditions = ["None detected"]
 
-    confidence = 0.72
+    # Confidence reflects how many questionnaire signals were actually provided.
+    # No questionnaire → very low confidence; full questionnaire → moderate confidence.
+    # Cap at 0.65: questionnaire-only inference is inherently less precise than model.
+    filled_fields = sum(1 for k in ("skin_feel", "skin_texture", "moisture_level", "oil_levels") if q.get(k))
+    confidence = min(0.65, 0.35 + filled_fields * 0.075)
     all_skin = ["Oily", "Dry", "Combination", "Normal", "Sensitive"]
     all_cond  = ["Acne", "Hyperpigmentation", "Uneven tone", "Dehydration", "Wrinkles", "Redness", "None detected"]
 
@@ -194,17 +198,21 @@ def _aggregate_zone_probs(
 ) -> np.ndarray:
     """Average probability vectors across zones.
 
-    Skin-type scores are averaged uniformly; condition scores are
-    taken as the per-condition maximum across zones (spec §4 intent:
-    a condition showing up in *any* zone should be surfaced).
+    Skin-type scores are averaged uniformly; condition scores use a
+    weighted blend of max and mean — surfaces real localised conditions
+    without amplifying noise from an undertrained model.
     """
     n_skin = len(skin_labels)
     stacked = np.stack(all_probs, axis=0)          # [zones, num_classes]
 
-    skin_avg  = stacked[:, :n_skin].mean(axis=0)   # average skin type probabilities
-    cond_max  = stacked[:, n_skin:].max(axis=0)    # max condition probability per zone
+    skin_avg = stacked[:, :n_skin].mean(axis=0)    # average skin type probabilities
 
-    return np.concatenate([skin_avg, cond_max])
+    # Blend 60% mean + 40% max: more robust than pure max when model confidence
+    # is low, while still surfacing conditions that appear in multiple zones.
+    cond_stack = stacked[:, n_skin:]
+    cond_agg   = 0.6 * cond_stack.mean(axis=0) + 0.4 * cond_stack.max(axis=0)
+
+    return np.concatenate([skin_avg, cond_agg])
 
 
 def run_skin_inference(
@@ -284,8 +292,11 @@ def run_skin_inference(
         cond_start  = len(skin_labels)
         cond_scores = final_probs[cond_start : cond_start + len(condition_labels)]
 
-        # Adaptive threshold: higher confidence → tighter threshold (lowered for better recall)
-        threshold = 0.30 if skin_confidence > 0.7 else 0.25
+        # Adaptive threshold: higher confidence → tighter threshold.
+        # Raised from 0.25/0.30 to 0.38/0.45 to reduce false-positive
+        # Hyperpigmentation detections caused by training-data imbalance
+        # (HAM10000 bkl+mel = 22% Hyperpigmentation vs 0% Redness/Wrinkles).
+        threshold = 0.45 if skin_confidence > 0.7 else 0.38
 
         conditions = [
             condition_labels[i]
