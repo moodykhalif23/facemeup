@@ -77,7 +77,7 @@ export default function Analysis() {
       const response = await api.post('/analyze', {
         image_base64: base64Image,
         questionnaire,
-        landmarks: landmarks.map(({ x, y, z }) => ({ x, y, z })),
+        landmarks: landmarks ? landmarks.map(({ x, y, z }) => ({ x, y, z })) : null,
         capture_images: captureBase64List,
       });
 

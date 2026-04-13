@@ -2,3 +2,11 @@
     Header unset Permissions-Policy
     Header always set Permissions-Policy "geolocation=(), camera=*, microphone=*"
 </IfModule>
+
+# Allow large request bodies for API endpoints (base64-encoded images can be several MB)
+LimitRequestBody 52428800
+
+# Disable ModSecurity WAF for this context — it blocks legitimate base64 JSON payloads
+<IfModule mod_security2.c>
+    SecRuleEngine Off
+</IfModule>
