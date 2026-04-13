@@ -189,8 +189,23 @@ const FaceMeshCapture = ({ onCapture, onFaceDetected }) => {
       try {
         if (!videoRef.current || !canvasRef.current) return;
 
+        // Ask for camera permission explicitly before MediaPipe starts.
+        // This triggers the browser dialog immediately and gives a clear error
+        // if denied — rather than a cryptic MediaPipe failure.  We stop the
+        // test stream right away; MediaPipe's Camera will re-open the device.
+        try {
+          const testStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+          testStream.getTracks().forEach(t => t.stop());
+        } catch (permErr) {
+          if (mounted) setError(permErr.message || 'Camera permission denied');
+          return;
+        }
+
+        // MediaPipe WASM files are vendored to /mediapipe/face_mesh/ at build
+        // time (vite.config.js) so they are served from the same origin.
+        // This prevents ad blockers / CDN outages from breaking the feature.
         const faceMesh = new FaceMesh({
-          locateFile: (f) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${f}`,
+          locateFile: (f) => `/mediapipe/face_mesh/${f}`,
         });
 
         faceMesh.setOptions({
