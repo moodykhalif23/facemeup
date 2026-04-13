@@ -3,19 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { Layout, Card, Button, Typography, Row, Col, App, Spin } from 'antd';
 import { ShoppingCartOutlined } from '@ant-design/icons';
-import { getRecommendations } from '../services/api';
+import { getRecommendations, getProxiedImageUrl } from '../services/api';
 import AppHeader from '../components/AppHeader';
 
 const { Content } = Layout;
 const { Title, Text } = Typography;
-
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
-
-const getProxiedImageUrl = (imageUrl) => {
-  if (!imageUrl) return null;
-  const baseUrl = API_BASE_URL.replace('/api/v1', '');
-  return `${baseUrl}/api/v1/proxy/image?url=${encodeURIComponent(imageUrl)}`;
-};
 
 export default function Recommendations() {
   const navigate = useNavigate();

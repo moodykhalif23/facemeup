@@ -4,20 +4,12 @@ import { useDispatch } from 'react-redux';
 import { Layout, Card, Button, Typography, Space, InputNumber, Divider, Tag, App } from 'antd';
 import { ShoppingCartOutlined } from '@ant-design/icons';
 import DOMPurify from 'dompurify';
-import { getProduct } from '../services/api';
+import { getProduct, getProxiedImageUrl } from '../services/api';
 import { addToCart } from '../store/slices/cartSlice';
 import AppHeader from '../components/AppHeader';
 
 const { Content } = Layout;
 const { Title, Text, Paragraph } = Typography;
-
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
-
-const getProxiedImageUrl = (imageUrl) => {
-  if (!imageUrl) return null;
-  const baseUrl = API_BASE_URL.replace('/api/v1', '');
-  return `${baseUrl}/api/v1/proxy/image?url=${encodeURIComponent(imageUrl)}`;
-};
 
 export default function ProductDetail() {
   const navigate = useNavigate();

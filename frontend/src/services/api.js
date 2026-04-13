@@ -2,7 +2,17 @@ import axios from 'axios';
 import { store } from '../store';
 import { logout } from '../store/slices/authSlice';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
+const API_BASE_URL = import.meta.env.VITE_API_URL;
+
+if (!API_BASE_URL) {
+  throw new Error('[api.js] VITE_API_URL is not defined. Add it to your .env file and rebuild.');
+}
+
+export const getProxiedImageUrl = (imageUrl) => {
+  if (!imageUrl) return null;
+  const base = API_BASE_URL.replace(/\/api\/v1\/?$/, '');
+  return `${base}/api/v1/proxy/image?url=${encodeURIComponent(imageUrl)}`;
+};
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -34,7 +44,6 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Avoid redirect loop on the login page itself
       if (!window.location.pathname.startsWith('/login')) {
         store.dispatch(logout());
         window.location.href = '/login';
