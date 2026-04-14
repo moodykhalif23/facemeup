@@ -23,6 +23,7 @@ const CONFIG = {
   username: 'Cyrus',
   password: 'Zhuri',
   rawDir: path.join(__dirname, 'raw'),
+  imagesDir: path.join(__dirname, 'raw', 'images'),
   pageSize: 20,
 };
 
@@ -35,6 +36,7 @@ const LIMIT = parseInt(getArg('--limit', '100'));
 const START_PAGE = parseInt(getArg('--page', '1'));
 
 if (!fs.existsSync(CONFIG.rawDir)) fs.mkdirSync(CONFIG.rawDir, { recursive: true });
+if (!fs.existsSync(CONFIG.imagesDir)) fs.mkdirSync(CONFIG.imagesDir, { recursive: true });
 
 function log(msg) { console.log('[' + new Date().toISOString().substring(11, 19) + '] ' + msg); }
 
@@ -74,10 +76,6 @@ function apiRequest(method, urlPath, token, formData) {
 const apiPost = (p, tok, form) => apiRequest('POST', p, tok, form);
 
 
-/**
- * Extract the 15 standardized skin metric scores from a record's analysis object.
- * Returns an object with score (0-100) and level (1-5) for each metric.
- */
 function extractScores(analysis) {
   if (!analysis) return null;
 
@@ -165,6 +163,249 @@ function deriveSkinType(scores) {
   return 'Normal';
 }
 
+/**
+ * Download a file from a URL (https) to a local path.
+ * Returns true on success, false on failure.
+ */
+function downloadFile(url, destPath) {
+  return new Promise((resolve) => {
+    const proto = url.startsWith('https') ? require('https') : require('http');
+    const file = fs.createWriteStream(destPath);
+    proto.get(url, (res) => {
+      if (res.statusCode === 301 || res.statusCode === 302) {
+        file.close();
+        fs.unlink(destPath, () => {});
+        return downloadFile(res.headers.location, destPath).then(resolve);
+      }
+      if (res.statusCode !== 200) {
+        file.close();
+        fs.unlink(destPath, () => {});
+        return resolve(false);
+      }
+      res.pipe(file);
+      file.on('finish', () => { file.close(); resolve(true); });
+      file.on('error', () => { fs.unlink(destPath, () => {}); resolve(false); });
+    }).on('error', () => { fs.unlink(destPath, () => {}); resolve(false); });
+  });
+}
+
+
+function buildImageUrls(filename) {
+  if (!filename || typeof filename !== 'string') return [];
+  // Already a full URL
+  if (filename.startsWith('http')) return [filename];
+  const clean = filename.replace(/^\/+/, '');
+  return [
+    `https://${CONFIG.base}/${clean}`,
+    `https://${CONFIG.base}/data/${clean}`,
+  ];
+}
+
+
+async function downloadRecordImage(record) {
+  const { result_id, derived_skin_type, derived_conditions, scores,
+          image_url, image_url_positive, original_images } = record;
+  const destBase = path.join(CONFIG.imagesDir, result_id);
+  const metaPath = destBase + '.json';
+
+  // Skip if already downloaded
+  if (fs.existsSync(destBase + '.jpg') || fs.existsSync(destBase + '.jpeg') || fs.existsSync(destBase + '.png')) {
+    return 'skipped';
+  }
+
+  const origEntries = original_images && typeof original_images === 'object'
+    ? Object.values(original_images).filter(Boolean).map(v =>
+        v.startsWith('http') ? v : `https://${CONFIG.base}/fileSvr/get/${v}`)
+    : [];
+
+  const candidates = [
+    image_url,
+    image_url_positive,
+    ...origEntries,
+  ].filter(Boolean);
+
+  let downloaded = false;
+  let savedExt = '.jpg';
+  for (const fname of candidates) {
+    for (const url of buildImageUrls(fname)) {
+      const ext = path.extname(url).toLowerCase().replace(/[^a-z]/g, '') || 'jpg';
+      const destPath = destBase + '.' + ext;
+      const ok = await downloadFile(url, destPath);
+      if (ok) {
+        savedExt = '.' + ext;
+        downloaded = true;
+        break;
+      }
+    }
+    if (downloaded) break;
+  }
+
+  if (!downloaded) return 'failed';
+
+  // Map conditions to ML label space
+  const CONDITION_MAP = {
+    blackhead: 'Acne', pimples: 'Acne', uv_acne: 'Acne',
+    spots: 'Hyperpigmentation', uv_spots: 'Hyperpigmentation', pigmentation: 'Hyperpigmentation',
+    wrinkles: 'Wrinkles',
+    moisture: 'Dehydration',
+    sensitivity: 'Redness',
+    pores: 'Acne',
+    dark_circles: 'Hyperpigmentation',
+  };
+  const mlConditions = [...new Set(
+    (derived_conditions || []).map(c => CONDITION_MAP[c]).filter(Boolean)
+  )];
+  if (!mlConditions.length) mlConditions.push('None detected');
+
+  const meta = {
+    result_id,
+    skin_type: derived_skin_type,
+    conditions: mlConditions,
+    raw_conditions: derived_conditions,
+    scores,
+    source: 'bitmoji_device',
+    image_file: result_id + savedExt,
+  };
+  fs.writeFileSync(metaPath, JSON.stringify(meta, null, 2), 'utf8');
+  return 'downloaded';
+}
+
+/**
+ * Playwright: open a headed browser session, navigate to Reports,
+ * click View Details for each visible record (capture + screenshot),
+ * then click Export Pictures to trigger bulk download.
+ */
+async function closeDialog(page) {
+  const closeBtn = page.locator('.el-dialog__close, [aria-label="Close"]').first();
+  if (await closeBtn.count() > 0) {
+    await closeBtn.click({ force: true, timeout: 3000 }).catch(() => {});
+    await page.waitForTimeout(600);
+  } else {
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(400);
+  }
+}
+
+async function browseReportsAndExport() {
+  log('Launching browser for Reports page...');
+  const browser = await chromium.launch({ headless: false, slowMo: 60, args: ['--no-sandbox'] });
+  const ctx = await browser.newContext({
+    viewport: { width: 1440, height: 900 },
+    ignoreHTTPSErrors: true,
+    acceptDownloads: true,
+  });
+  const page = await ctx.newPage();
+
+  // Login
+  await page.goto(`https://${CONFIG.base}/`, { waitUntil: 'networkidle', timeout: 30000 });
+  const langPicker = page.locator('.el-select').first();
+  if (await langPicker.count() > 0) {
+    await langPicker.click({ force: true });
+    await page.waitForTimeout(400);
+    for (const o of await page.locator('.el-select-dropdown__item').all()) {
+      if ((await o.textContent().catch(() => '')).trim().toLowerCase() === 'english') {
+        await o.click({ force: true }); break;
+      }
+    }
+    await page.waitForTimeout(500);
+  }
+  await page.locator('input[type="text"]:not([readonly])').first().fill(CONFIG.username);
+  await page.locator('input[type="password"]').first().fill(CONFIG.password);
+  await page.locator('button[type="submit"], button:has-text("Login")').first().click();
+  try { await page.waitForLoadState('networkidle', { timeout: 15000 }); } catch (_) {}
+  await page.waitForTimeout(1500);
+  log('  Logged in → ' + page.url());
+
+  // Navigate to Reports
+  await page.locator('text="Reports"').first().click({ timeout: 6000 });
+  try { await page.waitForLoadState('networkidle', { timeout: 10000 }); } catch (_) {}
+  await page.waitForTimeout(2000);
+  await closeDialog(page);
+  await page.screenshot({ path: path.join(CONFIG.rawDir, 'reports-list.png'), fullPage: true });
+  log('  Reports page loaded');
+
+  const rowBtns = page.locator('.el-table__row button, .el-table__row .el-button');
+  const totalBtns = await rowBtns.count();
+  const totalRows = Math.floor(totalBtns / 3);
+  log(`  Found ${totalRows} rows (${totalBtns} row buttons total)`);
+
+  const detailsData = [];
+  let exportOk = 0, exportFail = 0;
+
+  for (let row = 0; row < totalRows; row++) {
+    const viewDetailsIdx    = row * 3;      // 0, 3, 6, 9 …
+    const exportPicturesIdx = row * 3 + 2;  // 2, 5, 8, 11 …
+
+    try {
+      await rowBtns.nth(viewDetailsIdx).scrollIntoViewIfNeeded().catch(() => {});
+      await rowBtns.nth(viewDetailsIdx).click({ force: true, timeout: 4000 });
+      await page.waitForTimeout(1200);
+
+      await page.screenshot({ path: path.join(CONFIG.rawDir, `detail-${row}.png`) });
+      const txt = await page.locator('.el-dialog, .el-drawer, main').first().innerText().catch(() => '');
+      detailsData.push({ row, text: txt.substring(0, 3000) });
+
+      await closeDialog(page);
+    } catch (e) {
+      log(`  Row ${row} View Details failed: ${e.message.split('\n')[0]}`);
+      await closeDialog(page);
+    }
+
+    try {
+      await rowBtns.nth(exportPicturesIdx).scrollIntoViewIfNeeded().catch(() => {});
+
+      const [download] = await Promise.all([
+        ctx.waitForEvent('download', { timeout: 15000 }).catch(() => null),
+        rowBtns.nth(exportPicturesIdx).click({ force: true, timeout: 4000 }),
+      ]);
+
+      if (download) {
+        const fname = download.suggestedFilename() || `row-${row}.zip`;
+        const savePath = path.join(CONFIG.imagesDir, fname);
+        await download.saveAs(savePath);
+        log(`  Row ${row}: downloaded → ${fname}`);
+        exportOk++;
+      } else {
+        // Button may open a confirmation dialog — look for OK/Confirm
+        await page.waitForTimeout(800);
+        const confirmBtn = page.locator('button:has-text("OK"), button:has-text("Confirm"), button:has-text("Yes")').first();
+        if (await confirmBtn.count() > 0) {
+          const [dl2] = await Promise.all([
+            ctx.waitForEvent('download', { timeout: 15000 }).catch(() => null),
+            confirmBtn.click({ force: true }),
+          ]);
+          if (dl2) {
+            const fname2 = dl2.suggestedFilename() || `row-${row}.zip`;
+            await dl2.saveAs(path.join(CONFIG.imagesDir, fname2));
+            log(`  Row ${row}: downloaded (after confirm) → ${fname2}`);
+            exportOk++;
+          } else {
+            await closeDialog(page);
+            exportFail++;
+          }
+        } else {
+          exportFail++;
+        }
+      }
+    } catch (e) {
+      log(`  Row ${row} export failed: ${e.message.split('\n')[0]}`);
+      await closeDialog(page);
+      exportFail++;
+    }
+
+    await page.waitForTimeout(300);
+  }
+
+  fs.writeFileSync(path.join(CONFIG.rawDir, 'reports-details.json'),
+    JSON.stringify(detailsData, null, 2), 'utf8');
+  log(`  Details captured: ${detailsData.length}`);
+  log(`  Exports: ${exportOk} downloaded, ${exportFail} failed`);
+  log(`  Images saved to: ${CONFIG.imagesDir}`);
+
+  await browser.close();
+  log('Browser session closed');
+}
+
 /** Headless Playwright login — returns a fresh access_token */
 async function getFreshToken() {
   log('Getting fresh token via headless login...');
@@ -234,7 +475,6 @@ async function getFreshToken() {
     }
   }
 
-  // Re-login via Playwright to get a new token
   if (!token) {
     token = await getFreshToken();
   }
@@ -244,7 +484,6 @@ async function getFreshToken() {
     process.exit(1);
   }
 
-  // Step 2: Fetch detection schema (settings) 
   log('Fetching detection schema...');
   const settingsResp = await apiPost('/skinMgrSrv/settings/get', token, {});
   if (settingsResp.body?.list) {
@@ -253,7 +492,6 @@ async function getFreshToken() {
     log('Settings saved (' + settingsResp.body.list.length + ' items)');
   }
 
-  // Step 3: Fetch copywriting (all conditions, all levels) 
   log('Fetching surface copywriting...');
   const surfaceResp = await apiPost('/skinMgrSrv/settings/articleList', token,
     { type: 'layer', page: 1, pageSize: 200 });
@@ -272,7 +510,7 @@ async function getFreshToken() {
     log('Deep copywriting saved (' + deepResp.body.list.length + ' entries)');
   }
 
-  // Step 4: Fetch records with full analysis 
+  //Fetch records with full analysis 
   const now = new Date();
   const past = new Date(now - 90 * 24 * 3600 * 1000);
   const fmt = d => d.toISOString().slice(0, 16).replace('T', ' ');
@@ -310,7 +548,7 @@ async function getFreshToken() {
       const conditions = scores ? extractConditions(scores) : [];
       const skinType = scores ? deriveSkinType(scores) : 'Unknown';
 
-      // Store full record
+      // Store full record (including image URLs for download in Step 6)
       allRecords.push({
         id: record.id,
         result_id: record.result_id,
@@ -318,6 +556,10 @@ async function getFreshToken() {
         timestamp: record.crt_time,
         status: record.status,
         analysis_keys: Object.keys(analysis),
+        // Image URLs — filename is the normal-light original face photo
+        image_url: analysis.filename || null,
+        image_url_positive: analysis.filename_positive || null,
+        original_images: analysis.original_images || null,
         scores,
         derived_skin_type: skinType,
         derived_conditions: conditions,
@@ -373,13 +615,37 @@ async function getFreshToken() {
     await new Promise(r => setTimeout(r, 300)); // polite delay
   }
 
-  //Step 5: Save 
+  log('\n=== STEP 5: Browse Reports → View Details + Export Pictures ===');
+  await browseReportsAndExport();
+
+  log('\n=== STEP 6: Downloading face images ===');
+  let dlOk = 0, dlSkipped = 0, dlFailed = 0;
+  for (let i = 0; i < allRecords.length; i++) {
+    const record = allRecords[i];
+    if (i % 10 === 0) log(`  Progress: ${i}/${allRecords.length}`);
+    const result = await downloadRecordImage(record);
+    if (result === 'downloaded') dlOk++;
+    else if (result === 'skipped') dlSkipped++;
+    else dlFailed++;
+    await new Promise(r => setTimeout(r, 150)); // polite delay
+  }
+  log(`  Images: ${dlOk} downloaded, ${dlSkipped} skipped, ${dlFailed} failed`);
+  log(`  Saved to: ${CONFIG.imagesDir}`);
+
+  // Print move command to copy images into the ML training pipeline
+  const mlDir = path.resolve(__dirname, '..', 'backend', 'ml', 'data', 'bitmoji');
+  log('\n=== STEP 7: Move images to ML training folder ===');
+  log('  Run this command to copy images into the training pipeline:');
+  log(`  mkdir -p "${mlDir}" && cp -r "${CONFIG.imagesDir}/." "${mlDir}/"`);
+  log('  Then retrain with:  docker exec -d skincare-api python ml/train_pipeline.py --skip-download');
+
+
+  log('\n=== STEP 8: Saving JSON / CSV ===');
   fs.writeFileSync(path.join(CONFIG.rawDir, 'records-full.json'),
     JSON.stringify(allRecords, null, 2), 'utf8');
   fs.writeFileSync(path.join(CONFIG.rawDir, 'records-scores.json'),
     JSON.stringify(allScores, null, 2), 'utf8');
 
-  // Also write CSV for ML pipeline ingestion
   if (allScores.length > 0) {
     const headers = Object.keys(allScores[0]).join(',');
     const rows = allScores.map(r => Object.values(r).map(v =>
@@ -389,8 +655,9 @@ async function getFreshToken() {
       [headers, ...rows].join('\n'), 'utf8');
   }
 
-  log('=== DONE ===');
-  log('Records fetched: ' + allRecords.length);
+  log('\n=== DONE ===');
+  log('Records fetched : ' + allRecords.length);
+  log('Images saved to : ' + CONFIG.imagesDir);
   log('Skin type distribution:');
   const dist = {};
   for (const s of allScores) { dist[s.skin_type] = (dist[s.skin_type] || 0) + 1; }
@@ -399,4 +666,6 @@ async function getFreshToken() {
   log('  raw/records-full.json     — full analysis objects');
   log('  raw/records-scores.json   — simplified scores per record');
   log('  raw/records-scores.csv    — CSV for ML pipeline');
+  log('  raw/images/*.jpg          — original face images');
+  log('  raw/images/*.json         — ML label metadata per image');
 })();
