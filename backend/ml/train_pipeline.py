@@ -265,17 +265,26 @@ def build_label_index(meta_path: Path, all_imgs: list) -> dict:
     # Auto-detect delimiter
     delimiter = "\t" if meta_path.suffix == ".tab" else ","
 
+    # Only use face-localised images — back/leg/abdomen images cause severe
+    # distribution mismatch with phone-camera face photos at inference time.
+    FACE_LOCATIONS = {"face", "neck", "ear", "scalp"}
+    skipped_location = 0
+
     with open(meta_path, newline="", encoding="utf-8") as f:
         reader = csv.DictReader(f, delimiter=delimiter)
         for row in reader:
             img_id = row.get("image_id", "").strip()
             dx = row.get("dx", "").strip().lower()
+            loc = row.get("localization", "").strip().strip('"').lower()
 
             if img_id not in img_lookup:
                 skipped += 1
                 continue
             if dx not in HAM_TO_SKIN_TYPE:
                 skipped += 1
+                continue
+            if loc not in FACE_LOCATIONS:
+                skipped_location += 1
                 continue
 
             skin_type = HAM_TO_SKIN_TYPE[dx]
@@ -290,7 +299,10 @@ def build_label_index(meta_path: Path, all_imgs: list) -> dict:
                 "condition": condition,
                 "skin_idx":  skin_idx,
                 "cond_idx":  cond_idx,
+                "source":    "ham10000_face",
             }
+
+    print(f"  Skipped {skipped_location} non-face images (back/leg/trunk/etc.)")
 
     user_labels = _load_user_captured_labels(DATA_DIR)
     if user_labels:
