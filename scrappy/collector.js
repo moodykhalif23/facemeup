@@ -165,17 +165,18 @@ function deriveSkinType(scores) {
 
 /**
  * Download a file from a URL (https) to a local path.
- * Returns true on success, false on failure.
+
  */
-function downloadFile(url, destPath) {
+function downloadFile(url, destPath, extraHeaders = {}) {
   return new Promise((resolve) => {
     const proto = url.startsWith('https') ? require('https') : require('http');
     const file = fs.createWriteStream(destPath);
-    proto.get(url, (res) => {
+    const options = { headers: { ...extraHeaders } };
+    proto.get(url, options, (res) => {
       if (res.statusCode === 301 || res.statusCode === 302) {
         file.close();
         fs.unlink(destPath, () => {});
-        return downloadFile(res.headers.location, destPath).then(resolve);
+        return downloadFile(res.headers.location, destPath, extraHeaders).then(resolve);
       }
       if (res.statusCode !== 200) {
         file.close();
@@ -202,7 +203,7 @@ function buildImageUrls(filename) {
 }
 
 
-async function downloadRecordImage(record) {
+async function downloadRecordImage(record, token) {
   const { result_id, derived_skin_type, derived_conditions, scores,
           image_url, image_url_positive, original_images } = record;
   const destBase = path.join(CONFIG.imagesDir, result_id);
@@ -212,6 +213,8 @@ async function downloadRecordImage(record) {
   if (fs.existsSync(destBase + '.jpg') || fs.existsSync(destBase + '.jpeg') || fs.existsSync(destBase + '.png')) {
     return 'skipped';
   }
+
+  const authHeaders = token ? { 'access_token': token } : {};
 
   const origEntries = original_images && typeof original_images === 'object'
     ? Object.values(original_images).filter(Boolean).map(v =>
@@ -230,7 +233,7 @@ async function downloadRecordImage(record) {
     for (const url of buildImageUrls(fname)) {
       const ext = path.extname(url).toLowerCase().replace(/[^a-z]/g, '') || 'jpg';
       const destPath = destBase + '.' + ext;
-      const ok = await downloadFile(url, destPath);
+      const ok = await downloadFile(url, destPath, authHeaders);
       if (ok) {
         savedExt = '.' + ext;
         downloaded = true;
@@ -271,24 +274,24 @@ async function downloadRecordImage(record) {
 }
 
 /**
- * Playwright: open a headed browser session, navigate to Reports,
- * click View Details for each visible record (capture + screenshot),
- * then click Export Pictures to trigger bulk download.
+ * Playwright: open a headed browser, navigate to Reports, and for every row
+ * capture View Details text + trigger Export Pictures download.
+ * Uses page.evaluate(el => el.click()) so dialog backdrops / virtual-scroll
+ * visibility never block the action.
  */
-async function closeDialog(page) {
-  const closeBtn = page.locator('.el-dialog__close, [aria-label="Close"]').first();
-  if (await closeBtn.count() > 0) {
-    await closeBtn.click({ force: true, timeout: 3000 }).catch(() => {});
-    await page.waitForTimeout(600);
-  } else {
-    await page.keyboard.press('Escape');
-    await page.waitForTimeout(400);
-  }
+async function dismissAnyDialog(page) {
+  await page.evaluate(() => {
+    const btn = document.querySelector(
+      '.el-dialog__headerbtn, .el-dialog__close, [aria-label="Close"]'
+    );
+    if (btn) btn.click();
+  });
+  await page.waitForTimeout(700);
 }
 
 async function browseReportsAndExport() {
   log('Launching browser for Reports page...');
-  const browser = await chromium.launch({ headless: false, slowMo: 60, args: ['--no-sandbox'] });
+  const browser = await chromium.launch({ headless: false, slowMo: 40, args: ['--no-sandbox'] });
   const ctx = await browser.newContext({
     viewport: { width: 1440, height: 900 },
     ignoreHTTPSErrors: true,
@@ -296,114 +299,133 @@ async function browseReportsAndExport() {
   });
   const page = await ctx.newPage();
 
-  // Login
+  // ── Login ────────────────────────────────────────────────────────────────
   await page.goto(`https://${CONFIG.base}/`, { waitUntil: 'networkidle', timeout: 30000 });
-  const langPicker = page.locator('.el-select').first();
-  if (await langPicker.count() > 0) {
-    await langPicker.click({ force: true });
-    await page.waitForTimeout(400);
-    for (const o of await page.locator('.el-select-dropdown__item').all()) {
-      if ((await o.textContent().catch(() => '')).trim().toLowerCase() === 'english') {
-        await o.click({ force: true }); break;
-      }
+
+  // Select English via JS
+  await page.evaluate(() => { const s = document.querySelector('.el-select'); if (s) s.click(); });
+  await page.waitForTimeout(400);
+  for (const o of await page.locator('.el-select-dropdown__item').all()) {
+    if ((await o.textContent().catch(() => '')).trim().toLowerCase() === 'english') {
+      await o.evaluate(el => el.click()); break;
     }
-    await page.waitForTimeout(500);
   }
+  await page.waitForTimeout(500);
+
   await page.locator('input[type="text"]:not([readonly])').first().fill(CONFIG.username);
   await page.locator('input[type="password"]').first().fill(CONFIG.password);
-  await page.locator('button[type="submit"], button:has-text("Login")').first().click();
+  await page.evaluate(() => {
+    const btn = document.querySelector('button[type="submit"]') ||
+      [...document.querySelectorAll('button')].find(b => /login/i.test(b.textContent));
+    if (btn) btn.click();
+  });
   try { await page.waitForLoadState('networkidle', { timeout: 15000 }); } catch (_) {}
   await page.waitForTimeout(1500);
   log('  Logged in → ' + page.url());
 
   // Navigate to Reports
-  await page.locator('text="Reports"').first().click({ timeout: 6000 });
+  await page.evaluate(() => {
+    const el = [...document.querySelectorAll('a, li, span, div')]
+      .find(e => /^Reports?$/i.test((e.textContent || '').trim()) && e.childElementCount <= 2);
+    if (el) el.click();
+  });
   try { await page.waitForLoadState('networkidle', { timeout: 10000 }); } catch (_) {}
-  await page.waitForTimeout(2000);
-  await closeDialog(page);
+  await page.waitForTimeout(2500);
+  await dismissAnyDialog(page);
   await page.screenshot({ path: path.join(CONFIG.rawDir, 'reports-list.png'), fullPage: true });
-  log('  Reports page loaded');
+  log('  Reports page loaded → ' + page.url());
 
-  const rowBtns = page.locator('.el-table__row button, .el-table__row .el-button');
-  const totalBtns = await rowBtns.count();
+  // Count rows
+  const totalBtns = await page.evaluate(() =>
+    document.querySelectorAll('.el-table__row button, .el-table__row .el-button').length
+  );
   const totalRows = Math.floor(totalBtns / 3);
-  log(`  Found ${totalRows} rows (${totalBtns} row buttons total)`);
+  log(`  Found ${totalRows} rows (${totalBtns} buttons, 3 per row)`);
+  if (totalRows === 0) {
+    await page.screenshot({ path: path.join(CONFIG.rawDir, 'reports-empty.png'), fullPage: true });
+    await browser.close();
+    return;
+  }
 
   const detailsData = [];
   let exportOk = 0, exportFail = 0;
 
   for (let row = 0; row < totalRows; row++) {
-    const viewDetailsIdx    = row * 3;      // 0, 3, 6, 9 …
-    const exportPicturesIdx = row * 3 + 2;  // 2, 5, 8, 11 …
+    const viewIdx   = row * 3;     // "View Details"
+    const exportIdx = row * 3 + 2; // "exporting pictures"
 
+    // View Details
     try {
-      await rowBtns.nth(viewDetailsIdx).scrollIntoViewIfNeeded().catch(() => {});
-      await rowBtns.nth(viewDetailsIdx).click({ force: true, timeout: 4000 });
-      await page.waitForTimeout(1200);
+      await page.evaluate((idx) => {
+        const btn = document.querySelectorAll(
+          '.el-table__row button, .el-table__row .el-button'
+        )[idx];
+        if (btn) btn.click();
+      }, viewIdx);
+      await page.waitForTimeout(1500);
 
       await page.screenshot({ path: path.join(CONFIG.rawDir, `detail-${row}.png`) });
-      const txt = await page.locator('.el-dialog, .el-drawer, main').first().innerText().catch(() => '');
-      detailsData.push({ row, text: txt.substring(0, 3000) });
+      const txt = await page.locator('.el-dialog, .el-drawer, [role="dialog"]').first()
+        .innerText({ timeout: 2000 }).catch(() => '');
+      if (txt) detailsData.push({ row, text: txt.substring(0, 3000) });
 
-      await closeDialog(page);
+      await dismissAnyDialog(page);
     } catch (e) {
-      log(`  Row ${row} View Details failed: ${e.message.split('\n')[0]}`);
-      await closeDialog(page);
+      log(`  Row ${row} View Details error: ${e.message.split('\n')[0]}`);
+      await dismissAnyDialog(page);
     }
 
+    // Export Pictures
     try {
-      await rowBtns.nth(exportPicturesIdx).scrollIntoViewIfNeeded().catch(() => {});
+      // Register download listener BEFORE the click
+      const dlPromise = page.waitForEvent('download', { timeout: 12000 }).catch(() => null);
 
-      const [download] = await Promise.all([
-        ctx.waitForEvent('download', { timeout: 15000 }).catch(() => null),
-        rowBtns.nth(exportPicturesIdx).click({ force: true, timeout: 4000 }),
-      ]);
+      await page.evaluate((idx) => {
+        const btn = document.querySelectorAll(
+          '.el-table__row button, .el-table__row .el-button'
+        )[idx];
+        if (btn) btn.click();
+      }, exportIdx);
 
+      await page.waitForTimeout(900);
+
+      // Click confirm/OK if it appeared
+      const confirmed = await page.evaluate(() => {
+        const btn = [...document.querySelectorAll('button')]
+          .find(b => /^(OK|Confirm|Yes|确定)$/i.test((b.textContent || '').trim()));
+        if (btn) { btn.click(); return true; }
+        return false;
+      });
+      if (confirmed) log(`  Row ${row}: confirm dialog clicked`);
+
+      const download = await dlPromise;
       if (download) {
-        const fname = download.suggestedFilename() || `row-${row}.zip`;
+        const fname = download.suggestedFilename() || `row-${row}-export.zip`;
         const savePath = path.join(CONFIG.imagesDir, fname);
         await download.saveAs(savePath);
-        log(`  Row ${row}: downloaded → ${fname}`);
+        log(`  Row ${row}: saved → ${fname}`);
         exportOk++;
       } else {
-        // Button may open a confirmation dialog — look for OK/Confirm
-        await page.waitForTimeout(800);
-        const confirmBtn = page.locator('button:has-text("OK"), button:has-text("Confirm"), button:has-text("Yes")').first();
-        if (await confirmBtn.count() > 0) {
-          const [dl2] = await Promise.all([
-            ctx.waitForEvent('download', { timeout: 15000 }).catch(() => null),
-            confirmBtn.click({ force: true }),
-          ]);
-          if (dl2) {
-            const fname2 = dl2.suggestedFilename() || `row-${row}.zip`;
-            await dl2.saveAs(path.join(CONFIG.imagesDir, fname2));
-            log(`  Row ${row}: downloaded (after confirm) → ${fname2}`);
-            exportOk++;
-          } else {
-            await closeDialog(page);
-            exportFail++;
-          }
-        } else {
-          exportFail++;
-        }
+        log(`  Row ${row}: no download event`);
+        await dismissAnyDialog(page);
+        exportFail++;
       }
     } catch (e) {
-      log(`  Row ${row} export failed: ${e.message.split('\n')[0]}`);
-      await closeDialog(page);
+      log(`  Row ${row} export error: ${e.message.split('\n')[0]}`);
+      await dismissAnyDialog(page);
       exportFail++;
     }
 
-    await page.waitForTimeout(300);
+    await page.waitForTimeout(400);
   }
 
   fs.writeFileSync(path.join(CONFIG.rawDir, 'reports-details.json'),
     JSON.stringify(detailsData, null, 2), 'utf8');
-  log(`  Details captured: ${detailsData.length}`);
-  log(`  Exports: ${exportOk} downloaded, ${exportFail} failed`);
-  log(`  Images saved to: ${CONFIG.imagesDir}`);
+  log(`  View Details captured: ${detailsData.length}/${totalRows}`);
+  log(`  Exports: ${exportOk} ok, ${exportFail} failed`);
 
   await browser.close();
-  log('Browser session closed');
+  log('Browser closed');
 }
 
 /** Headless Playwright login — returns a fresh access_token */
@@ -461,24 +483,11 @@ async function getFreshToken() {
     log('Using token from CLI arg');
   }
 
-  if (!token) {
-    const fp = path.join(CONFIG.rawDir, 'fresh-token.json');
-    if (fs.existsSync(fp)) {
-      try {
-        const saved = JSON.parse(fs.readFileSync(fp, 'utf8'));
-        const ageHours = (Date.now() - saved.ts) / 3600000;
-        if (ageHours < 23 && saved.access_token) {
-          token = saved.access_token;
-          log('Using saved fresh token (' + ageHours.toFixed(1) + 'h old)');
-        }
-      } catch (_) {}
-    }
-  }
-
+  // Step 1: Always get a fresh token — API sessions expire in < 1 h
   if (!token) {
     token = await getFreshToken();
   }
- //step 1: authenticate and get token
+
   if (!token) {
     log('ERROR: Could not obtain auth token');
     process.exit(1);
@@ -623,7 +632,7 @@ async function getFreshToken() {
   for (let i = 0; i < allRecords.length; i++) {
     const record = allRecords[i];
     if (i % 10 === 0) log(`  Progress: ${i}/${allRecords.length}`);
-    const result = await downloadRecordImage(record);
+    const result = await downloadRecordImage(record, token);
     if (result === 'downloaded') dlOk++;
     else if (result === 'skipped') dlSkipped++;
     else dlFailed++;
