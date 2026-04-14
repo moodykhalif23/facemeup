@@ -31,10 +31,11 @@ import yaml
 # ---------------------------------------------------------------------------
 # Paths (all relative to backend/ = Docker /app)
 # ---------------------------------------------------------------------------
-CONFIG_PATH   = Path("ml/config.yaml")
-DATA_DIR      = Path("ml/data/ham10000")
-CHECKPOINT_DIR = Path("ml/checkpoints")
-LOGS_DIR      = Path("ml/logs")
+CONFIG_PATH     = Path("ml/config.yaml")
+DATA_DIR        = Path("ml/data/ham10000")
+BITMOJI_DIR     = Path("ml/data/bitmoji")   # Device-captured face images with JSON labels
+CHECKPOINT_DIR  = Path("ml/checkpoints")
+LOGS_DIR        = Path("ml/logs")
 SAVED_MODEL_DIR = Path("app/models_artifacts/saved_model")
 
 # ---------------------------------------------------------------------------
@@ -296,6 +297,18 @@ def build_label_index(meta_path: Path, all_imgs: list) -> dict:
         label_index.update(user_labels)
         print(f"\n  ✓ Added user-captured images: {len(user_labels)}")
 
+    bitmoji_labels = _load_bitmoji_labels()
+    if bitmoji_labels:
+        label_index.update(bitmoji_labels)
+        print(f"  ✓ Added Bitmoji device images: {len(bitmoji_labels)}")
+        from collections import Counter
+        bm_skin_dist = Counter(v["skin_type"] for v in bitmoji_labels.values())
+        bm_cond_dist = Counter(v["condition"] for v in bitmoji_labels.values())
+        print(f"    Skin types : {dict(bm_skin_dist)}")
+        print(f"    Conditions : {dict(bm_cond_dist)}")
+    else:
+        print(f"\n  ℹ  No Bitmoji images found in {BITMOJI_DIR} (add face images to include them)")
+
     export_training_manifest_csv(label_index, DATA_DIR / "training_manifest.csv")
 
     # Distribution
@@ -373,6 +386,73 @@ def _load_user_captured_labels(data_dir: Path) -> dict:
     return label_index
 
 
+def _load_bitmoji_labels() -> dict:
+    """
+    Load Bitmoji-device-captured face images from ml/data/bitmoji/.
+    Each image (*.jpg / *.jpeg) has a companion *.json with Bitmoji ground-truth labels:
+      {
+        "skin_type": "Oily",
+        "conditions": ["Acne", "Hyperpigmentation", "Dehydration"],
+        "result_id": "...",
+        ...
+      }
+    These are real face photos analyzed by the professional Bitmoji skin scanner,
+    making them the highest-quality labels in our training set.
+    """
+    label_index: dict[str, dict] = {}
+
+    if not BITMOJI_DIR.exists():
+        return label_index
+
+    img_extensions = {".jpg", ".jpeg", ".png"}
+    for img_path in sorted(BITMOJI_DIR.iterdir()):
+        if img_path.suffix.lower() not in img_extensions:
+            continue
+
+        # Companion JSON has the same stem (result_id.jpg → result_id.json)
+        json_path = img_path.with_suffix(".json")
+        if not json_path.exists():
+            continue
+
+        try:
+            meta = json.loads(json_path.read_text(encoding="utf-8"))
+        except Exception:
+            continue
+
+        skin_type = meta.get("skin_type", "")
+        if skin_type not in SKIN_TYPES:
+            continue
+
+        conditions = meta.get("conditions") or []
+        condition = _resolve_condition(conditions)
+        if condition not in CONDITIONS:
+            condition = "None detected"
+
+        skin_idx = SKIN_TYPES.index(skin_type)
+        cond_idx = CONDITIONS.index(condition)   # primary (for compat)
+
+        # All valid condition indices for multi-hot label vector
+        cond_indices = list({
+            CONDITIONS.index(c) for c in conditions if c in CONDITIONS
+        })
+        if not cond_indices:
+            cond_indices = [cond_idx]
+
+        key = f"bitmoji_{img_path.stem}"
+        label_index[key] = {
+            "path":         img_path,
+            "skin_type":    skin_type,
+            "condition":    condition,
+            "conditions":   conditions,    # full multi-label list (strings)
+            "skin_idx":     skin_idx,
+            "cond_idx":     cond_idx,      # primary condition index
+            "cond_indices": cond_indices,  # all condition indices (multi-hot)
+            "source":       "bitmoji_device",
+        }
+
+    return label_index
+
+
 def export_training_manifest_csv(label_index: dict, output_path: Path) -> None:
     """
     Export a unified manifest of all training items (HAM10000 + user-captured)
@@ -382,6 +462,7 @@ def export_training_manifest_csv(label_index: dict, output_path: Path) -> None:
         "image_path",
         "skin_type",
         "condition",
+        "conditions_all",
         "skin_idx",
         "cond_idx",
         "source",
@@ -389,14 +470,16 @@ def export_training_manifest_csv(label_index: dict, output_path: Path) -> None:
     ]
     rows = []
     for v in label_index.values():
+        conds_all = v.get("conditions") or []
         rows.append(
             {
-                "image_path": str(v.get("path")),
-                "skin_type": v.get("skin_type"),
-                "condition": v.get("condition"),
-                "skin_idx": v.get("skin_idx"),
-                "cond_idx": v.get("cond_idx"),
-                "source": v.get("source", "ham10000"),
+                "image_path":   str(v.get("path")),
+                "skin_type":    v.get("skin_type"),
+                "condition":    v.get("condition"),
+                "conditions_all": "|".join(conds_all) if conds_all else v.get("condition", ""),
+                "skin_idx":     v.get("skin_idx"),
+                "cond_idx":     v.get("cond_idx"),
+                "source":       v.get("source", "ham10000"),
                 "questionnaire": json.dumps(v.get("questionnaire") or {}, ensure_ascii=False),
             }
         )
@@ -514,11 +597,14 @@ def create_real_datasets(label_index: dict, config: dict):
         w = cond_weight[c] / mean_w
         print(f"    {c:<22} {cnt:>5} samples  → weight {w:.3f}")
 
-    def make_label_vector(skin_idx: int, cond_idx: int) -> np.ndarray:
-        """Multi-hot vector: skin type + condition both flagged."""
+    def make_label_vector(item: dict) -> np.ndarray:
+        """Multi-hot vector: skin type (one-hot) + conditions (multi-hot).
+        Bitmoji items carry cond_indices (list) for all conditions; HAM10000
+        items have only cond_idx (single). Both are handled transparently."""
         v = np.zeros(NUM_CLASSES, dtype=np.float32)
-        v[skin_idx] = 1.0
-        v[len(SKIN_TYPES) + cond_idx] = 1.0
+        v[item["skin_idx"]] = 1.0
+        for ci in item.get("cond_indices") or [item["cond_idx"]]:
+            v[len(SKIN_TYPES) + ci] = 1.0
         return v
 
     def load_image(path_str: str) -> np.ndarray:
@@ -555,7 +641,7 @@ def create_real_datasets(label_index: dict, config: dict):
     def build_ds(items_list, augment: bool, sample_weights: np.ndarray | None = None):
         paths  = [str(it["path"]) for it in items_list]
         labels = np.array([
-            make_label_vector(it["skin_idx"], it["cond_idx"])
+            make_label_vector(it)
             for it in items_list
         ], dtype=np.float32)
 
@@ -607,7 +693,7 @@ def _compute_pos_weights(train_items: list) -> np.ndarray:
     """
     label_matrix = np.array(
         [
-            _make_label_vector_static(it["skin_idx"], it["cond_idx"])
+            _make_label_vector_static(it)
             for it in train_items
         ],
         dtype=np.float32,
@@ -623,10 +709,13 @@ def _compute_pos_weights(train_items: list) -> np.ndarray:
     return clipped.astype(np.float32)
 
 
-def _make_label_vector_static(skin_idx: int, cond_idx: int) -> np.ndarray:
+def _make_label_vector_static(item: dict) -> np.ndarray:
+    """Multi-hot vector for an item dict. Supports cond_indices (multi-label)
+    from Bitmoji items and falls back to cond_idx for HAM10000 items."""
     v = np.zeros(NUM_CLASSES, dtype=np.float32)
-    v[skin_idx] = 1.0
-    v[len(SKIN_TYPES) + cond_idx] = 1.0
+    v[item["skin_idx"]] = 1.0
+    for ci in item.get("cond_indices") or [item["cond_idx"]]:
+        v[len(SKIN_TYPES) + ci] = 1.0
     return v
 
 
