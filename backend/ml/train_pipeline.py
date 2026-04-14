@@ -430,16 +430,54 @@ def create_real_datasets(label_index: dict, config: dict):
     val_items   = items[n_train:n_train + n_val]
     test_items  = items[n_train + n_val:]
 
-    print(f"  Train  : {len(train_items)}")
+    # ── ML-007: Rebalance training set before weighting ──────────────────
+    # Val and test sets are left untouched (stratified sample of real dist).
+    # For training, we:
+    #   1. Undersample the dominant (skin_type, condition) pairs so that no
+    #      single pair exceeds MAJORITY_CAP samples — prevents the model
+    #      learning "always predict Normal/None" on a 68% majority.
+    #   2. Oversample every minority pair up to MINORITY_TARGET by repeating
+    #      samples — ensures rare conditions (Redness, Wrinkles, Dehydration)
+    #      have enough gradient signal to learn from.
+    MAJORITY_CAP     = 800    # max samples per (skin_type, condition) pair
+    MINORITY_TARGET  = 300    # min samples per pair (repeat if needed)
+
+    from collections import defaultdict
+    pair_buckets: dict[tuple, list] = defaultdict(list)
+    for it in train_items:
+        pair_buckets[(it["skin_type"], it["condition"])].append(it)
+
+    rebalanced: list = []
+    rng = np.random.default_rng(42)
+    for pair, bucket in pair_buckets.items():
+        if len(bucket) > MAJORITY_CAP:
+            # Undersample: random subset without replacement
+            chosen = rng.choice(len(bucket), size=MAJORITY_CAP, replace=False).tolist()
+            rebalanced.extend(bucket[i] for i in chosen)
+        elif len(bucket) < MINORITY_TARGET:
+            # Oversample: repeat with replacement until target is reached
+            repeats = rng.choice(len(bucket), size=MINORITY_TARGET, replace=True).tolist()
+            rebalanced.extend(bucket[i] for i in repeats)
+        else:
+            rebalanced.extend(bucket)
+
+    rng.shuffle(rebalanced)
+    train_items = rebalanced
+
+    print(f"  Train  : {len(train_items)} (after rebalance; cap={MAJORITY_CAP}, target={MINORITY_TARGET})")
     print(f"  Val    : {len(val_items)}")
     print(f"  Test   : {len(test_items)}")
 
-    # ── ML-003: Inverse-frequency sample weights ─────────────────────────
-    # Addresses 68% Normal/None-detected imbalance. Weight each training
-    # sample by the geometric mean of its skin-type weight and condition
-    # weight so rare classes (Dry, Oily, Sensitive, Redness, Wrinkles)
-    # receive proportionally higher gradient signal.
     from collections import Counter
+    rebal_dist = Counter(f"{it['skin_type']}+{it['condition']}" for it in train_items)
+    print(f"\n  Rebalanced training distribution:")
+    for label, cnt in sorted(rebal_dist.items()):
+        bar = "█" * (cnt // 50)
+        print(f"    {label:<35} {cnt:>5}  {bar}")
+
+    # ── ML-003: Inverse-frequency sample weights ─────────────────────────
+    # After rebalancing, apply residual inverse-frequency weights so any
+    # remaining imbalance within the rebalanced set is further corrected.
     skin_counts = Counter(it["skin_type"] for it in train_items)
     cond_counts = Counter(it["condition"] for it in train_items)
     total_train = len(train_items)
@@ -553,13 +591,49 @@ def create_real_datasets(label_index: dict, config: dict):
     val_ds   = build_ds(val_items,   augment=False)
     test_ds  = build_ds(test_items,  augment=False)
 
-    return train_ds, val_ds, test_ds, test_items
+    return train_ds, val_ds, test_ds, test_items, train_items
+
+
+# ---------------------------------------------------------------------------
+# Helpers for class-balanced loss
+# ---------------------------------------------------------------------------
+def _compute_pos_weights(train_items: list) -> np.ndarray:
+    """Return per-output positive weights: neg_count / pos_count.
+
+    For a 12-output multi-label problem, each output i gets a weight that
+    amplifies the gradient from rare positive examples (Redness, Wrinkles)
+    and dampens the gradient from abundant positives (Normal, None detected).
+    Clipped to [1.0, 50.0] so minority classes don't explode the gradient.
+    """
+    label_matrix = np.array(
+        [
+            _make_label_vector_static(it["skin_idx"], it["cond_idx"])
+            for it in train_items
+        ],
+        dtype=np.float32,
+    )
+    pos_counts = label_matrix.sum(axis=0)                      # shape (12,)
+    neg_counts = len(train_items) - pos_counts
+    raw = neg_counts / np.maximum(pos_counts, 1.0)
+    clipped = np.clip(raw, 1.0, 50.0)
+    print("\n  Per-output positive weights (neg/pos, clipped 1–50):")
+    all_labels = SKIN_TYPES + CONDITIONS
+    for lbl, w, p in zip(all_labels, clipped, pos_counts):
+        print(f"    {lbl:<22} pos={int(p):>5}  weight={w:.1f}")
+    return clipped.astype(np.float32)
+
+
+def _make_label_vector_static(skin_idx: int, cond_idx: int) -> np.ndarray:
+    v = np.zeros(NUM_CLASSES, dtype=np.float32)
+    v[skin_idx] = 1.0
+    v[len(SKIN_TYPES) + cond_idx] = 1.0
+    return v
 
 
 # ---------------------------------------------------------------------------
 # Step 4 – Train & export
 # ---------------------------------------------------------------------------
-def build_model(config: dict, phase: int):
+def build_model(config: dict, phase: int, train_items: list | None = None):
     from tensorflow import keras
     from tensorflow.keras import layers
 
@@ -600,18 +674,34 @@ def build_model(config: dict, phase: int):
     train_cfg = config["training"][f"phase{phase}"]
     optimizer = keras.optimizers.Adam(learning_rate=train_cfg["learning_rate"])
 
-    # Focal loss reduces the gradient contribution from easy (majority-class)
-    # examples and focuses training on hard, rare-class samples.
-    # gamma=2.0: standard focal scaling; label_smoothing=0.05 reduces overconfidence.
-    focal_loss = keras.losses.BinaryFocalCrossentropy(
-        gamma=2.0,
-        label_smoothing=0.05,
-        from_logits=False,
-    )
+    # Per-output positive-class weights: for each of the 12 binary outputs,
+    # weight positive examples by (num_negatives / num_positives) so rare
+    # conditions (Redness, Wrinkles, Dehydration) receive proportionally
+    # stronger gradient signal than majority outputs (Normal, None detected).
+    # This is more numerically stable than focal loss and avoids the
+    # all-zeros collapse that focal gamma>2 causes on severe imbalance.
+    import tensorflow as _tf
+
+    _train_items = train_items or []
+    pos_weights_np = _compute_pos_weights(_train_items) if _train_items else np.ones(NUM_CLASSES, dtype=np.float32)
+    pos_weights_tensor = _tf.constant(pos_weights_np, dtype=_tf.float32)
+
+    def weighted_bce(y_true, y_pred):
+        eps = 1e-7
+        y_pred = _tf.clip_by_value(y_pred, eps, 1.0 - eps)
+        # Standard log-loss terms
+        pos_term = y_true * _tf.math.log(y_pred)
+        neg_term = (1.0 - y_true) * _tf.math.log(1.0 - y_pred)
+        # Scale positive term by per-output pos_weight; label smooth 0.05
+        smooth = 0.05
+        y_true_s = y_true * (1.0 - smooth) + 0.5 * smooth
+        loss = -(pos_weights_tensor * y_true_s * _tf.math.log(y_pred)
+                 + (1.0 - y_true_s) * _tf.math.log(1.0 - y_pred))
+        return _tf.reduce_mean(loss)
 
     model.compile(
         optimizer=optimizer,
-        loss=focal_loss,
+        loss=weighted_bce,
         metrics=[
             keras.metrics.BinaryAccuracy(name="accuracy"),
             keras.metrics.Precision(name="precision"),
@@ -667,7 +757,7 @@ def get_callbacks(phase: int, config: dict):
 
 
 def train_phase(phase: int, config: dict, train_ds, val_ds, test_ds,
-                prev_model=None):
+                prev_model=None, train_items: list | None = None):
     import tensorflow as tf
 
     print(f"\n{'='*70}")
@@ -678,7 +768,7 @@ def train_phase(phase: int, config: dict, train_ds, val_ds, test_ds,
 
     if phase == 2 and prev_model is not None:
         # Rebuild with top layers unfrozen, reload weights
-        model = build_model(config, phase=2)
+        model = build_model(config, phase=2, train_items=train_items)
         ckpt = str(CHECKPOINT_DIR / "phase1_best.keras")
         if Path(ckpt).exists():
             print(f"  Loading Phase 1 weights from {ckpt}")
@@ -694,7 +784,7 @@ def train_phase(phase: int, config: dict, train_ds, val_ds, test_ds,
         else:
             print("  ⚠ Phase 1 checkpoint not found – starting Phase 2 from scratch")
     else:
-        model = build_model(config, phase=phase)
+        model = build_model(config, phase=phase, train_items=train_items)
 
     callbacks = get_callbacks(phase, config)
 
@@ -850,15 +940,15 @@ def main():
         sys.exit(1)
 
     # ── Step 3: Datasets ─────────────────────────────────────────────────
-    train_ds, val_ds, test_ds, _ = create_real_datasets(label_index, config)
+    train_ds, val_ds, test_ds, _, train_items = create_real_datasets(label_index, config)
 
     # ── Step 4: Train ────────────────────────────────────────────────────
     model = None
     if args.phase in (1, 12):
-        model, _, _ = train_phase(1, config, train_ds, val_ds, test_ds)
+        model, _, _ = train_phase(1, config, train_ds, val_ds, test_ds, train_items=train_items)
 
     if args.phase in (2, 12):
-        model, _, results = train_phase(2, config, train_ds, val_ds, test_ds, prev_model=model)
+        model, _, results = train_phase(2, config, train_ds, val_ds, test_ds, prev_model=model, train_items=train_items)
 
         # Check against performance targets
         val = config.get("validation", {})
