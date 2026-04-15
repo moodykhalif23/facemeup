@@ -8,6 +8,7 @@ from pathlib import Path
 import tensorflow as tf
 from tensorflow import keras
 import numpy as np
+import losses  # noqa: F401 – registers WeightedBCE before load_model
 
 
 def export_to_tflite(model_path: str, output_path: str, 

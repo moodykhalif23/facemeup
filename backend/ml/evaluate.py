@@ -15,6 +15,7 @@ import yaml
 from pathlib import Path
 import tensorflow as tf
 from tensorflow import keras
+import losses  # noqa: F401 – registers WeightedBCE before load_model
 from sklearn.metrics import (
     classification_report,
     confusion_matrix,

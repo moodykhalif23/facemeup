@@ -19,6 +19,7 @@ os_error = None
 try:
     import tensorflow as tf
     from tensorflow import keras
+    import losses  # noqa: F401 – registers WeightedBCE before load_model
 except ImportError as e:
     os_error = e
 

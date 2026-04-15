@@ -781,28 +781,14 @@ def build_model(config: dict, phase: int, train_items: list | None = None):
     # stronger gradient signal than majority outputs (Normal, None detected).
     # This is more numerically stable than focal loss and avoids the
     # all-zeros collapse that focal gamma>2 causes on severe imbalance.
-    import tensorflow as _tf
+    from losses import WeightedBCE  # registers class with keras serialization
 
     _train_items = train_items or []
     pos_weights_np = _compute_pos_weights(_train_items) if _train_items else np.ones(NUM_CLASSES, dtype=np.float32)
-    pos_weights_tensor = _tf.constant(pos_weights_np, dtype=_tf.float32)
-
-    def weighted_bce(y_true, y_pred):
-        eps = 1e-7
-        y_pred = _tf.clip_by_value(y_pred, eps, 1.0 - eps)
-        # Standard log-loss terms
-        pos_term = y_true * _tf.math.log(y_pred)
-        neg_term = (1.0 - y_true) * _tf.math.log(1.0 - y_pred)
-        # Scale positive term by per-output pos_weight; label smooth 0.05
-        smooth = 0.05
-        y_true_s = y_true * (1.0 - smooth) + 0.5 * smooth
-        loss = -(pos_weights_tensor * y_true_s * _tf.math.log(y_pred)
-                 + (1.0 - y_true_s) * _tf.math.log(1.0 - y_pred))
-        return _tf.reduce_mean(loss)
 
     model.compile(
         optimizer=optimizer,
-        loss=weighted_bce,
+        loss=WeightedBCE(pos_weights_np),
         metrics=[
             keras.metrics.BinaryAccuracy(name="accuracy"),
             keras.metrics.Precision(name="precision"),
