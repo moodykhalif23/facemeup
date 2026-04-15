@@ -43,11 +43,7 @@ export default function Results() {
     );
   }
 
-  const { profile, inference_mode } = currentAnalysis;
-
-  const isAiMode = inference_mode && inference_mode.startsWith('server_savedmodel');
-  const modeLabel = isAiMode ? 'Analysed by AI' : 'Based on your answers';
-  const modeColor = isAiMode ? '#10B981' : '#F59E0B';
+  const { profile } = currentAnalysis;
 
   return (
     <Layout style={{ minHeight: '100vh', background: 'var(--background)' }}>
@@ -56,22 +52,6 @@ export default function Results() {
       <Content style={{ padding: '16px' }}>
         <div style={{ maxWidth: 800, margin: '0 auto' }}>
           <Space direction="vertical" size="middle" style={{ width: '100%' }}>
-            {/* Inference mode badge */}
-            {inference_mode && (
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 8,
-                padding: '8px 12px',
-                borderRadius: 4,
-                background: isAiMode ? '#D1FAE5' : '#FEF3C7',
-                border: `1px solid ${modeColor}`,
-              }}>
-                <Text style={{ fontSize: 13, color: '#374151', fontWeight: 500 }}>
-                  {modeLabel}
-                </Text>
-              </div>
-            )}
             {/* Skin Profile */}
             <div>
               <div style={{
