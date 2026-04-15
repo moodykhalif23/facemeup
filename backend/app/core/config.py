@@ -28,7 +28,7 @@ class Settings(BaseSettings):
     model_saved_path: str = "app/models_artifacts/saved_model"
     model_input_size: int = 224
     model_skin_types: str = "Oily,Dry,Combination,Normal,Sensitive"
-    model_conditions: str = "Acne,Hyperpigmentation,Uneven tone,Dehydration,Wrinkles,Redness,None detected"
+    model_conditions: str = "Acne,Hyperpigmentation,Uneven tone,Redness,None detected"
     woocommerce_url: str
     woocommerce_consumer_key: str
     woocommerce_consumer_secret: str

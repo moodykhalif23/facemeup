@@ -309,6 +309,24 @@ def run_skin_inference(
         if not conditions:
             conditions = ["None detected"]
 
+        # Overlay conditions the model cannot detect visually (no training data yet).
+        # These are derived from the questionnaire and merged in with a fixed score
+        # so clients still receive accurate results for Dehydration and Wrinkles.
+        _QUESTIONNAIRE_ONLY_CONDITIONS = {
+            "dryness": ("Dehydration", 0.72),
+            "wrinkles": ("Wrinkles", 0.72),
+        }
+        if questionnaire:
+            raw_concerns = set(questionnaire.get("concerns") or [])
+            for q_key, (label, score) in _QUESTIONNAIRE_ONLY_CONDITIONS.items():
+                if q_key in raw_concerns:
+                    if label not in conditions:
+                        conditions = [c for c in conditions if c != "None detected"]
+                        conditions.append(label)
+                    condition_scores[label] = score
+            if not conditions:
+                conditions = ["None detected"]
+
         # Blend skin type: if questionnaire strongly disagrees with model, use questionnaire
         if questionnaire:
             q_skin_type = _derive_skin_type_from_new_fields(questionnaire)
