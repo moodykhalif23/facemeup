@@ -27,10 +27,10 @@ def get_stats(
     _: User = Depends(require_roles("admin")),
 ) -> dict:
     """Aggregate numbers for the admin dashboard."""
-    total_users = db.execute(select(func.count()).select_from(User)).scalar_one()
+    total_users = db.execute(select(func.count()).select_from(User).where(User.deleted_at.is_(None))).scalar_one()
     total_orders = db.execute(select(func.count()).select_from(Order)).scalar_one()
     total_products = db.execute(select(func.count()).select_from(ProductCatalog)).scalar_one()
-    total_analyses = db.execute(select(func.count()).select_from(SkinProfileHistory)).scalar_one()
+    total_analyses = db.execute(select(func.count()).select_from(SkinProfileHistory).where(SkinProfileHistory.deleted_at.is_(None))).scalar_one()
 
     # Revenue = sum of all order items
     orders = db.execute(select(Order)).scalars().all()
@@ -46,6 +46,7 @@ def get_stats(
     # Skin-type distribution from latest profile per user
     skin_dist_rows = db.execute(
         select(SkinProfileHistory.skin_type, func.count().label("cnt"))
+        .where(SkinProfileHistory.deleted_at.is_(None))
         .group_by(SkinProfileHistory.skin_type)
     ).all()
     skin_distribution = {row.skin_type: row.cnt for row in skin_dist_rows}
