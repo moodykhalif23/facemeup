@@ -46,12 +46,11 @@ CONDITIONS = [
     "Acne",
     "Hyperpigmentation",
     "Uneven tone",
-    "Dehydration",
-    "Wrinkles",      # spec §1: detectable condition
-    "Redness",       # spec §1: redness / sensitivity indicator
+    "Redness",
     "None detected",
+    # Dehydration and Wrinkles removed: no labeled training data yet
 ]
-NUM_CLASSES = len(SKIN_TYPES) + len(CONDITIONS)  # 12
+NUM_CLASSES = len(SKIN_TYPES) + len(CONDITIONS)  # 10
 
 # ---------------------------------------------------------------------------
 # HAM10000 clinical label → our label space

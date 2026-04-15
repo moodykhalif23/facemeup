@@ -63,16 +63,13 @@ app = FastAPI(title=settings.app_name, lifespan=lifespan)
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-# CORS — origins are read from CORS_ORIGINS in .env
-# Development default: * (all origins)
-# Production: set CORS_ORIGINS=https://yourapp.com,https://www.yourapp.com
 _origins = [o.strip() for o in settings.cors_origins.split(",") if o.strip()]
 _wildcard = _origins == ["*"]
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=_origins,
-    allow_credentials=not _wildcard,  # credentials require explicit origins
+    allow_credentials=not _wildcard, 
     allow_methods=["*"],
     allow_headers=["*"],
 )

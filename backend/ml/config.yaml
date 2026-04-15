@@ -20,8 +20,6 @@ model:
     - "Acne"
     - "Hyperpigmentation"
     - "Uneven tone"
-    - "Dehydration"
-    - "Wrinkles"
     - "Redness"
     - "None detected"
 
@@ -51,23 +49,23 @@ dataset:
 training:
   # Phase 1: Feature Extraction
   phase1:
-    epochs: 20
-    learning_rate: 0.001
+    epochs: 30
+    learning_rate: 0.0005
     optimizer: "adam"
     freeze_base: true
-    early_stopping_patience: 5
+    early_stopping_patience: 7
     reduce_lr_patience: 3
     reduce_lr_factor: 0.5
-  
+
   # Phase 2: Fine-Tuning
   phase2:
-    epochs: 15
-    learning_rate: 0.00001
+    epochs: 20
+    learning_rate: 0.000005   # 5e-6: gentler than before to avoid destroying phase 1
     optimizer: "adam"
-    unfreeze_layers: 30  # Unfreeze top 30 layers
-    early_stopping_patience: 5
+    unfreeze_layers: 15       # was 30 – fewer layers protects early representations
+    early_stopping_patience: 7
     reduce_lr_patience: 3
-    reduce_lr_factor: 0.5
+    reduce_lr_factor: 0.3
 
 architecture:
   # Custom classification head
@@ -75,7 +73,7 @@ architecture:
   dense_units: 256
   dense_activation: "relu"
   batch_normalization: true
-  dropout_rate: 0.4
+  dropout_rate: 0.3
   output_activation: "sigmoid"
 
 loss:
