@@ -21,6 +21,8 @@ class ProductUpsert(BaseModel):
     category: str | None = None
     description: str | None = None
     ingredients: list[str] = []
+    benefits: list[str] = []
+    usage: str | None = None
     image_url: str | None = None
     suitable_for: str | None = "all"
     effects: list[str] = []
@@ -72,28 +74,8 @@ def get_product(product_id: str, db: Session = Depends(get_db)) -> ProductDetail
     if not row:
         raise HTTPException(status_code=404, detail="Product not found")
     
-    # Derive benefits from ingredients in the product
-    ingredient_benefits = {
-        "Salicylic Acid": "Unclogs pores and reduces acne",
-        "Niacinamide": "Minimizes pores and controls oil",
-        "Hyaluronic Acid": "Deeply hydrates and plumps skin",
-        "Retinol": "Reduces fine lines and firms skin",
-        "Vitamin C": "Brightens skin and fades dark spots",
-        "Ceramides": "Restores and strengthens skin barrier",
-        "Glycolic Acid": "Exfoliates and improves texture",
-        "Tea Tree": "Targets blemishes and bacteria",
-        "Peptides": "Boosts collagen and firms skin",
-        "Alpha Arbutin": "Fades dark spots and evens tone",
-        "Kojic Acid": "Lightens hyperpigmentation",
-        "Centella": "Soothes and calms irritated skin",
-        "Shea Butter": "Deeply nourishes and moisturizes",
-        "Zinc": "Controls sebum and reduces inflammation",
-        "Aloe Vera": "Soothes and hydrates sensitive skin",
-    }
-    ingredients_list = [v.strip() for v in row.ingredients_csv.split(",") if v.strip()]
-    benefits = [ingredient_benefits[i] for i in ingredients_list if i in ingredient_benefits][:4]
-    if not benefits:
-        benefits = [f"Formulated with {ingredients_list[0]}" if ingredients_list else "Premium skincare formula"]
+    ingredients_list = [v.strip() for v in (row.ingredients_csv or "").split(",") if v.strip()]
+    benefits = [v.strip() for v in (row.benefits_csv or "").split("|") if v.strip()]
 
     product = ProductDetail(
         id=row.sku,
@@ -101,13 +83,10 @@ def get_product(product_id: str, db: Session = Depends(get_db)) -> ProductDetail
         name=row.name,
         price=row.price,
         category=row.category or "",
-        # Use the description stored by admin or synced from WooCommerce.
-        # An empty string is intentional — no fake placeholder copy.
         description=row.description or "",
         benefits=benefits,
         ingredients=", ".join(ingredients_list),
-        # usage is left empty; admin fills it in or WooCommerce sync provides it.
-        usage="",
+        usage=row.usage or "",
         stock=row.stock,
         image_url=row.image_url,
         suitable_for=row.suitable_for,
@@ -150,6 +129,8 @@ def create_product(
         category=payload.category,
         description=payload.description,
         ingredients_csv=",".join(payload.ingredients),
+        benefits_csv="|".join(payload.benefits),
+        usage=payload.usage,
         image_url=payload.image_url,
         suitable_for=(payload.suitable_for or "all").lower(),
         effects_csv=",".join(normalize_effects(payload.effects)),
@@ -193,6 +174,8 @@ def update_product(
     row.category = payload.category
     row.description = payload.description
     row.ingredients_csv = ",".join(payload.ingredients)
+    row.benefits_csv = "|".join(payload.benefits)
+    row.usage = payload.usage
     row.image_url = payload.image_url
     row.suitable_for = (payload.suitable_for or "all").lower()
     row.effects_csv = ",".join(normalize_effects(payload.effects))

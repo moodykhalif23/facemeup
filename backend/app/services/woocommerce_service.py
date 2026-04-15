@@ -103,31 +103,51 @@ class WooCommerceService:
         Returns:
             Parsed product data for database
         """
-        # Extract ingredients from description or meta data
         ingredients = []
-        
-        # Try to extract from short description or description
-        description = wc_product.get('short_description', '') or wc_product.get('description', '')
-        
-        # Look for ingredients in meta data
+        benefits = []
+        usage = ""
+
+        # Extract fields from meta data
+        meta_key_map = {
+            'ingredients': 'ingredients',
+            '_ingredients': 'ingredients',
+            'key_benefits': 'benefits',
+            '_key_benefits': 'benefits',
+            'benefits': 'benefits',
+            '_benefits': 'benefits',
+            'how_to_use': 'usage',
+            '_how_to_use': 'usage',
+            'usage': 'usage',
+            '_usage': 'usage',
+            'directions': 'usage',
+        }
         for meta in wc_product.get('meta_data', []):
-            if meta.get('key', '').lower() in ['ingredients', '_ingredients']:
-                ingredients_text = meta.get('value', '')
-                if isinstance(ingredients_text, str):
-                    ingredients = [i.strip() for i in ingredients_text.split(',')]
-                break
-        
-        # If no ingredients found, use a default
+            key = meta.get('key', '').lower()
+            value = meta.get('value', '')
+            if not isinstance(value, str) or not value.strip():
+                continue
+            field = meta_key_map.get(key)
+            if field == 'ingredients' and not ingredients:
+                ingredients = [i.strip() for i in value.split(',') if i.strip()]
+            elif field == 'benefits' and not benefits:
+                benefits = [b.strip() for b in value.split('|') if b.strip()]
+                if not benefits:
+                    benefits = [b.strip() for b in value.split('\n') if b.strip()]
+            elif field == 'usage' and not usage:
+                usage = value.strip()
+
         if not ingredients:
-            ingredients = ['Natural Extracts', 'Vitamins', 'Moisturizers']
-        
+            ingredients = []
+
         return {
             'sku': wc_product.get('sku') or f"WC-{wc_product['id']}",
             'name': wc_product.get('name', 'Unknown Product'),
             'ingredients_csv': ','.join(ingredients),
+            'benefits_csv': '|'.join(benefits),
+            'usage': usage,
             'stock': wc_product.get('stock_quantity', 0) or 0,
             'price': float(wc_product.get('price', 0) or 0),
-            'description': wc_product.get('short_description', ''),
+            'description': wc_product.get('short_description', '') or wc_product.get('description', ''),
             'category': ', '.join([cat['name'] for cat in wc_product.get('categories', [])]),
             'image_url': wc_product.get('images', [{}])[0].get('src', '') if wc_product.get('images') else '',
             'suitable_for': 'all',

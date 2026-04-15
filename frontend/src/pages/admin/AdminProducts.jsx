@@ -110,17 +110,18 @@ export default function AdminProducts() {
       stock: record.stock,
       category: record.category,
       ingredients: record.ingredients ?? [],
+      benefits: record.benefits ?? [],
+      usage: record.usage ?? '',
       suitable_for: record.suitable_for ?? 'all',
       effects: record.effects ?? [],
       image_url: record.image_url ?? '',
-      // Pre-populate description so admin sees current value
       description: record.description ?? '',
     });
   };
 
   const handleSave = async (values) => {
     setSaving(true);
-    const payload = { ...values, ingredients: values.ingredients ?? [] };
+    const payload = { ...values, ingredients: values.ingredients ?? [], benefits: values.benefits ?? [] };
     try {
       await adminUpdateProduct(editing.sku, payload);
       message.success('Product updated');
@@ -356,6 +357,18 @@ export default function AdminProducts() {
               placeholder="Select or type ingredients"
               tokenSeparators={[',']}
             />
+          </Form.Item>
+
+          <Form.Item label="Key Benefits" name="benefits" extra="One benefit per tag (e.g. Hydrates skin)">
+            <Select
+              mode="tags"
+              placeholder="Type a benefit and press Enter"
+              tokenSeparators={[',']}
+            />
+          </Form.Item>
+
+          <Form.Item label="How to Use" name="usage">
+            <Input.TextArea rows={2} placeholder="e.g. Apply a small amount to cleansed skin morning and evening." />
           </Form.Item>
 
           <Form.Item label="Suitable For" name="suitable_for" rules={[{ required: true }]}>
