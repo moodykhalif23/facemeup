@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import {
-  Table, Select, Tag, Typography, App, Space, Button, Input, Descriptions, Modal,
+  Table, Select, Tag, Typography, App, Space, Button, Input, Descriptions, Modal, List,
 } from 'antd';
-import { ReloadOutlined, SearchOutlined, EyeOutlined } from '@ant-design/icons';
+import { ReloadOutlined, SearchOutlined, EyeOutlined, SyncOutlined } from '@ant-design/icons';
 import AdminLayout from '../../components/AdminLayout';
-import { adminGetOrders, adminUpdateOrderStatus } from '../../services/api';
+import { adminGetOrders, adminUpdateOrderStatus, adminSyncWooCommerceOrders } from '../../services/api';
 
 const { Text } = Typography;
 
@@ -18,6 +18,7 @@ export default function AdminOrders() {
   const [orders, setOrders] = useState([]);
   const [filtered, setFiltered] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [syncing, setSyncing] = useState(false);
   const [search, setSearch] = useState('');
   const [detail, setDetail] = useState(null);
 
@@ -44,6 +45,20 @@ export default function AdminOrders() {
         : orders
     );
   }, [search, orders]);
+
+  const syncOrders = async () => {
+    setSyncing(true);
+    try {
+      const r = await adminSyncWooCommerceOrders();
+      const d = r.data;
+      message.success(`Synced ${d.orders_synced} order(s) — ${d.added} new, ${d.updated} updated, ${d.skipped_no_user} skipped`);
+      load();
+    } catch (err) {
+      message.error(err.response?.data?.detail ?? 'Order sync failed');
+    } finally {
+      setSyncing(false);
+    }
+  };
 
   const updateStatus = async (orderId, status) => {
     try {
@@ -153,16 +168,25 @@ export default function AdminOrders() {
         gap: 12,
         flexWrap: 'wrap',
       }}>
-        <Space style={{ width: '100%', maxWidth: 420 }}>
+        <Space wrap>
           <Input
             prefix={<SearchOutlined />}
             placeholder="Search by customer or order #"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            style={{ width: '100%' }}
+            style={{ width: 260 }}
             allowClear
           />
           <Button icon={<ReloadOutlined />} onClick={load}>Refresh</Button>
+          <Button
+            icon={<SyncOutlined />}
+            onClick={syncOrders}
+            loading={syncing}
+            type="primary"
+            ghost
+          >
+            Sync from WooCommerce
+          </Button>
         </Space>
       </div>
 
@@ -189,19 +213,44 @@ export default function AdminOrders() {
         width={480}
       >
         {detail && (
-          <Descriptions column={1} size="small" bordered style={{ marginTop: 12 }}>
-            <Descriptions.Item label="Customer">{detail.user_email}</Descriptions.Item>
-            <Descriptions.Item label="Channel">{detail.channel ?? 'web'}</Descriptions.Item>
-            <Descriptions.Item label="Status">
-              <Tag color={STATUS_COLOR[detail.status]}>{detail.status}</Tag>
-            </Descriptions.Item>
-            <Descriptions.Item label="Total">
-              KES {(detail.total ?? 0).toLocaleString()}
-            </Descriptions.Item>
-            <Descriptions.Item label="Date">
-              {new Date(detail.created_at).toLocaleString()}
-            </Descriptions.Item>
-          </Descriptions>
+          <>
+            <Descriptions column={1} size="small" bordered style={{ marginTop: 12 }}>
+              <Descriptions.Item label="Customer">{detail.user_email}</Descriptions.Item>
+              <Descriptions.Item label="Channel">{detail.channel ?? 'web'}</Descriptions.Item>
+              {detail.wc_order_id && (
+                <Descriptions.Item label="WC Order ID">#{detail.wc_order_id}</Descriptions.Item>
+              )}
+              <Descriptions.Item label="Status">
+                <Tag color={STATUS_COLOR[detail.status]}>{detail.status}</Tag>
+              </Descriptions.Item>
+              <Descriptions.Item label="Total">
+                KES {(detail.total ?? 0).toLocaleString()}
+              </Descriptions.Item>
+              <Descriptions.Item label="Date">
+                {new Date(detail.created_at).toLocaleString()}
+              </Descriptions.Item>
+            </Descriptions>
+
+            {detail.items?.length > 0 && (
+              <>
+                <Typography.Text strong style={{ display: 'block', marginTop: 16, marginBottom: 8 }}>
+                  Items
+                </Typography.Text>
+                <List
+                  size="small"
+                  dataSource={detail.items}
+                  renderItem={(item) => (
+                    <List.Item>
+                      <div style={{ flex: 1 }}>{item.product_name}</div>
+                      <div style={{ color: 'var(--muted-foreground)', marginRight: 16 }}>×{item.quantity}</div>
+                      <div>KES {(item.price * item.quantity).toLocaleString()}</div>
+                    </List.Item>
+                  )}
+                  bordered
+                />
+              </>
+            )}
+          </>
         )}
       </Modal>
     </AdminLayout>

@@ -270,8 +270,10 @@ def list_all_orders(
             "user_id": order.user_id,
             "channel": order.channel,
             "status": order.status,
-            "total": round(total, 2),
+            "total": order.total if order.total is not None else round(total, 2),
             "items_count": len(items),
+            "items": items,
+            "wc_order_id": order.wc_order_id,
             "created_at": order.created_at.isoformat(),
         })
 

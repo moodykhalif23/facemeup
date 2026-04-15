@@ -1,5 +1,7 @@
 """WooCommerce integration service for fetching products from Dr. Rashel store"""
+import json
 import logging
+from datetime import datetime
 from typing import Any
 
 from woocommerce import API
@@ -154,6 +156,83 @@ class WooCommerceService:
             'effects_csv': '',
             'wc_id': wc_product['id']
         }
+
+
+    # WooCommerce status → local status
+    WC_STATUS_MAP: dict[str, str] = {
+        "pending": "created",
+        "processing": "paid",
+        "on-hold": "created",
+        "completed": "delivered",
+        "cancelled": "cancelled",
+        "refunded": "cancelled",
+        "failed": "cancelled",
+    }
+
+    def fetch_orders(self, per_page: int = 100, after: datetime | None = None) -> list[dict[str, Any]]:
+        """Fetch all orders from WooCommerce (newest first)."""
+        all_orders: list[dict[str, Any]] = []
+        page = 1
+        params: dict[str, Any] = {"per_page": per_page, "page": page, "orderby": "date", "order": "desc"}
+        if after:
+            params["after"] = after.strftime("%Y-%m-%dT%H:%M:%S")
+
+        try:
+            while True:
+                params["page"] = page
+                response = self.wcapi.get("orders", params=params)
+                if response.status_code != 200:
+                    logger.error(f"Failed to fetch orders page {page}: {response.status_code}")
+                    break
+                orders = response.json()
+                if not orders:
+                    break
+                all_orders.extend(orders)
+                total_pages = int(response.headers.get("X-WP-TotalPages", 1))
+                if page >= total_pages:
+                    break
+                page += 1
+        except Exception as e:
+            logger.error(f"Error fetching orders from WooCommerce: {e}")
+            raise
+
+        logger.info(f"Fetched {len(all_orders)} orders from WooCommerce")
+        return all_orders
+
+    def parse_order_for_db(self, wc_order: dict[str, Any], user_id: str) -> dict[str, Any]:
+        """Convert a WooCommerce order payload into local DB fields."""
+        items = []
+        for line in wc_order.get("line_items", []):
+            items.append({
+                "product_name": line.get("name", "Product"),
+                "sku": line.get("sku", ""),
+                "quantity": line.get("quantity", 1),
+                "price": float(line.get("price", 0) or 0),
+            })
+
+        local_status = self.WC_STATUS_MAP.get(wc_order.get("status", ""), "created")
+        total = float(wc_order.get("total", 0) or 0)
+
+        # Parse WC date — comes as ISO 8601 without timezone suffix
+        date_str = wc_order.get("date_created", "")
+        try:
+            created_at = datetime.fromisoformat(date_str)
+        except (ValueError, TypeError):
+            created_at = datetime.utcnow()
+
+        return {
+            "wc_order_id": wc_order["id"],
+            "user_id": user_id,
+            "channel": "woocommerce",
+            "items_json": __import__("json").dumps(items),
+            "status": local_status,
+            "total": total,
+            "created_at": created_at,
+        }
+
+    def billing_email(self, wc_order: dict[str, Any]) -> str:
+        """Extract billing email from a WooCommerce order."""
+        return (wc_order.get("billing", {}).get("email", "") or "").lower().strip()
 
 
 # Singleton instance

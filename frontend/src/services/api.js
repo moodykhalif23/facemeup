@@ -113,6 +113,7 @@ export const adminSeedProducts = () => api.post('/products/admin/seed');
 export const adminBulkDeleteProducts = () => api.delete('/products/admin/bulk');
 export const adminSyncWooCommerce = () => api.post('/sync/woocommerce');
 export const syncWooCommerceWcIds = () => api.post('/sync/woocommerce/wc-id');
+export const adminSyncWooCommerceOrders = () => api.post('/sync/woocommerce/orders');
 export const adminClearCache = () => api.post('/admin/cache/clear');
 export const adminSyncTrainingAssets = () => api.post('/admin/training/sync');
 

@@ -32,6 +32,7 @@ class Settings(BaseSettings):
     woocommerce_url: str
     woocommerce_consumer_key: str
     woocommerce_consumer_secret: str
+    woocommerce_webhook_secret: str = ""
     admin_email: str
     admin_password: str
 

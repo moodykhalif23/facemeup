@@ -1,8 +1,15 @@
-from fastapi import APIRouter, Depends, HTTPException
+import hashlib
+import hmac
+import json
+
+from fastapi import APIRouter, Depends, HTTPException, Request
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.core.config import settings
 from app.core.database import get_db
 from app.core.deps import get_current_user, require_roles
+from app.models.order import Order
 from app.models.product import ProductCatalog
 from app.models.user import User
 from app.schemas.sync import BitmojiSyncRequest, BitmojiSyncResponse, WooCommerceSyncResponse, WooCommerceWcIdSyncResponse
@@ -158,3 +165,110 @@ def sync_woocommerce_wc_ids(
             status_code=500,
             detail=f"Failed to sync WooCommerce IDs: {str(e)}"
         )
+
+
+def _upsert_wc_order(db: Session, wc_order: dict, email_to_user: dict[str, str]) -> str:
+    """
+    Upsert a single WooCommerce order into the local DB.
+    Returns 'added', 'updated', or 'skipped' (no matching local user).
+    """
+    email = woocommerce_service.billing_email(wc_order)
+    user_id = email_to_user.get(email)
+    if not user_id:
+        return "skipped"
+
+    data = woocommerce_service.parse_order_for_db(wc_order, user_id)
+    wc_id = data["wc_order_id"]
+
+    existing = db.execute(
+        select(Order).where(Order.wc_order_id == wc_id)
+    ).scalar_one_or_none()
+
+    if existing:
+        existing.status = data["status"]
+        existing.items_json = data["items_json"]
+        existing.total = data["total"]
+        return "updated"
+    else:
+        db.add(Order(**data))
+        return "added"
+
+
+@router.post("/woocommerce/orders")
+def sync_woocommerce_orders(
+    db: Session = Depends(get_db),
+    _: User = Depends(require_roles("admin")),
+) -> dict:
+    """Pull all orders from WooCommerce and upsert into the local DB (admin only)."""
+    # Build email → user_id map for all non-deleted local users
+    rows = db.execute(select(User.id, User.email).where(User.deleted_at.is_(None))).all()
+    email_to_user = {row.email.lower().strip(): row.id for row in rows}
+
+    try:
+        wc_orders = woocommerce_service.fetch_orders()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to fetch orders from WooCommerce: {e}")
+
+    added = updated = skipped = failed = 0
+    for wc_order in wc_orders:
+        try:
+            result = _upsert_wc_order(db, wc_order, email_to_user)
+            if result == "added":
+                added += 1
+            elif result == "updated":
+                updated += 1
+            else:
+                skipped += 1
+        except Exception as e:
+            failed += 1
+            db.rollback()
+            continue
+
+    db.commit()
+    return {
+        "success": True,
+        "orders_synced": added + updated,
+        "added": added,
+        "updated": updated,
+        "skipped_no_user": skipped,
+        "failed": failed,
+        "message": f"Synced {added + updated} order(s) from WooCommerce ({skipped} skipped — no matching user)",
+    }
+
+
+@router.post("/woocommerce/webhook/order", include_in_schema=False)
+async def woocommerce_order_webhook(
+    request: Request,
+    db: Session = Depends(get_db),
+) -> dict:
+    """
+    Receive WooCommerce order webhooks (order.created / order.updated).
+    Verifies the X-WC-Webhook-Signature header when a secret is configured.
+    """
+    raw_body = await request.body()
+
+    # Verify HMAC-SHA256 signature when a secret is set
+    if settings.woocommerce_webhook_secret:
+        sig_header = request.headers.get("X-WC-Webhook-Signature", "")
+        import base64
+        expected = base64.b64encode(
+            hmac.new(
+                settings.woocommerce_webhook_secret.encode(),
+                raw_body,
+                hashlib.sha256,
+            ).digest()
+        ).decode()
+        if not hmac.compare_digest(sig_header, expected):
+            raise HTTPException(status_code=401, detail="Invalid webhook signature")
+
+    try:
+        wc_order = json.loads(raw_body)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid JSON body")
+
+    rows = db.execute(select(User.id, User.email).where(User.deleted_at.is_(None))).all()
+    email_to_user = {row.email.lower().strip(): row.id for row in rows}
+
+    result = _upsert_wc_order(db, wc_order, email_to_user)
+    db.commit()
+    return {"result": result, "wc_order_id": wc_order.get("id")}
