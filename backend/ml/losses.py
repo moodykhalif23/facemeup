@@ -9,7 +9,7 @@ import tensorflow as tf
 from tensorflow import keras
 
 
-@keras.saving.register_keras_serializable(package="skincare")
+@tf.keras.utils.register_keras_serializable(package="skincare")
 class WeightedBCE(keras.losses.Loss):
     """Weighted binary cross-entropy with per-output positive weights and label smoothing.
 
