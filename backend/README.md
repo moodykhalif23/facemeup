@@ -16,3 +16,9 @@
 1. `POST /api/v1/auth/signup`
 2. `POST /api/v1/auth/login`
 3. Send `Authorization: Bearer <token>` for protected endpoints.
+
+To wire up the webhook in WooCommerce:
+
+Go to WooCommerce → Settings → Advanced → Webhooks
+Add webhook: Topic = Order created + Order updated, Delivery URL = https://your-api/api/v1/sync/woocommerce/webhook/order
+Copy the secret into your .env as WOOCOMMERCE_WEBHOOK_SECRET=...

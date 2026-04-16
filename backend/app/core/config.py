@@ -33,6 +33,9 @@ class Settings(BaseSettings):
     woocommerce_consumer_key: str
     woocommerce_consumer_secret: str
     woocommerce_webhook_secret: str = ""
+    ollama_url: str = "http://localhost:11434"
+    ollama_vision_model: str = "llava:7b"
+    ollama_text_model: str = "llama3.2:3b"
     admin_email: str
     admin_password: str
 

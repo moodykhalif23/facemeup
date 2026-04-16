@@ -323,19 +323,24 @@ def sync_training_assets(
     except Exception as exc:
         raise AppError(500, "training_sync_failed", f"Training sync failed: {exc}")
 
-# Model management
-
-@router.post("/model/reload")
-def reload_model(
+@router.get("/model/status")
+def model_status(
     _: User = Depends(require_roles("admin")),
 ) -> dict:
-    """
-    Force the inference service to reload the SavedModel from disk.
-    Call this after deploying a new model without restarting the container.
-    """
-    from app.services.inference import _load_model
-    _load_model.cache_clear()
-    return {"reloaded": True, "message": "Model cache cleared — next request will reload from disk"}
+    """Check Ollama connectivity and which models are in use."""
+    import httpx
+    from app.core.config import settings
+    try:
+        r = httpx.get(f"{settings.ollama_url.rstrip('/')}/api/tags", timeout=5.0)
+        available = [m["name"] for m in r.json().get("models", [])]
+        return {
+            "ollama": "ok",
+            "vision_model": settings.ollama_vision_model,
+            "text_model": settings.ollama_text_model,
+            "available_models": available,
+        }
+    except Exception as exc:
+        return {"ollama": "unreachable", "error": str(exc)}
 
 
 # Cache management

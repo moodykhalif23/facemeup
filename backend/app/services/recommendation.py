@@ -1,3 +1,4 @@
+"""Product recommendation: keyword/ingredient first-pass → Ollama re-ranking."""
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -5,49 +6,37 @@ from app.core.database import get_db
 from app.models.product import ProductCatalog
 from app.schemas.recommend import ProductRecommendation
 from app.services.effects import CONDITION_EFFECT_MAP, split_effects_csv
+from app.services.ollama_service import ollama_service
 
-# Ingredient mapping for skin types and conditions
-INGREDIENT_MAP: dict[str, list[str]] = {
-    # Skin Types
-    "Oily": ["Niacinamide", "Salicylic Acid", "Tea Tree", "Zinc", "Clay", "Charcoal"],
-    "Dry": ["Hyaluronic Acid", "Ceramides", "Glycerin", "Shea Butter", "Squalane", "Vitamin E"],
-    "Combination": ["Niacinamide", "Hyaluronic Acid", "Glycerin", "Vitamin C"],
-    "Normal": ["Vitamin C", "Glycerin", "Hyaluronic Acid", "Niacinamide"],
-    "Sensitive": ["Panthenol", "Ceramides", "Aloe Vera", "Centella", "Chamomile", "Oat"],
-    
-    # Conditions
-    "Acne": ["Salicylic Acid", "Tea Tree", "Niacinamide", "Benzoyl Peroxide", "Zinc"],
-    "Hyperpigmentation": ["Vitamin C", "Alpha Arbutin", "Niacinamide", "Kojic Acid", "Licorice"],
-    "Uneven tone": ["Niacinamide", "Vitamin C", "Alpha Arbutin", "Glycolic Acid"],
-    "Dehydration": ["Hyaluronic Acid", "Glycerin", "Ceramides", "Squalane"],
-    "Fine lines": ["Retinol", "Peptides", "Vitamin C", "Hyaluronic Acid"],
-    "Wrinkles": ["Retinol", "Peptides", "Vitamin C", "Collagen"],
-    "Dark spots": ["Vitamin C", "Alpha Arbutin", "Kojic Acid", "Niacinamide"],
-    # Redness / sensitivity — spec §1 lists this as a detectable condition
-    "Redness": ["Centella", "Niacinamide", "Aloe Vera", "Green Tea", "Panthenol"],
-    "Sensitivity": ["Panthenol", "Ceramides", "Aloe Vera", "Centella", "Chamomile"],
+# Desired ingredients per skin type / condition
+_INGREDIENT_MAP: dict[str, list[str]] = {
+    "Oily":              ["Niacinamide", "Salicylic Acid", "Tea Tree", "Zinc", "Clay"],
+    "Dry":               ["Hyaluronic Acid", "Ceramides", "Glycerin", "Shea Butter", "Squalane"],
+    "Combination":       ["Niacinamide", "Hyaluronic Acid", "Glycerin", "Vitamin C"],
+    "Normal":            ["Vitamin C", "Glycerin", "Hyaluronic Acid", "Niacinamide"],
+    "Sensitive":         ["Panthenol", "Ceramides", "Aloe Vera", "Centella"],
+    "Acne":              ["Salicylic Acid", "Tea Tree", "Niacinamide", "Benzoyl Peroxide", "Zinc"],
+    "Hyperpigmentation": ["Vitamin C", "Alpha Arbutin", "Niacinamide", "Kojic Acid"],
+    "Uneven tone":       ["Niacinamide", "Vitamin C", "Alpha Arbutin", "Glycolic Acid"],
+    "Dehydration":       ["Hyaluronic Acid", "Glycerin", "Ceramides", "Squalane"],
+    "Wrinkles":          ["Retinol", "Peptides", "Vitamin C", "Collagen"],
+    "Redness":           ["Centella", "Niacinamide", "Aloe Vera", "Panthenol"],
 }
 
-# Keywords to match in product names/descriptions for each skin type/condition
-KEYWORD_MAP: dict[str, list[str]] = {
-    # Skin Types
-    "Oily": ["oil control", "mattifying", "pore", "salicylic", "clay", "charcoal", "niacinamide"],
-    "Dry": ["hydrat", "moistur", "nourish", "hyaluronic", "ceramide", "shea butter", "dry skin"],
-    "Combination": ["balance", "hydrat", "niacinamide", "vitamin c"],
-    "Normal": ["vitamin c", "glow", "radiance", "maintain"],
-    "Sensitive": ["gentle", "soothing", "calm", "sensitive", "aloe", "centella"],
-    
-    # Conditions
-    "Acne": ["acne", "blemish", "clear", "salicylic", "tea tree", "pimple"],
-    "Hyperpigmentation": ["bright", "whitening", "pigment", "dark spot", "vitamin c", "arbutin"],
-    "Uneven tone": ["bright", "even", "tone", "radiance", "vitamin c", "niacinamide"],
-    "Dehydration": ["hydrat", "moistur", "hyaluronic", "water", "plump"],
-    "Fine lines": ["anti-aging", "retinol", "wrinkle", "firm", "peptide"],
-    "Wrinkles": ["anti-aging", "retinol", "wrinkle", "firm", "collagen"],
-    "Dark spots": ["bright", "whitening", "dark spot", "pigment", "vitamin c"],
-    "Redness": ["soothing", "calm", "redness", "sensitive", "centella", "aloe"],
-    "Sensitivity": ["gentle", "soothing", "calm", "sensitive", "aloe", "fragrance-free"],
+_KEYWORD_MAP: dict[str, list[str]] = {
+    "Oily":              ["oil control", "mattifying", "pore", "salicylic", "clay", "niacinamide"],
+    "Dry":               ["hydrat", "moistur", "nourish", "hyaluronic", "ceramide", "dry skin"],
+    "Combination":       ["balance", "hydrat", "niacinamide", "vitamin c"],
+    "Normal":            ["vitamin c", "glow", "radiance"],
+    "Sensitive":         ["gentle", "soothing", "calm", "sensitive", "centella"],
+    "Acne":              ["acne", "blemish", "clear", "salicylic", "tea tree"],
+    "Hyperpigmentation": ["bright", "whitening", "dark spot", "vitamin c", "arbutin"],
+    "Uneven tone":       ["bright", "even tone", "radiance", "vitamin c"],
+    "Dehydration":       ["hydrat", "moistur", "hyaluronic", "plump"],
+    "Wrinkles":          ["anti-aging", "retinol", "wrinkle", "firm", "collagen"],
+    "Redness":           ["soothing", "calm", "redness", "centella", "aloe"],
 }
+
 
 def recommend_products(
     skin_type: str,
@@ -56,113 +45,90 @@ def recommend_products(
     age: int | None = None,
     db: Session = None,
 ) -> list[ProductRecommendation]:
-    """
-    Recommend products from database based on skin type and conditions
-    Uses both ingredient matching and keyword matching in product names/descriptions
-    
-    Args:
-        skin_type: User's skin type
-        conditions: List of skin conditions
-        db: Database session (optional, will create if not provided)
-        
-    Returns:
-        List of recommended products sorted by relevance score
-    """
-    # Get desired ingredients and keywords
-    desired_ingredients = set(INGREDIENT_MAP.get(skin_type, []))
-    desired_keywords = set(KEYWORD_MAP.get(skin_type, []))
-    
-    for condition in conditions:
-        if condition != "None detected":
-            desired_ingredients.update(INGREDIENT_MAP.get(condition, []))
-            desired_keywords.update(KEYWORD_MAP.get(condition, []))
-    
-    desired_effects: set[str] = set()
-    for condition in conditions:
-        if condition != "None detected":
-            desired_effects.update(CONDITION_EFFECT_MAP.get(condition, []))
-    
-    # If no specific criteria, use general skincare
-    if not desired_ingredients and not desired_keywords:
-        desired_ingredients = {"Hyaluronic Acid", "Vitamin C", "Niacinamide", "Glycerin"}
-        desired_keywords = {"hydrat", "moistur", "vitamin", "serum"}
-    
-    # Get database session if not provided
     if db is None:
         db = next(get_db())
-    
-    # Fetch all products from database
+
     products = db.execute(select(ProductCatalog)).scalars().all()
-    
     if not products:
         return []
-    
-    scored: list[ProductRecommendation] = []
-    
-    for product in products:
-        # Filter by suitable_for if provided
+
+    # Build desired sets from skin type + conditions
+    desired_ingredients: set[str] = set(_INGREDIENT_MAP.get(skin_type, []))
+    desired_keywords: set[str] = set(_KEYWORD_MAP.get(skin_type, []))
+    desired_effects: set[str] = set()
+    for cond in conditions:
+        if cond != "None detected":
+            desired_ingredients.update(_INGREDIENT_MAP.get(cond, []))
+            desired_keywords.update(_KEYWORD_MAP.get(cond, []))
+            desired_effects.update(CONDITION_EFFECT_MAP.get(cond, []))
+
+    # ── First pass: score all products, keep top 30 candidates ────────────────
+    candidates: list[tuple[float, ProductCatalog]] = []
+    for p in products:
         if gender and gender.lower() in ("male", "female"):
-            product_gender = (product.suitable_for or "all").lower()
-            if product_gender not in ("all", gender.lower()):
+            if (p.suitable_for or "all").lower() not in ("all", gender.lower()):
                 continue
 
-        # Parse ingredients from CSV
-        product_ingredients = [ing.strip() for ing in product.ingredients_csv.split(",") if ing.strip()]
-        product_effects = split_effects_csv(product.effects_csv)
-        
-        # Combine product name, category, and description for keyword matching
-        searchable_text = f"{product.name} {product.category or ''} {product.description or ''}".lower()
-        
-        # Find matching ingredients (case-insensitive)
-        matched_ingredients = []
-        for desired_ing in desired_ingredients:
-            for product_ing in product_ingredients:
-                if desired_ing.lower() in product_ing.lower():
-                    matched_ingredients.append(desired_ing)
-                    break
-        
-        # Find matching keywords in product name/description
-        matched_keywords = []
-        for keyword in desired_keywords:
-            if keyword.lower() in searchable_text:
-                matched_keywords.append(keyword)
+        p_ingredients = [i.strip() for i in (p.ingredients_csv or "").split(",") if i.strip()]
+        p_effects = split_effects_csv(p.effects_csv)
+        text = f"{p.name} {p.category or ''} {p.description or ''}".lower()
 
-        # Match effects to conditions
-        matched_effects = []
-        for desired_eff in desired_effects:
-            if desired_eff in product_effects:
-                matched_effects.append(desired_eff)
-        
-        # Calculate score based on ingredient, keyword, and effects matches
-        ingredient_score = len(matched_ingredients) / max(len(desired_ingredients), 1) if desired_ingredients else 0
-        keyword_score = len(matched_keywords) / max(len(desired_keywords), 1) if desired_keywords else 0
-        effect_score = len(matched_effects) / max(len(desired_effects), 1) if desired_effects else 0
-        
-        # Weighted average: keywords are more reliable for our data
-        total_score = (keyword_score * 0.6) + (ingredient_score * 0.25) + (effect_score * 0.15)
+        ing_hits = sum(1 for d in desired_ingredients if any(d.lower() in pi.lower() for pi in p_ingredients))
+        kw_hits  = sum(1 for kw in desired_keywords if kw.lower() in text)
+        eff_hits = sum(1 for e in desired_effects if e in p_effects)
 
-        # Small age-based boost for anti-aging effects
-        if age is not None and product_effects:
-            if age >= 30 and any(eff in product_effects for eff in ["anti wrinkle", "antifading", "collagen", "eye lines"]):
-                total_score += 0.05
-            if age < 20 and any(eff in product_effects for eff in ["anti wrinkle", "antifading", "collagen"]):
-                total_score -= 0.03
-        
-        # Only include products with some relevance
-        if total_score > 0.1:
-            scored.append(
-                ProductRecommendation(
-                    id=product.sku,
-                    sku=product.sku,
-                    name=product.name,
-                    price=product.price or 0,
-                    score=round(total_score, 4),
-                    matched_ingredients=sorted(set(matched_ingredients + matched_keywords + matched_effects))[:5],
-                    image_url=product.image_url,
-                    category=product.category,
-                    effects=product_effects,
-                )
-            )
-    
-    # Sort by score (highest first) and return top recommendations
-    return sorted(scored, key=lambda x: x.score, reverse=True)[:10]
+        ing_score = ing_hits / max(len(desired_ingredients), 1)
+        kw_score  = kw_hits  / max(len(desired_keywords), 1)
+        eff_score = eff_hits / max(len(desired_effects), 1)
+        score = kw_score * 0.6 + ing_score * 0.25 + eff_score * 0.15
+
+        if age is not None:
+            anti_age = {"anti wrinkle", "antifading", "collagen", "eye lines"}
+            if age >= 30 and any(e in p_effects for e in anti_age):
+                score += 0.05
+
+        if score > 0.05:
+            candidates.append((score, p))
+
+    candidates.sort(key=lambda x: x[0], reverse=True)
+    top30 = candidates[:30]
+
+    if not top30:
+        return []
+
+    # ── Ollama re-ranking ─────────────────────────────────────────────────────
+    ollama_input = [
+        {
+            "sku": p.sku,
+            "name": p.name,
+            "ingredients": p.ingredients_csv or "",
+            "effects": p.effects_csv or "",
+        }
+        for _, p in top30
+    ]
+    ranked_skus = ollama_service.rank_products(skin_type, conditions, ollama_input)
+
+    # Build SKU → product map for fast lookup
+    sku_map = {p.sku: p for _, p in top30}
+    score_map = {p.sku: score for score, p in top30}
+
+    results: list[ProductRecommendation] = []
+    for sku in ranked_skus[:10]:
+        p = sku_map.get(sku)
+        if not p:
+            continue
+        p_ingredients = [i.strip() for i in (p.ingredients_csv or "").split(",") if i.strip()]
+        matched = sorted({d for d in desired_ingredients if any(d.lower() in pi.lower() for pi in p_ingredients)})[:5]
+        results.append(ProductRecommendation(
+            id=p.sku,
+            sku=p.sku,
+            name=p.name,
+            price=p.price or 0,
+            score=round(score_map.get(sku, 0), 4),
+            matched_ingredients=matched,
+            image_url=p.image_url,
+            category=p.category,
+            effects=split_effects_csv(p.effects_csv),
+        ))
+
+    return results
