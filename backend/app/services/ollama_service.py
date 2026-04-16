@@ -25,8 +25,10 @@ class OllamaService:
         payload: dict = {"model": model, "prompt": prompt, "stream": False, "format": "json"}
         if image_b64:
             payload["images"] = [image_b64]
+        # Vision model needs more time for image processing; text model is fast
+        timeout = 150.0 if image_b64 else 45.0
         try:
-            r = httpx.post(f"{self._base}/api/generate", json=payload, timeout=90.0)
+            r = httpx.post(f"{self._base}/api/generate", json=payload, timeout=timeout)
             r.raise_for_status()
             return json.loads(r.json()["response"])
         except Exception as exc:
