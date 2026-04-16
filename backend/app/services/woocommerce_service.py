@@ -224,7 +224,7 @@ class WooCommerceService:
             "wc_order_id": wc_order["id"],
             "user_id": user_id,
             "channel": "woocommerce",
-            "items_json": __import__("json").dumps(items),
+            "items_json": json.dumps(items),
             "status": local_status,
             "total": total,
             "created_at": created_at,

@@ -212,16 +212,16 @@ def sync_woocommerce_orders(
     added = updated = skipped = failed = 0
     for wc_order in wc_orders:
         try:
-            result = _upsert_wc_order(db, wc_order, email_to_user)
+            with db.begin_nested():  # savepoint — failure rolls back only this order
+                result = _upsert_wc_order(db, wc_order, email_to_user)
             if result == "added":
                 added += 1
             elif result == "updated":
                 updated += 1
             else:
                 skipped += 1
-        except Exception as e:
+        except Exception:
             failed += 1
-            db.rollback()
             continue
 
     db.commit()
