@@ -36,7 +36,7 @@ class MultiHeadClassifier(nn.Module):
         super().__init__()
         # Feature extractor: timm with num_classes=0 returns pooled features.
         self.backbone = timm.create_model(backbone, pretrained=pretrained, num_classes=0, global_pool="avg")
-        feat_dim = self.backbone.num_features
+        feat_dim = _probe_output_dim(self.backbone)
 
         self.bottleneck = nn.Sequential(
             nn.BatchNorm1d(feat_dim),
@@ -61,6 +61,26 @@ class MultiHeadClassifier(nn.Module):
         if out.logits_skin_type is not None:
             result["skin_type"] = torch.softmax(out.logits_skin_type, dim=-1)
         return result
+
+
+def _probe_output_dim(backbone: nn.Module) -> int:
+    """Return the pooled feature dimension of a timm backbone.
+
+    `backbone.num_features` is unreliable for models with a post-pool conv_head
+    (notably MobileNetV3: reports 576, actually outputs 1024). A 1-sample dummy
+    forward always gives the truth.
+    """
+    was_training = backbone.training
+    backbone.eval()
+    try:
+        with torch.no_grad():
+            dummy = torch.zeros(1, 3, 224, 224)
+            out = backbone(dummy)
+    finally:
+        backbone.train(was_training)
+    if out.ndim != 2:
+        raise RuntimeError(f"expected (B, C) features from backbone; got shape {tuple(out.shape)}")
+    return int(out.shape[1])
 
 
 def build_model(
