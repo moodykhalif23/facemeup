@@ -1,0 +1,53 @@
+name: skincare-v2
+
+# Runs the new Go API + Python ML sidecar ALONGSIDE the existing backend stack.
+# Reuses the existing postgres + redis from ../docker-compose.yml by joining the
+# same network. Bring the base stack up first: `docker compose -f ../docker-compose.yml up -d db redis`.
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: skincare-v2-api
+    ports:
+      - "8012:8000"
+    environment:
+      ENV: development
+      PORT: "8000"
+      API_V1_PREFIX: /api/v1
+      CORS_ORIGINS: "*"
+      DATABASE_URL: postgres://postgres:postgres@skincare-db:5432/skincare?sslmode=disable
+      REDIS_URL: redis://skincare-redis:6379/0
+      JWT_SECRET: c9cfc79916312ab549626a3fc81c8e4a0905b14573e8738b3935b48ad4e376b2
+      JWT_ALGORITHM: HS256
+      ML_SERVICE_URL: http://ml-service:8000
+      MODEL_SKIN_TYPES: "Oily,Dry,Combination,Normal,Sensitive"
+      MODEL_CONDITIONS: "Acne,Hyperpigmentation,Uneven tone,Dehydration,Wrinkles,Redness,None detected"
+    depends_on:
+      - ml-service
+    networks:
+      - skincare
+      - default
+
+  ml-service:
+    build:
+      context: ./ml_service
+      dockerfile: Dockerfile
+    container_name: skincare-v2-ml
+    ports:
+      - "8013:8000"   
+    environment:
+      ML_ENV: development
+      ML_PORT: "8000"
+    volumes:
+      - ./ml_service/models:/app/models:ro
+    networks:
+      - skincare
+      - default
+
+networks:
+  skincare:
+    external: true
+    name: skincare_skincare
+  default:

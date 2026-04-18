@@ -1,0 +1,26 @@
+.env
+*.env.local
+/bin/
+/dist/
+/tmp/
+
+# Go
+/api
+/api.exe
+*.test
+*.out
+vendor/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+.pytest_cache/
+.ruff_cache/
+
+# ML artifacts — tracked via LFS or released separately
+ml_service/models/*.onnx
+ml_training/data/
+ml_training/checkpoints/
+ml_training/runs/
