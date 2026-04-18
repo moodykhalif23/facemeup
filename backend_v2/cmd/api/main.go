@@ -10,7 +10,11 @@ import (
 	"syscall"
 	"time"
 
+	"skincare/backend-v2/internal/auth"
+	"skincare/backend-v2/internal/cache"
 	"skincare/backend-v2/internal/config"
+	"skincare/backend-v2/internal/db"
+	"skincare/backend-v2/internal/mlclient"
 	"skincare/backend-v2/internal/server"
 )
 
@@ -24,7 +28,43 @@ func main() {
 		os.Exit(1)
 	}
 
-	srv := server.New(cfg, logger)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	// --- dependencies ---
+	pool, err := db.NewPool(ctx, cfg.DatabaseURL)
+	if err != nil {
+		slog.Error("pg pool", "err", err)
+		os.Exit(1)
+	}
+	defer pool.Close()
+	slog.Info("pg pool ready")
+
+	redisCli, err := cache.New(ctx, cfg.RedisURL, 5*time.Minute)
+	if err != nil {
+		slog.Error("redis", "err", err)
+		os.Exit(1)
+	}
+	defer redisCli.Close()
+	slog.Info("redis ready")
+
+	ml := mlclient.New(cfg.MLServiceURL, 30*time.Second)
+	if err := ml.Healthz(ctx); err != nil {
+		slog.Warn("ml-service health check failed (continuing, will retry per-request)", "err", err)
+	} else {
+		slog.Info("ml-service ready", "url", cfg.MLServiceURL)
+	}
+
+	deps := &server.Deps{
+		Pool:      pool,
+		Users:     db.NewUsers(pool),
+		Cache:     redisCli,
+		MLClient:  ml,
+		Issuer:    auth.NewIssuer(cfg.JWTSecret, 30*time.Minute),
+		AccessTTL: 30 * time.Minute,
+	}
+
+	srv := server.New(cfg, deps, logger)
 
 	httpServer := &http.Server{
 		Addr:              ":" + cfg.Port,
@@ -48,9 +88,9 @@ func main() {
 	<-stop
 
 	slog.Info("shutting down")
-	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
-	defer cancel()
-	if err := httpServer.Shutdown(ctx); err != nil {
+	shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer shutdownCancel()
+	if err := httpServer.Shutdown(shutdownCtx); err != nil {
 		slog.Error("shutdown error", "err", err)
 	}
 }

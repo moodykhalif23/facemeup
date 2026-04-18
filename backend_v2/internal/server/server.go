@@ -10,18 +10,20 @@ import (
 	chimw "github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
 
+	"skincare/backend-v2/internal/auth"
 	"skincare/backend-v2/internal/config"
 )
 
 type Server struct {
 	cfg    *config.Config
+	deps   *Deps
 	log    *slog.Logger
 	router *chi.Mux
 	start  time.Time
 }
 
-func New(cfg *config.Config, log *slog.Logger) *Server {
-	s := &Server{cfg: cfg, log: log, start: time.Now()}
+func New(cfg *config.Config, deps *Deps, log *slog.Logger) *Server {
+	s := &Server{cfg: cfg, deps: deps, log: log, start: time.Now()}
 	s.router = s.buildRouter()
 	return s
 }
@@ -47,7 +49,18 @@ func (s *Server) buildRouter() *chi.Mux {
 
 	r.Route(s.cfg.APIPrefix, func(api chi.Router) {
 		api.Get("/health", s.health)
-		// Endpoints land here in Phase 5: auth, analyze, products, orders, loyalty, admin, sync
+
+		// Public auth routes
+		api.Post("/auth/signup", s.handleSignup)
+		api.Post("/auth/login", s.handleLogin)
+
+		// Authenticated routes (Phase 5b: /auth/me only; more land in 5c+)
+		api.Group(func(protected chi.Router) {
+			if s.deps != nil && s.deps.Issuer != nil {
+				protected.Use(auth.Middleware(s.deps.Issuer))
+			}
+			protected.Get("/auth/me", s.handleMe)
+		})
 	})
 
 	return r
