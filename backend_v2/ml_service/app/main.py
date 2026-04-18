@@ -6,9 +6,10 @@ from fastapi import FastAPI, HTTPException
 from .config import get_settings
 from .onnx_runner import OnnxRegistry
 from .pipeline import SkinPipeline
-from .pipeline.classify import placeholder_classify
+from .pipeline.classify import ONNXClassifier, placeholder_classify
+from .pipeline.heatmaps import generate_heatmaps
 from .pipeline.runner import NoFaceFoundError
-from .schemas import AnalyzeRequest, AnalyzeResponse, HealthResponse
+from .schemas import AnalyzeRequest, AnalyzeResponse, HealthResponse, HeatmapPayload
 
 log = logging.getLogger("ml_service")
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
@@ -22,7 +23,16 @@ async def lifespan(app: FastAPI):
     registry = OnnxRegistry(settings.models_dir, settings.onnx_providers)
     app.state.registry = registry
     app.state.pipeline = SkinPipeline(settings, registry)
-    log.info("pipeline ready (models load lazily on first /v1/analyze)")
+
+    # Eagerly attempt classifier load so we log once at startup whether heatmaps are available.
+    classifier_session = registry.get(settings.classifier_model)
+    if classifier_session is not None:
+        app.state.classifier = ONNXClassifier(classifier_session, settings.conditions)
+        log.info("classifier ONNX loaded: %s", settings.classifier_model)
+    else:
+        app.state.classifier = None
+        log.warning("no classifier ONNX — falling back to placeholder, heatmaps disabled")
+
     yield
     log.info("ml_service stopping")
 
@@ -45,6 +55,7 @@ async def healthz() -> HealthResponse:
 async def analyze(req: AnalyzeRequest) -> AnalyzeResponse:
     settings = get_settings()
     pipeline: SkinPipeline = app.state.pipeline
+    classifier: ONNXClassifier | None = app.state.classifier
 
     try:
         result = pipeline.run(
@@ -60,13 +71,31 @@ async def analyze(req: AnalyzeRequest) -> AnalyzeResponse:
         raise HTTPException(status_code=500, detail=f"pipeline error: {e}") from e
 
     tensor = pipeline.build_classifier_batch(result.patches)
-    clf = placeholder_classify(
-        tensor, settings.skin_types, settings.conditions, req.questionnaire
-    )
 
-    active = [
-        label for label, prob in clf.condition_scores.items() if prob >= 0.5
-    ]
+    heatmaps: list[HeatmapPayload] = []
+    if classifier is not None and tensor.size > 0:
+        try:
+            clf = classifier.classify(tensor, settings.skin_types, req.questionnaire)
+            raw_probs = _raw_probs_for_heatmap(classifier, tensor)
+            hm_results = generate_heatmaps(
+                session=classifier._session,
+                input_name=classifier._input_name,
+                output_name=classifier._output_name,
+                patches_imagenet=tensor,
+                patches_raw=[p.image for p in result.patches],
+                patch_regions=[p.region for p in result.patches],
+                condition_names=settings.conditions,
+                baseline_probs=raw_probs,
+            )
+            heatmaps = [HeatmapPayload(label=h.label, image_base64=h.image_base64) for h in hm_results]
+        except Exception as e:
+            # Fail heatmaps soft — better to ship the analysis without them than 500.
+            log.exception("heatmap generation failed: %s", e)
+            clf = classifier.classify(tensor, settings.skin_types, req.questionnaire)
+    else:
+        clf = placeholder_classify(tensor, settings.skin_types, settings.conditions, req.questionnaire)
+
+    active = [label for label, prob in clf.condition_scores.items() if prob >= 0.5]
 
     return AnalyzeResponse(
         skin_type=clf.skin_type,
@@ -75,5 +104,15 @@ async def analyze(req: AnalyzeRequest) -> AnalyzeResponse:
         condition_scores=clf.condition_scores,
         confidence=clf.confidence,
         inference_mode=clf.inference_mode,
-        heatmaps=[],
+        heatmaps=heatmaps,
     )
+
+
+def _raw_probs_for_heatmap(classifier: ONNXClassifier, tensor):
+    """Run the classifier once more to get per-patch probabilities for heatmap targeting.
+
+    Kept separate so we don't pollute `ONNXClassifier.classify()`'s return type.
+    """
+    return classifier._session.run(
+        [classifier._output_name], {classifier._input_name: tensor}
+    )[0]

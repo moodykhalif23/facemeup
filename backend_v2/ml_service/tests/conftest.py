@@ -1,10 +1,18 @@
 import base64
+import sys
 from io import BytesIO
+from pathlib import Path
 
 import cv2
 import numpy as np
 import pytest
 from PIL import Image
+
+# Make the repo-level `scripts/` folder importable so tests can use
+# `build_stub_classifier.build_stub`.
+_SCRIPTS_DIR = Path(__file__).resolve().parent.parent / "scripts"
+if str(_SCRIPTS_DIR) not in sys.path:
+    sys.path.insert(0, str(_SCRIPTS_DIR))
 
 
 def _synthetic_face(size: int = 512) -> np.ndarray:
@@ -52,6 +60,21 @@ def synthetic_face_bgr() -> np.ndarray:
 @pytest.fixture(scope="session")
 def synthetic_face_b64(synthetic_face_bgr) -> str:
     return _b64_encode(synthetic_face_bgr)
+
+
+@pytest.fixture(scope="session")
+def stub_onnx_path(tmp_path_factory) -> Path:
+    """Build a tiny random-weights ONNX classifier once per session."""
+    from build_stub_classifier import build_stub
+    out = tmp_path_factory.mktemp("onnx") / "stub.onnx"
+    build_stub(out, n_conditions=6, input_size=224, seed=7)
+    return out
+
+
+@pytest.fixture(scope="session")
+def stub_onnx_session(stub_onnx_path):
+    import onnxruntime as ort
+    return ort.InferenceSession(str(stub_onnx_path), providers=["CPUExecutionProvider"])
 
 
 @pytest.fixture(scope="session")
