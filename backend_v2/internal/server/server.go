@@ -54,12 +54,70 @@ func (s *Server) buildRouter() *chi.Mux {
 		api.Post("/auth/signup", s.handleSignup)
 		api.Post("/auth/login", s.handleLogin)
 
-		// Authenticated routes (Phase 5b: /auth/me only; more land in 5c+)
+		// Image proxy — public on purpose (frontend needs to embed without auth).
+		// SSRF-hardened via safeDialContext.
+		api.Get("/proxy/image", s.handleImageProxy)
+
+		// Authenticated routes
 		api.Group(func(protected chi.Router) {
 			if s.deps != nil && s.deps.Issuer != nil {
 				protected.Use(auth.Middleware(s.deps.Issuer))
 			}
 			protected.Get("/auth/me", s.handleMe)
+
+			// Analyze + profile (Phase 5c)
+			protected.Post("/analyze", s.handleAnalyze)
+			protected.Post("/analyze/feedback", s.handleAnalyzeFeedback)
+			protected.Post("/training/submit", s.handleTrainingSubmit)
+			protected.Get("/profile/{userId}", s.handleGetProfile)
+
+			// Products (Phase 5d)
+			protected.Get("/products", s.handleListProducts)
+			protected.Get("/products/{id}", s.handleGetProduct)
+
+			// Recommend (Phase 5d)
+			protected.Post("/recommend", s.handleRecommend)
+
+			// Orders (Phase 5e)
+			protected.Post("/orders", s.handleCreateOrder)
+			protected.Get("/orders", s.handleListOrders)
+			protected.Get("/orders/{id}", s.handleGetOrder)
+
+			// Loyalty (Phase 5e)
+			protected.Get("/loyalty", s.handleGetLoyalty)
+			protected.Get("/loyalty/{userId}", s.handleGetLoyalty)
+			protected.Post("/loyalty/earn", s.handleLoyaltyEarn)
+
+			// WooCommerce sync — wc-id resolution is used by the cart,
+			// so non-admin users can call it.
+			protected.Post("/sync/woocommerce/wc-id", s.handleSyncWoocommerceIDs)
+
+			// Admin-only routes (Phase 5f)
+			protected.Group(func(admin chi.Router) {
+				admin.Use(auth.RequireAdmin())
+				admin.Get("/admin/stats", s.handleAdminStats)
+				admin.Get("/admin/users", s.handleAdminListUsers)
+				admin.Put("/admin/users/{userId}/role", s.handleAdminUpdateUserRole)
+				admin.Delete("/admin/users/{userId}", s.handleAdminDeleteUser)
+				admin.Get("/admin/orders", s.handleAdminListOrders)
+				admin.Put("/admin/orders/{orderId}/status", s.handleAdminUpdateOrderStatus)
+				admin.Get("/admin/reports", s.handleAdminListReports)
+				admin.Delete("/admin/reports/{reportId}", s.handleAdminDeleteReport)
+				admin.Get("/admin/reports/{userId}", s.handleAdminUserReports)
+				admin.Post("/admin/cache/clear", s.handleAdminCacheClear)
+				admin.Post("/admin/training/sync", s.handleAdminTrainingSync)
+
+				// Product admin CRUD
+				admin.Post("/products/admin/create", s.handleAdminCreateProduct)
+				admin.Put("/products/admin/{sku}", s.handleAdminUpdateProduct)
+				admin.Delete("/products/admin/{sku}", s.handleAdminDeleteProduct)
+				admin.Delete("/products/admin/bulk", s.handleAdminBulkDeleteProducts)
+				admin.Post("/products/admin/seed", s.handleAdminSeedProducts)
+
+				// WC sync (admin)
+				admin.Post("/sync/woocommerce", s.handleSyncWoocommerceProducts)
+				admin.Post("/sync/woocommerce/orders", s.handleSyncWoocommerceOrders)
+			})
 		})
 	})
 

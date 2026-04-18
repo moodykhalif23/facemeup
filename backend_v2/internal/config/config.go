@@ -20,6 +20,12 @@ type Config struct {
 	MLServiceURL  string
 	SkinTypes     []string
 	Conditions    []string
+
+	// WooCommerce — optional. If absent, the /sync/* endpoints 503 with
+	// "not_configured" instead of crashing.
+	WooCommerceURL    string
+	WooCommerceKey    string
+	WooCommerceSecret string
 }
 
 func Load() (*Config, error) {
@@ -35,6 +41,10 @@ func Load() (*Config, error) {
 		MLServiceURL: getenv("ML_SERVICE_URL", "http://ml-service:8000"),
 		SkinTypes:    splitCSV(getenv("MODEL_SKIN_TYPES", "Oily,Dry,Combination,Normal,Sensitive")),
 		Conditions:   splitCSV(getenv("MODEL_CONDITIONS", "Acne,Hyperpigmentation,Uneven tone,Dehydration,Wrinkles,Redness,None detected")),
+
+		WooCommerceURL:    os.Getenv("WOOCOMMERCE_URL"),
+		WooCommerceKey:    os.Getenv("WOOCOMMERCE_CONSUMER_KEY"),
+		WooCommerceSecret: os.Getenv("WOOCOMMERCE_CONSUMER_SECRET"),
 	}
 
 	if c.DatabaseURL == "" {

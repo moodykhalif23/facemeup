@@ -16,6 +16,7 @@ import (
 	"skincare/backend-v2/internal/db"
 	"skincare/backend-v2/internal/mlclient"
 	"skincare/backend-v2/internal/server"
+	"skincare/backend-v2/internal/woocommerce"
 )
 
 func main() {
@@ -31,7 +32,7 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	// --- dependencies ---
+	// --- Postgres ---
 	pool, err := db.NewPool(ctx, cfg.DatabaseURL)
 	if err != nil {
 		slog.Error("pg pool", "err", err)
@@ -40,6 +41,7 @@ func main() {
 	defer pool.Close()
 	slog.Info("pg pool ready")
 
+	// --- Redis ---
 	redisCli, err := cache.New(ctx, cfg.RedisURL, 5*time.Minute)
 	if err != nil {
 		slog.Error("redis", "err", err)
@@ -48,18 +50,34 @@ func main() {
 	defer redisCli.Close()
 	slog.Info("redis ready")
 
-	ml := mlclient.New(cfg.MLServiceURL, 30*time.Second)
+	// --- ML sidecar ---
+	ml := mlclient.New(cfg.MLServiceURL, 60*time.Second)
 	if err := ml.Healthz(ctx); err != nil {
 		slog.Warn("ml-service health check failed (continuing, will retry per-request)", "err", err)
 	} else {
 		slog.Info("ml-service ready", "url", cfg.MLServiceURL)
 	}
 
+	// --- WooCommerce (optional — nil is valid; sync handlers return 503) ---
+	var wcClient *woocommerce.Client
+	if cfg.WooCommerceURL != "" && cfg.WooCommerceKey != "" && cfg.WooCommerceSecret != "" {
+		wcClient = woocommerce.New(cfg.WooCommerceURL, cfg.WooCommerceKey, cfg.WooCommerceSecret, 30*time.Second)
+		slog.Info("woocommerce client configured", "url", cfg.WooCommerceURL)
+	} else {
+		slog.Warn("woocommerce not configured — /sync endpoints will return 503")
+	}
+
 	deps := &server.Deps{
 		Pool:      pool,
 		Users:     db.NewUsers(pool),
+		Profiles:  db.NewProfiles(pool),
+		Products:  db.NewProducts(pool),
+		Orders:    db.NewOrders(pool),
+		Loyalty:   db.NewLoyalty(pool),
+		Admin:     db.NewAdmin(pool),
 		Cache:     redisCli,
 		MLClient:  ml,
+		WCClient:  wcClient,
 		Issuer:    auth.NewIssuer(cfg.JWTSecret, 30*time.Minute),
 		AccessTTL: 30 * time.Minute,
 	}
