@@ -48,15 +48,16 @@ def export(
     dummy = torch.randn(1, 3, image_size, image_size)
     output.parent.mkdir(parents=True, exist_ok=True)
 
+    # Use dynamo-friendly dynamic_shapes (preferred in torch>=2.5).
+    batch_dim = torch.export.Dim("batch", min=1, max=128)
     torch.onnx.export(
         wrapper,
-        dummy,
+        (dummy,),
         str(output),
         input_names=["image"],
         output_names=["condition_probs"],
         opset_version=opset,
-        dynamic_axes={"image": {0: "batch"}, "condition_probs": {0: "batch"}},
-        do_constant_folding=True,
+        dynamic_shapes={"x": {0: batch_dim}},
     )
     log.info("wrote %s", output)
 

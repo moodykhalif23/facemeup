@@ -61,7 +61,7 @@ def test_model_training_step_reduces_loss(tiny_model) -> None:
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
-        losses.append(float(loss))
+        losses.append(loss.item())
     assert losses[-1] < losses[0], f"loss did not decrease: {losses}"
 
 
@@ -123,11 +123,12 @@ def test_onnx_export_roundtrip(tiny_model) -> None:
 
     with tempfile.TemporaryDirectory() as td:
         onnx_path = Path(td) / "tiny.onnx"
+        batch = torch.export.Dim("batch", min=1, max=32)
         torch.onnx.export(
-            wrapper, x, str(onnx_path),
+            wrapper, (x,), str(onnx_path),
             input_names=["image"], output_names=["probs"],
             opset_version=17,
-            dynamic_axes={"image": {0: "batch"}, "probs": {0: "batch"}},
+            dynamic_shapes={"x": {0: batch}},
         )
         assert onnx_path.is_file()
 
