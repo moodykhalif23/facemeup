@@ -1,37 +1,117 @@
 # ml_training
 
-PyTorch training code for the skin analysis pipeline. Runs in Colab/Kaggle
-(or any GPU box) — **not** deployed to production.
+PyTorch training pipeline for the skincare multi-label skin-condition classifier.
+Runs in Colab / Kaggle / any GPU box — **not** deployed to production. Output is
+an ONNX file that drops into [`../ml_service/models/`](../ml_service/models/).
 
-Outputs: ONNX artifacts copied into `../ml_service/models/`.
+## Layout
 
-## Planned scripts (Phase 2–3)
+```
+ml_training/
+├── pyproject.toml
+├── configs/base.yaml                 # default hyperparameters
+├── src/skin_training/
+│   ├── config.py                     # typed YAML config loader
+│   ├── data/
+│   │   ├── labels.py                 # Condition enum + SCIN → 6-class mapping
+│   │   ├── scin.py                   # SCIN CSV parser
+│   │   ├── precompute.py             # runs ml_service pipeline → aligned .npy
+│   │   ├── dataset.py                # PyTorch Dataset + pixel augmentations
+│   │   └── sampler.py                # class-balanced multi-label sampler
+│   ├── models/classifier.py          # EfficientNet-B0 / MobileNetV3 dual-head
+│   ├── train/
+│   │   ├── losses.py                 # weighted BCE + CE
+│   │   └── loop.py                   # full training loop (AMP + TB + early stop)
+│   ├── eval/metrics.py               # per-condition + Fitzpatrick stratified
+│   └── export/to_onnx.py             # checkpoint → ONNX + numerical roundtrip
+├── scripts/colab_quickstart.py       # Colab one-liner entry point
+└── tests/                            # smoke tests
+```
 
-| Path                          | Purpose                                                       |
-|-------------------------------|---------------------------------------------------------------|
-| `src/data/scin.py`            | SCIN dataset loader + Fitzpatrick labels                      |
-| `src/data/augment.py`         | Torchvision v2 transforms (CLAHE via cv2, flips, color jitter)|
-| `src/data/preprocess.py`      | Face detect → align → CLAHE → segment → patch extract         |
-| `src/models/classifier.py`    | EfficientNet-B0 / MobileNetV3 multi-head (6 condition sigmoid)|
-| `src/train/train.py`          | Multi-label BCE trainer with class-balanced sampling          |
-| `src/train/distill.py`        | Knowledge distillation: EfficientNet → MobileNetV3            |
-| `src/eval/fairness.py`        | Per-Fitzpatrick precision/recall/F1 audit                     |
-| `src/eval/gradcam_viz.py`     | Sanity-check Grad-CAM overlays on validation set              |
-| `src/export/to_onnx.py`       | Export + verify ONNX roundtrip (MobileNet, U-Net, RetinaFace) |
-| `configs/base.yaml`           | Hyperparams, paths, Fitzpatrick stratification                |
+## Pipeline at a glance
+
+```
+SCIN (CSV + images)          ← download manually (DUA required)
+      │
+      ▼
+skin-precompute              ← runs ml_service preprocessing
+      │   — face detect + align + CLAHE + WB
+      │   — saves aligned .npy + labels.csv
+      ▼
+skin-train                   ← EfficientNet-B0 + 6-way sigmoid head
+      │   — BCE with pos_weight
+      │   — class-balanced sampler
+      │   — Fitzpatrick-stratified validation split
+      │   — cosine LR, mixed precision, early stop
+      ▼
+skin-export                  ← ONNX opset-17 + roundtrip diff check
+      │
+      ▼
+ml_service/models/skin_classifier_mobilenet.onnx
+```
+
+## Install
+
+### Locally (inference dev only — no GPU)
+
+```bash
+cd backend_v2/ml_training
+pip install -e "../ml_service"    # pipeline preprocessing
+pip install -e ".[dev]"           # torch, timm, etc.
+pytest -v                         # smoke tests
+```
+
+### Colab
+
+```python
+!git clone https://github.com/<your-org>/skincare.git
+%cd skincare/backend_v2
+!pip install -e ml_service
+!pip install -e ml_training
+!python ml_training/scripts/colab_quickstart.py \
+    --scin-root /content/scin \
+    --work-dir /content/work
+```
 
 ## Data sources
 
-- **SCIN** (Google, ~10k real phone photos, CC-BY-4.0) — primary
-- **Small labeled bootstrap** (~500 internal Dr Rashel user photos with consent)
+- **SCIN** (Google, 10k+ consumer photos, Fitzpatrick I–VI, CC-BY-4.0 / DUA) —
+  primary. Download from github.com/google-research-datasets/scin.
+- **Small labeled bootstrap** — ~500 Dr Rashel user photos with consent.
+  Match SCIN's schema (see `data/scin.py`) and point `--scin-root` at the
+  merged folder.
 
-## Usage (Colab-ready)
+## Label taxonomy
 
-```python
-!pip install -e ".[train]"
+Spec §1 six macro conditions, used throughout frontend + API:
 
-from ml_training.src.train.train import train_multilabel
-train_multilabel(config="configs/base.yaml")
-```
+| idx | name                | SCIN mapping examples                                  |
+|-----|---------------------|--------------------------------------------------------|
+| 0   | Acne                | acne vulgaris, folliculitis, perioral dermatitis       |
+| 1   | Dryness             | eczema, xerosis, atopic dermatitis, ichthyosis         |
+| 2   | Oiliness            | seborrheic dermatitis, seborrhea                       |
+| 3   | Hyperpigmentation   | melasma, PIH, solar lentigo, lentigines                |
+| 4   | Wrinkles            | rhytides, photodamage, elastosis                       |
+| 5   | Redness             | rosacea, telangiectasia, erythema                      |
 
-Checkpoint → ONNX export → drop into `ml_service/models/` → rebuild sidecar.
+Multi-label sigmoid (spec §6) — a single face can carry multiple labels.
+
+## Training targets (spec §11)
+
+| Metric             | Target  |
+|--------------------|---------|
+| Macro F1           | ≥ 0.70  |
+| Per-condition AUC  | ≥ 0.75  |
+| Fitzpatrick V/VI F1 within 0.10 of I/II F1 (fairness — spec §12)     |
+
+## Phase 2 status
+
+- ✅ Package scaffolded, installable, CLI entry points registered
+- ✅ SCIN parser + 6-class mapping with Fitzpatrick stratification
+- ✅ Precompute reuses ml_service preprocessing (single source of truth)
+- ✅ Dual-head classifier (conditions always, skin-type gated by config)
+- ✅ Weighted BCE + class-balanced sampler + per-condition + stratified metrics
+- ✅ Full training loop (AMP, cosine LR, early stop, TensorBoard, resume)
+- ✅ ONNX export with numerical roundtrip check
+- ⏳ Phase 3: actual training run on SCIN in Colab → first checkpoint
+- ⏳ Phase 4: wire that ONNX into ml_service `/v1/analyze`
