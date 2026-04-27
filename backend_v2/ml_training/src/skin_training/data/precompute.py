@@ -208,15 +208,48 @@ def _label_row(s: SCINSample) -> str:
 
 
 def _import_ml_service_or_fail() -> None:
+    """Ensure ml_service's `app` package is importable.
+
+    When installed with `pip install -e ml_service`, the editable install adds
+    the ml_service directory to the path so `import app` works. If that fails
+    (e.g. Colab subprocess with a different env), we auto-add the most likely
+    ml_service paths and retry before giving up.
+    """
     try:
         import app  # noqa: F401
+        return
     except ImportError:
-        print(
-            "ERROR: the ml_service `app` package is not importable.\n"
-            "Install it first:  pip install -e ../ml_service",
-            file=sys.stderr,
-        )
-        sys.exit(2)
+        pass
+
+    # Auto-discovery: look for ml_service relative to this file and typical Colab paths.
+    import pathlib
+    candidates = [
+        pathlib.Path(__file__).resolve().parents[5] / "ml_service",   # ../../../.. from data/
+        pathlib.Path("/content/skincare/backend_v2/ml_service"),
+        pathlib.Path("/content/facemeup/backend_v2/ml_service"),
+    ]
+    # Also check PYTHONPATH env var
+    for extra in os.environ.get("PYTHONPATH", "").split(":"):
+        if extra:
+            candidates.append(pathlib.Path(extra))
+
+    for candidate in candidates:
+        if (candidate / "app").is_dir() and str(candidate) not in sys.path:
+            sys.path.insert(0, str(candidate))
+            try:
+                import app  # noqa: F401
+                log.info("ml_service auto-added to sys.path from %s", candidate)
+                return
+            except ImportError:
+                sys.path.pop(0)
+
+    print(
+        "ERROR: the ml_service `app` package is not importable.\n"
+        "Fix:  pip install -e /path/to/backend_v2/ml_service\n"
+        "  OR: PYTHONPATH=/path/to/backend_v2/ml_service python -m skin_training.data.precompute ...",
+        file=sys.stderr,
+    )
+    sys.exit(2)
 
 
 def main() -> None:
