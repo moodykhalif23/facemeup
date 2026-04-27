@@ -67,7 +67,7 @@ def stub_onnx_path(tmp_path_factory) -> Path:
     """Build a tiny random-weights ONNX classifier once per session."""
     from build_stub_classifier import build_stub
     out = tmp_path_factory.mktemp("onnx") / "stub.onnx"
-    build_stub(out, n_conditions=6, input_size=224, seed=7)
+    build_stub(out, n_conditions=7, input_size=224, seed=7)
     return out
 
 

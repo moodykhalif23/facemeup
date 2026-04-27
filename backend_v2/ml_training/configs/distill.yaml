@@ -14,7 +14,7 @@ model:
   pretrained: false                # teacher loaded from ckpt, not pretrained hub
   dropout: 0.4
   embed_dim: 256
-  n_conditions: 6
+  n_conditions: 7
   n_skin_types: 5
   skin_type_head_enabled: false
 

@@ -6,9 +6,10 @@ from skin_training.data.labels import (
 
 
 def test_condition_enum_has_6_members() -> None:
-    assert len(Condition) == 6
+    assert len(Condition) == 7
     assert Condition.ACNE == 0
     assert Condition.REDNESS == 5
+    assert Condition.DARK_CIRCLES == 6
 
 
 def test_acne_maps_to_macro_acne() -> None:
@@ -25,14 +26,14 @@ def test_seborrheic_dermatitis_triggers_oiliness_and_redness() -> None:
 
 def test_melasma_is_hyperpigmentation() -> None:
     vec = scin_labels_to_vector(["Melasma"])
-    assert vec[Condition.HYPERPIGMENTATION] == 1
+    assert vec[Condition.DARK_SPOTS] == 1
     assert sum(vec) == 1
 
 
 def test_multiple_labels_aggregate() -> None:
     vec = scin_labels_to_vector(["Acne vulgaris", "Melasma", "Rosacea"])
     assert vec[Condition.ACNE] == 1
-    assert vec[Condition.HYPERPIGMENTATION] == 1
+    assert vec[Condition.DARK_SPOTS] == 1
     assert vec[Condition.REDNESS] == 1
 
 

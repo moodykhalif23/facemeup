@@ -13,6 +13,7 @@ import numpy as np
 import pytest
 import torch
 
+from skin_training.data.labels import Condition
 from skin_training.models.classifier import build_model
 from skin_training.train.losses import compute_pos_weight
 
@@ -22,14 +23,14 @@ from skin_training.train.losses import compute_pos_weight
 @pytest.fixture(scope="module")
 def tiny_teacher():
     return build_model("mobilenetv3_small_100", pretrained=False,
-                       embed_dim=32, dropout=0.0, n_conditions=6,
+                       embed_dim=32, dropout=0.0, n_conditions=len(Condition),
                        n_skin_types=5, skin_type_head_enabled=False).eval()
 
 
 @pytest.fixture(scope="module")
 def tiny_student():
     return build_model("mobilenetv3_small_100", pretrained=False,
-                       embed_dim=32, dropout=0.0, n_conditions=6,
+                       embed_dim=32, dropout=0.0, n_conditions=len(Condition),
                        n_skin_types=5, skin_type_head_enabled=False)
 
 
@@ -40,12 +41,12 @@ def test_distillation_loss_backward(tiny_teacher, tiny_student):
     import torch.nn.functional as F
     from skin_training.train.losses import MultiHeadLoss
 
-    label_matrix = np.random.randint(0, 2, size=(16, 6)).astype(np.int32)
+    label_matrix = np.random.randint(0, 2, size=(16, len(Condition))).astype(np.int32)
     pos_weight   = compute_pos_weight(label_matrix)
     hard_fn      = MultiHeadLoss(pos_weight=pos_weight)
 
     x = torch.randn(4, 3, 112, 112)
-    y = torch.randint(0, 2, (4, 6)).float()
+    y = torch.randint(0, 2, (4, len(Condition))).float()
 
     temperature = 4.0
     alpha = 0.5

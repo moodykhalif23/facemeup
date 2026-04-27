@@ -3,7 +3,7 @@
 Lets us exercise the full `/v1/analyze` path (ONNX load, inference, Grad-CAM)
 without waiting for the real Phase 3 training run.
 
-The stub is a tiny 2-layer CNN with output shape (N, 6) after sigmoid — same
+The stub is a tiny 2-layer CNN with output shape (N, 7) after sigmoid — same
 contract as the production model trained by ml_training/.
 
 Usage:
@@ -31,7 +31,7 @@ except ImportError:
 
 def build_stub(
     out_path: Path,
-    n_conditions: int = 6,
+    n_conditions: int = 7,
     input_size: int = 224,
     seed: int = 0,
 ) -> Path:
@@ -85,7 +85,7 @@ def main() -> None:
     parser.add_argument("--output", type=Path,
                         default=Path(__file__).resolve().parent.parent / "models" / "skin_classifier_mobilenet.onnx")
     parser.add_argument("--input-size", type=int, default=224)
-    parser.add_argument("--n-conditions", type=int, default=6)
+    parser.add_argument("--n-conditions", type=int, default=7)
     parser.add_argument("--seed", type=int, default=0)
     args = parser.parse_args()
 

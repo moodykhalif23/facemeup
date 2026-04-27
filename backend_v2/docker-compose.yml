@@ -23,7 +23,7 @@ services:
       JWT_ALGORITHM: HS256
       ML_SERVICE_URL: http://ml-service:8000
       MODEL_SKIN_TYPES: "Oily,Dry,Combination,Normal,Sensitive"
-      MODEL_CONDITIONS: "Acne,Hyperpigmentation,Uneven tone,Dehydration,Wrinkles,Redness,None detected"
+      MODEL_CONDITIONS: "Acne,Dryness,Oiliness,Dark Spots,Wrinkles,Redness,Dark Circles,None detected"
     depends_on:
       - ml-service
     networks:

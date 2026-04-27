@@ -40,7 +40,7 @@ func Load() (*Config, error) {
 		JWTAlgorithm: getenv("JWT_ALGORITHM", "HS256"),
 		MLServiceURL: getenv("ML_SERVICE_URL", "http://ml-service:8000"),
 		SkinTypes:    splitCSV(getenv("MODEL_SKIN_TYPES", "Oily,Dry,Combination,Normal,Sensitive")),
-		Conditions:   splitCSV(getenv("MODEL_CONDITIONS", "Acne,Hyperpigmentation,Uneven tone,Dehydration,Wrinkles,Redness,None detected")),
+		Conditions:   splitCSV(getenv("MODEL_CONDITIONS", "Acne,Dryness,Oiliness,Dark Spots,Wrinkles,Redness,Dark Circles,None detected")),
 
 		WooCommerceURL:    os.Getenv("WOOCOMMERCE_URL"),
 		WooCommerceKey:    os.Getenv("WOOCOMMERCE_CONSUMER_KEY"),

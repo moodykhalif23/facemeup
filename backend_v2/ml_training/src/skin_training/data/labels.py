@@ -1,11 +1,12 @@
-"""Condition taxonomy and SCIN-to-macro label mapping.
+"""Condition taxonomy and source-to-macro label mapping.
 
-The target label set is the 6-class taxonomy from spec §1:
-    Acne, Dryness, Oiliness, Hyperpigmentation, Wrinkles, Redness
+The target label set is a 7-class cosmetic taxonomy aligned to the face-only
+GlowMix/Kaggle concern vocabulary:
+    Acne, Dryness, Oiliness, Dark Spots, Wrinkles, Redness, Dark Circles
 
 SCIN (Google, ~10k consumer photos) annotates ~93 fine-grained dermatologist
 diagnoses plus Fitzpatrick I–VI skin tone. We map the fine labels into macro
-categories so the classifier matches the spec and the frontend contract.
+categories so the classifier matches the cosmetics-oriented frontend contract.
 
 The mapping is deliberately conservative — we only map conditions where the
 spec category is clearly a superset. Anything ambiguous (e.g. "drug rash") is
@@ -21,12 +22,21 @@ class Condition(IntEnum):
     ACNE = 0
     DRYNESS = 1
     OILINESS = 2
-    HYPERPIGMENTATION = 3
+    DARK_SPOTS = 3
     WRINKLES = 4
     REDNESS = 5
+    DARK_CIRCLES = 6
 
 
-CONDITION_NAMES: tuple[str, ...] = tuple(c.name.title() for c in Condition)
+CONDITION_NAMES: tuple[str, ...] = (
+    "Acne",
+    "Dryness",
+    "Oiliness",
+    "Dark Spots",
+    "Wrinkles",
+    "Redness",
+    "Dark Circles",
+)
 
 
 # SCIN condition-name → list of macro Conditions it implies.
@@ -53,20 +63,20 @@ SCIN_MACRO_MAP: dict[str, tuple[Condition, ...]] = {
     "seborrhoeic dermatitis": (Condition.OILINESS, Condition.REDNESS),
     "seborrhea": (Condition.OILINESS,),
 
-    # Hyperpigmentation
-    "melasma": (Condition.HYPERPIGMENTATION,),
-    "post-inflammatory hyperpigmentation": (Condition.HYPERPIGMENTATION,),
-    "pih": (Condition.HYPERPIGMENTATION,),
-    "solar lentigo": (Condition.HYPERPIGMENTATION,),
-    "lentigines": (Condition.HYPERPIGMENTATION,),
-    "ephelides": (Condition.HYPERPIGMENTATION,),
-    "freckles": (Condition.HYPERPIGMENTATION,),
-    "cafe au lait": (Condition.HYPERPIGMENTATION,),
+    # Dark spots / pigmentation
+    "melasma": (Condition.DARK_SPOTS,),
+    "post-inflammatory hyperpigmentation": (Condition.DARK_SPOTS,),
+    "pih": (Condition.DARK_SPOTS,),
+    "solar lentigo": (Condition.DARK_SPOTS,),
+    "lentigines": (Condition.DARK_SPOTS,),
+    "ephelides": (Condition.DARK_SPOTS,),
+    "freckles": (Condition.DARK_SPOTS,),
+    "cafe au lait": (Condition.DARK_SPOTS,),
 
     # Wrinkles / aging
     "rhytides": (Condition.WRINKLES,),
-    "actinic damage": (Condition.WRINKLES, Condition.HYPERPIGMENTATION),
-    "photodamage": (Condition.WRINKLES, Condition.HYPERPIGMENTATION),
+    "actinic damage": (Condition.WRINKLES, Condition.DARK_SPOTS),
+    "photodamage": (Condition.WRINKLES, Condition.DARK_SPOTS),
     "elastosis": (Condition.WRINKLES,),
 
     # Redness / vascular
@@ -77,16 +87,79 @@ SCIN_MACRO_MAP: dict[str, tuple[Condition, ...]] = {
 }
 
 
-def scin_labels_to_vector(scin_labels: list[str]) -> list[int]:
-    """Convert a list of SCIN fine-grained labels to a 6-dim 0/1 macro vector.
+COSMETIC_MACRO_MAP: dict[str, tuple[Condition, ...]] = {
+    # Acne / blemishes
+    "acne": (Condition.ACNE,),
+    "pimple": (Condition.ACNE,),
+    "blemish": (Condition.ACNE,),
+    "breakout": (Condition.ACNE,),
+    "comedone": (Condition.ACNE,),
+    "blackhead": (Condition.ACNE, Condition.OILINESS),
 
-    Case-insensitive substring match against SCIN_MACRO_MAP keys; any label that
-    contains a mapped key contributes. Unknown labels contribute nothing.
-    """
+    # Dryness / texture
+    "dry": (Condition.DRYNESS,),
+    "dryness": (Condition.DRYNESS,),
+    "dehydrat": (Condition.DRYNESS,),
+    "flaky": (Condition.DRYNESS,),
+    "rough": (Condition.DRYNESS,),
+    "texture": (Condition.DRYNESS,),
+
+    # Oiliness / pores / shine
+    "oily": (Condition.OILINESS,),
+    "oiliness": (Condition.OILINESS,),
+    "sebum": (Condition.OILINESS,),
+    "shine": (Condition.OILINESS,),
+    "pore": (Condition.OILINESS,),
+
+    # Pigmentation / dark spots
+    "pigment": (Condition.DARK_SPOTS,),
+    "dark spot": (Condition.DARK_SPOTS,),
+    "spot": (Condition.DARK_SPOTS,),
+    "hyperpig": (Condition.DARK_SPOTS,),
+    "uneven tone": (Condition.DARK_SPOTS,),
+    "discolor": (Condition.DARK_SPOTS,),
+    "melasma": (Condition.DARK_SPOTS,),
+
+    # Wrinkles / fine lines
+    "wrinkle": (Condition.WRINKLES,),
+    "fine line": (Condition.WRINKLES,),
+    "aging": (Condition.WRINKLES,),
+    "ageing": (Condition.WRINKLES,),
+
+    # Redness / irritation / sensitivity
+    "redness": (Condition.REDNESS,),
+    "red": (Condition.REDNESS,),
+    "irritat": (Condition.REDNESS,),
+    "sensitive": (Condition.REDNESS,),
+    "sensitivity": (Condition.REDNESS,),
+    "rosacea": (Condition.REDNESS,),
+
+    # Dark circles
+    "dark circle": (Condition.DARK_CIRCLES,),
+    "under eye": (Condition.DARK_CIRCLES,),
+    "undereye": (Condition.DARK_CIRCLES,),
+    "eye bag": (Condition.DARK_CIRCLES,),
+}
+
+
+def scin_labels_to_vector(scin_labels: list[str]) -> list[int]:
+    """Convert SCIN fine-grained labels to the 7-dim cosmetics target vector."""
+    return _labels_to_vector(scin_labels, SCIN_MACRO_MAP)
+
+
+def cosmetic_labels_to_vector(raw_labels: list[str]) -> list[int]:
+    """Convert Kaggle/GlowMix-style cosmetic concern labels to the target vector."""
+    return _labels_to_vector(raw_labels, COSMETIC_MACRO_MAP)
+
+
+def _labels_to_vector(
+    raw_labels: list[str],
+    mapping: dict[str, tuple[Condition, ...]],
+) -> list[int]:
     vec = [0] * len(Condition)
-    for raw in scin_labels:
+    for raw in raw_labels:
         needle = raw.lower().strip()
-        for key, macros in SCIN_MACRO_MAP.items():
+        for key, macros in mapping.items():
             if key in needle:
                 for c in macros:
                     vec[int(c)] = 1

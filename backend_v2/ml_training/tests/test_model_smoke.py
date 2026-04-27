@@ -13,6 +13,7 @@ import pytest
 import torch
 
 from skin_training.data.sampler import class_balanced_sampler
+from skin_training.data.labels import Condition
 from skin_training.eval.metrics import evaluate
 from skin_training.models.classifier import build_model
 from skin_training.train.losses import MultiHeadLoss, compute_pos_weight
@@ -26,7 +27,7 @@ def tiny_model():
         pretrained=False,
         embed_dim=64,
         dropout=0.1,
-        n_conditions=6,
+        n_conditions=len(Condition),
         n_skin_types=5,
         skin_type_head_enabled=False,
     ).eval()
@@ -35,7 +36,7 @@ def tiny_model():
 def test_model_forward_shape(tiny_model) -> None:
     x = torch.randn(2, 3, 112, 112)
     out = tiny_model(x)
-    assert out.logits_conditions.shape == (2, 6)
+    assert out.logits_conditions.shape == (2, len(Condition))
     assert out.logits_skin_type is None
 
 
@@ -43,15 +44,15 @@ def test_model_training_step_reduces_loss(tiny_model) -> None:
     tiny_model.train()
     torch.manual_seed(0)
     optimizer = torch.optim.AdamW(tiny_model.parameters(), lr=1e-3)
-    loss_fn = MultiHeadLoss(pos_weight=torch.ones(6), skin_type_weight=0.0)
+    loss_fn = MultiHeadLoss(pos_weight=torch.ones(len(Condition)), skin_type_weight=0.0)
 
     # Small but deterministic batch; 3 steps should reduce loss.
     x = torch.randn(4, 3, 112, 112)
     y = torch.tensor([
-        [1, 0, 0, 1, 0, 0],
-        [0, 1, 1, 0, 0, 1],
-        [1, 1, 0, 0, 0, 0],
-        [0, 0, 0, 1, 1, 0],
+        [1, 0, 0, 1, 0, 0, 0],
+        [0, 1, 1, 0, 0, 1, 0],
+        [1, 1, 0, 0, 0, 0, 0],
+        [0, 0, 0, 1, 1, 0, 1],
     ], dtype=torch.float32)
 
     losses = []
@@ -67,11 +68,11 @@ def test_model_training_step_reduces_loss(tiny_model) -> None:
 
 def test_pos_weight_cap_applied() -> None:
     # class 0 present once in 100 samples → naive pos_weight ~99. Cap should clamp.
-    labels = np.zeros((100, 6), dtype=np.int32)
+    labels = np.zeros((100, len(Condition)), dtype=np.int32)
     labels[0, 0] = 1
     labels[:, 1] = 1  # class 1 always present → weight < 1, but clamped to 0.5 floor
     w = compute_pos_weight(labels, cap=5.0)
-    assert w.shape == (6,)
+    assert w.shape == (len(Condition),)
     assert 0.5 <= float(w[0]) <= 5.0
     assert 0.5 <= float(w[1]) <= 5.0
 
@@ -97,13 +98,13 @@ def test_class_balanced_sampler_weights_rare_class_higher() -> None:
 
 def test_evaluate_perfect_predictions() -> None:
     rng = np.random.default_rng(0)
-    targets = rng.integers(0, 2, size=(50, 6)).astype(np.int32)
+    targets = rng.integers(0, 2, size=(50, len(Condition))).astype(np.int32)
     # Probs slightly above 0.5 where target=1, slightly below where target=0
     probs = targets.astype(np.float32) * 0.8 + (1 - targets) * 0.2
     fp = rng.integers(1, 7, size=50)
     report = evaluate(probs, targets, fp)
     assert report.n_samples == 50
-    assert len(report.overall) == 6
+    assert len(report.overall) == len(Condition)
     # Every class perfectly separable
     for m in report.overall:
         if m.support > 0:

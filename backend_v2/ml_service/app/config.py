@@ -21,9 +21,10 @@ class Settings(BaseSettings):
         "Acne",
         "Dryness",
         "Oiliness",
-        "Hyperpigmentation",
+        "Dark Spots",
         "Wrinkles",
         "Redness",
+        "Dark Circles",
     )
 
     onnx_providers: tuple[str, ...] = ("CPUExecutionProvider",)

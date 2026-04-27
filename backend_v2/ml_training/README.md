@@ -76,23 +76,27 @@ pytest -v                         # smoke tests
 ## Data sources
 
 - **SCIN** (Google, 10k+ consumer photos, Fitzpatrick I–VI, CC-BY-4.0 / DUA) —
-  primary. Download from github.com/google-research-datasets/scin.
+  primary medical source. Use the HuggingFace face-only stream in Colab.
+- **GlowMix** (Kaggle face-only cosmetics dataset) —
+  recommended cosmetic source for acne, dryness, oiliness, dark spots,
+  wrinkles, redness, and dark circles.
 - **Small labeled bootstrap** — ~500 Dr Rashel user photos with consent.
   Match SCIN's schema (see `data/scin.py`) and point `--scin-root` at the
   merged folder.
 
 ## Label taxonomy
 
-Spec §1 six macro conditions, used throughout frontend + API:
+Seven cosmetic face concerns, used throughout training + API:
 
 | idx | name                | SCIN mapping examples                                  |
 |-----|---------------------|--------------------------------------------------------|
 | 0   | Acne                | acne vulgaris, folliculitis, perioral dermatitis       |
 | 1   | Dryness             | eczema, xerosis, atopic dermatitis, ichthyosis         |
 | 2   | Oiliness            | seborrheic dermatitis, seborrhea                       |
-| 3   | Hyperpigmentation   | melasma, PIH, solar lentigo, lentigines                |
+| 3   | Dark Spots          | melasma, PIH, solar lentigo, lentigines                |
 | 4   | Wrinkles            | rhytides, photodamage, elastosis                       |
 | 5   | Redness             | rosacea, telangiectasia, erythema                      |
+| 6   | Dark Circles        | under-eye darkness from GlowMix-style cosmetic labels  |
 
 Multi-label sigmoid (spec §6) — a single face can carry multiple labels.
 

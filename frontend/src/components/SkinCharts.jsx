@@ -10,11 +10,12 @@ const SKIN_PALETTE = {
 
 const COND_PALETTE = {
   Acne:              '#EF4444',   // red-500
-  Hyperpigmentation: '#8B5CF6',   // violet-500
-  'Uneven tone':     '#F59E0B',   // amber-400
-  Dehydration:       '#3B82F6',   // blue-500
+  Dryness:           '#3B82F6',   // blue-500
+  Oiliness:          '#F59E0B',   // amber-400
+  'Dark Spots':      '#8B5CF6',   // violet-500
   Wrinkles:          '#EC4899',   // pink-500
   Redness:           '#F97316',   // orange-500
+  'Dark Circles':    '#6366F1',   // indigo-500
   'None detected':   '#10B981',   // emerald-500
 };
 
@@ -252,7 +253,7 @@ export default function SkinCharts({ profile }) {
   const { skin_type, conditions = [], skin_type_scores, condition_scores, face_quality_score } = profile;
 
   const allSkinTypes  = ['Oily', 'Dry', 'Combination', 'Normal', 'Sensitive'];
-  const allConditions = ['Acne', 'Hyperpigmentation', 'Uneven tone', 'Dehydration', 'Wrinkles', 'Redness', 'None detected'];
+  const allConditions = ['Acne', 'Dryness', 'Oiliness', 'Dark Spots', 'Wrinkles', 'Redness', 'Dark Circles', 'None detected'];
 
   const skinData = allSkinTypes.map((name) => ({
     name,
@@ -345,4 +346,3 @@ export default function SkinCharts({ profile }) {
     </div>
   );
 }
-

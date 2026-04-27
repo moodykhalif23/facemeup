@@ -56,7 +56,7 @@ def test_heatmaps_skipped_when_below_threshold(stub_onnx_session) -> None:
     ]
     regions = ["forehead", "left_cheek", "right_cheek", "nose", "chin"]
     # Force all probabilities below threshold → no heatmaps emitted.
-    baseline = np.full((5, 6), 0.3, dtype=np.float32)
+    baseline = np.full((5, len(settings.conditions)), 0.3, dtype=np.float32)
 
     hm = generate_heatmaps(
         session=stub_onnx_session,
@@ -83,7 +83,7 @@ def test_heatmaps_generated_for_active_conditions(stub_onnx_session) -> None:
     ]
     regions = ["forehead", "left_cheek", "right_cheek", "nose", "chin"]
     # Force Acne (idx 0) high on forehead (patch 0), everything else low.
-    baseline = np.full((5, 6), 0.2, dtype=np.float32)
+    baseline = np.full((5, len(settings.conditions)), 0.2, dtype=np.float32)
     baseline[0, 0] = 0.85
 
     hm = generate_heatmaps(

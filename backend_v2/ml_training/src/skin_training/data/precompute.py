@@ -39,6 +39,7 @@ log = logging.getLogger("precompute")
 def load_samples(
     source: str,
     scin_root: Path | None = None,
+    glowmix_root: Path | None = None,
     hf_cache_dir: str | None = None,
     hf_token: str | None = None,
     face_only: bool = True,
@@ -51,7 +52,7 @@ def load_samples(
     for src in sources_to_load:
         log.info("loading source: %s", src)
         try:
-            batch = _load_single(src, scin_root, hf_cache_dir, hf_token, body_filter)
+            batch = _load_single(src, scin_root, glowmix_root, hf_cache_dir, hf_token, body_filter)
             log.info("  → %d samples from %s", len(batch), src)
             all_samples.extend(batch)
         except Exception as e:
@@ -75,6 +76,7 @@ def precompute(
     source: str,
     output_dir: Path,
     scin_root: Path | None = None,
+    glowmix_root: Path | None = None,
     aligned_size: int = 256,
     skip_existing: bool = True,
     hf_cache_dir: str | None = None,
@@ -97,7 +99,7 @@ def precompute(
     labels_path = output_dir / "labels.csv"
     index_path = output_dir / "index.json"
 
-    samples = load_samples(source, scin_root, hf_cache_dir, hf_token, face_only)
+    samples = load_samples(source, scin_root, glowmix_root, hf_cache_dir, hf_token, face_only)
     if not samples:
         log.error("0 samples loaded — check source, auth, and body-part filter settings")
         sys.exit(3)
@@ -172,12 +174,15 @@ def precompute(
 def _expand_source(source: str) -> list[str]:
     if source == "all":
         return ["scin_hf", "fitzpatrick17k"]
+    if source == "all_face_cosmetic":
+        return ["scin_hf", "glowmix"]
     return [source]
 
 
 def _load_single(
     source: str,
     scin_root: Path | None,
+    glowmix_root: Path | None,
     hf_cache_dir: str | None,
     hf_token: str | None,
     body_filter,
@@ -190,12 +195,20 @@ def _load_single(
         from .sources.fitzpatrick17k import load_fitzpatrick17k
         return load_fitzpatrick17k(body_parts=body_filter, cache_dir=hf_cache_dir, token=hf_token)
 
+    if source == "glowmix":
+        from .sources.glowmix import load_glowmix
+        if glowmix_root is None:
+            raise ValueError("--glowmix-root is required for source=glowmix or source=all_face_cosmetic")
+        return load_glowmix(glowmix_root)
+
     if source == "scin_csv":
         if scin_root is None:
             raise ValueError("--scin-root is required for source=scin_csv")
         return parse_scin_manifest(scin_root, body_parts=body_filter)
 
-    raise ValueError(f"unknown source: {source!r} — use scin_hf | fitzpatrick17k | scin_csv | all")
+    raise ValueError(
+        f"unknown source: {source!r} — use scin_hf | fitzpatrick17k | glowmix | scin_csv | all | all_face_cosmetic"
+    )
 
 
 def _label_row(s: SCINSample) -> str:
@@ -261,11 +274,13 @@ def main() -> None:
         description="Preprocess face-skin images → aligned tensors for training"
     )
     parser.add_argument("--source", default="scin_hf",
-                        choices=["scin_hf", "fitzpatrick17k", "scin_csv", "all"],
+                        choices=["scin_hf", "fitzpatrick17k", "glowmix", "scin_csv", "all", "all_face_cosmetic"],
                         help="Data source (default: scin_hf)")
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--scin-root", type=Path, default=None,
                         help="Path to local SCIN folder (only for source=scin_csv)")
+    parser.add_argument("--glowmix-root", type=Path, default=None,
+                        help="Path to extracted GlowMix Kaggle folder (for source=glowmix/all_face_cosmetic)")
     parser.add_argument("--aligned-size", type=int, default=256)
     parser.add_argument("--force", action="store_true",
                         help="Reprocess even if .npy already exists")
@@ -286,6 +301,7 @@ def main() -> None:
         source=args.source,
         output_dir=args.output,
         scin_root=args.scin_root,
+        glowmix_root=args.glowmix_root,
         aligned_size=args.aligned_size,
         skip_existing=not args.force,
         hf_cache_dir=args.hf_cache_dir,

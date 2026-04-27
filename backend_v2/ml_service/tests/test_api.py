@@ -59,7 +59,7 @@ def test_analyze_with_onnx_classifier(
         assert body["inference_mode"] == "onnx_mobilenet"
         assert body["skin_type"] == "Oily"   # questionnaire hint
         assert set(body["condition_scores"].keys()) == {
-            "Acne", "Dryness", "Oiliness", "Hyperpigmentation", "Wrinkles", "Redness"
+            "Acne", "Dryness", "Oiliness", "Dark Spots", "Wrinkles", "Redness", "Dark Circles"
         }
         # Heatmaps list is always present; may be empty if the random stub's
         # per-patch probs happen to stay below 0.5.

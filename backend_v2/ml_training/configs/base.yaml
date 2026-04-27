@@ -13,7 +13,7 @@ model:
   pretrained: true
   dropout: 0.4
   embed_dim: 256
-  n_conditions: 6                    # Acne, Dryness, Oiliness, Hyperpigmentation, Wrinkles, Redness
+  n_conditions: 7                    # Acne, Dryness, Oiliness, Dark Spots, Wrinkles, Redness, Dark Circles
   n_skin_types: 5                    # Oily, Dry, Combination, Normal, Sensitive
   skin_type_head_enabled: false      # SCIN has no skin-type labels; enable after bootstrap collection
 

@@ -29,7 +29,7 @@ class ModelConfig:
     pretrained: bool = True
     dropout: float = 0.4
     embed_dim: int = 256
-    n_conditions: int = 6
+    n_conditions: int = 7
     n_skin_types: int = 5
     skin_type_head_enabled: bool = False   # enable once we collect skin-type labels
 
