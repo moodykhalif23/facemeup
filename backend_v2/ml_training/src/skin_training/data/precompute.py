@@ -222,13 +222,17 @@ def _import_ml_service_or_fail() -> None:
         pass
 
     # Auto-discovery: look for ml_service relative to this file and typical Colab paths.
+    # This file lives at: ml_training/src/skin_training/data/precompute.py
+    # ml_service lives at: backend_v2/ml_service  (5 levels up from here → backend_v2)
     import pathlib
+    this_file = pathlib.Path(__file__).resolve()
+    backend_v2 = this_file.parents[4]   # backend_v2/
     candidates = [
-        pathlib.Path(__file__).resolve().parents[5] / "ml_service",   # ../../../.. from data/
+        backend_v2 / "ml_service",
         pathlib.Path("/content/skincare/backend_v2/ml_service"),
         pathlib.Path("/content/facemeup/backend_v2/ml_service"),
     ]
-    # Also check PYTHONPATH env var
+    # Also check every entry in PYTHONPATH
     for extra in os.environ.get("PYTHONPATH", "").split(":"):
         if extra:
             candidates.append(pathlib.Path(extra))
