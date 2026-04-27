@@ -82,11 +82,19 @@ def _build_transforms(image_size: int, train: bool):
 
 
 def load_samples(labels_csv: Path, aligned_dir: Path) -> list[AlignedSample]:
-    """Read labels.csv produced by precompute.py into AlignedSample rows."""
+    """Read labels.csv produced by precompute.py into AlignedSample rows.
+
+    Robust to optional columns (body_part added in the face-filter update):
+    condition columns are identified by the pattern c{N}_{name} where N is a digit,
+    not just any column starting with 'c' (e.g. 'case_id' must not be treated as a label).
+    """
     samples: list[AlignedSample] = []
     with labels_csv.open(encoding="utf8") as f:
         reader = csv.DictReader(f)
-        cond_cols = [c for c in reader.fieldnames or [] if c.startswith("c")]
+        fieldnames = reader.fieldnames or []
+        # Match "c0_acne", "c1_dryness", etc. — strict so body_part and case_id are excluded.
+        import re
+        cond_cols = [c for c in fieldnames if re.match(r"^c\d+_", c)]
         for row in reader:
             case_id = row["case_id"]
             path = aligned_dir / f"{case_id}.npy"
