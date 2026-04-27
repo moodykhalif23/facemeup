@@ -13,6 +13,7 @@ __pycache__/
 .venv
 venv/
 valid
+glowmix
 
 # Node
 node_modules/

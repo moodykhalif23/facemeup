@@ -23,10 +23,12 @@ import argparse
 import base64
 import json
 import logging
+import os
 import sys
 from collections import Counter
 from pathlib import Path
 
+import cv2
 import numpy as np
 from tqdm import tqdm
 
@@ -109,6 +111,7 @@ def precompute(
 
     fp_counter: Counter[int] = Counter()
     skipped_no_face = 0
+    fallback_face_crop = 0
     processed = 0
 
     with labels_path.open("w", encoding="utf8", newline="") as lf:
@@ -132,6 +135,19 @@ def precompute(
                 b64 = base64.b64encode(img_bytes).decode("ascii")
                 result = pipeline.run(b64, client_landmarks=None)
             except NoFaceFoundError:
+                if _should_use_face_crop_fallback(s):
+                    try:
+                        fallback = _fallback_face_crop_from_bytes(s.get_bytes(), aligned_size)
+                    except Exception as e:
+                        log.warning("fallback crop failed for %s: %s", s.case_id, e)
+                        skipped_no_face += 1
+                        continue
+                    np.save(out_npy, fallback)
+                    lf.write(_label_row(s))
+                    processed += 1
+                    fallback_face_crop += 1
+                    fp_counter[int(s.fitzpatrick or 0)] += 1
+                    continue
                 skipped_no_face += 1
                 continue
             except Exception as e:
@@ -159,11 +175,14 @@ def precompute(
         "n_candidates": len(samples),
         "n_samples": processed,
         "skipped_no_face": skipped_no_face,
+        "fallback_face_crop": fallback_face_crop,
         "face_detect_skip_pct": round(face_detect_skip_pct, 1),
         "body_part_dist": dict(list(bp_dist.items())[:20]),
         "fitzpatrick_dist": {str(k): v for k, v in sorted(fp_counter.items())},
     }
     index_path.write_text(json.dumps(summary, indent=2))
+    if fallback_face_crop:
+        log.info("used GlowMix fallback face crop for %d samples", fallback_face_crop)
     log.info("done: processed=%d, skipped_no_face=%d (%.0f%%)",
              processed, skipped_no_face, face_detect_skip_pct)
     return summary
@@ -218,6 +237,49 @@ def _label_row(s: SCINSample) -> str:
     return ",".join([s.case_id, str(fp), bp,
                      *[str(v) for v in s.label_vector],
                      cond_str]) + "\n"
+
+
+def _should_use_face_crop_fallback(sample: SCINSample) -> bool:
+    """Only allow fallback crops for sources expected to be face-centric.
+
+    GlowMix is merged from cosmetic/selfie-oriented sources, but many samples
+    appear to be tight crops that fail classical face detectors. We keep the
+    stricter behaviour for SCIN/Fitzpatrick/local CSV sources so non-face body
+    parts do not silently enter training.
+    """
+    return sample.case_id.startswith("glowmix_")
+
+
+def _fallback_face_crop_from_bytes(image_bytes: bytes, size: int) -> np.ndarray:
+    """Decode an image and produce a square fallback crop when detection fails.
+
+    This is intentionally simple: it preserves as much of an already-cropped
+    facial close-up as possible instead of discarding it. For portrait images,
+    the crop is biased slightly upward to keep the eye region in-frame.
+    """
+    buf = np.frombuffer(image_bytes, dtype=np.uint8)
+    image = cv2.imdecode(buf, cv2.IMREAD_COLOR)
+    if image is None:
+        raise ValueError("could not decode image bytes")
+
+    h, w = image.shape[:2]
+    side = min(h, w)
+    if side < 32:
+        raise ValueError(f"image too small for fallback crop: {w}x{h}")
+
+    x0 = max(0, (w - side) // 2)
+    if h > w:
+        # Portrait selfies usually place the eye line above the center.
+        y0 = max(0, min(h - side, int(round((h - side) * 0.35))))
+    else:
+        y0 = max(0, (h - side) // 2)
+
+    crop = image[y0:y0 + side, x0:x0 + side]
+    if crop.shape[0] != side or crop.shape[1] != side:
+        raise ValueError(f"invalid fallback crop produced: {crop.shape}")
+    if side != size:
+        crop = cv2.resize(crop, (size, size), interpolation=cv2.INTER_LINEAR)
+    return crop.astype(np.uint8, copy=False)
 
 
 def _import_ml_service_or_fail() -> None:
