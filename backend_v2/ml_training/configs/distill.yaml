@@ -1,0 +1,46 @@
+# Distillation config — inherits data + loss settings from base.yaml.
+# Run after Phase 3 produces the teacher checkpoint.
+
+data:
+  aligned_dir: data/aligned      # same folder used for teacher training
+  val_split: 0.1
+  test_split: 0.1
+  num_workers: 4
+  pin_memory: true
+  image_size: 224
+
+model:
+  backbone: efficientnet_b0        # teacher backbone (used to re-load teacher weights)
+  pretrained: false                # teacher loaded from ckpt, not pretrained hub
+  dropout: 0.4
+  embed_dim: 256
+  n_conditions: 6
+  n_skin_types: 5
+  skin_type_head_enabled: false
+
+# Student overrides are passed on the CLI: --student-backbone mobilenetv3_small_100
+# The config model section describes the TEACHER architecture.
+
+train:
+  epochs: 15                       # distillation converges faster than full training
+  batch_size: 32
+  lr: 0.0005                       # lower than teacher training
+  weight_decay: 0.0001
+  lr_schedule: cosine
+  warmup_epochs: 1
+  label_smoothing: 0.0
+  grad_clip: 1.0
+  mixed_precision: true
+  checkpoint_dir: runs/student
+  log_every: 20
+  save_every_epochs: 5
+  early_stop_patience: 5
+  seed: 42
+
+loss:
+  pos_weight_cap: 5.0
+  skin_type_weight: 0.0            # skin-type head disabled in Phase 3
+
+# Distillation hyper-params (CLI flags; documented here for reference)
+# --alpha 0.5        weight for hard (ground-truth) loss vs soft (KD) loss
+# --temperature 4.0  temperature for softening teacher logits

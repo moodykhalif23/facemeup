@@ -36,9 +36,11 @@ dev = [
 ]
 
 [project.scripts]
-skin-train = "skin_training.train.loop:main"
+skin-train      = "skin_training.train.loop:main"
+skin-distil     = "skin_training.train.distill:main"
 skin-precompute = "skin_training.data.precompute:main"
-skin-export = "skin_training.export.to_onnx:main"
+skin-export     = "skin_training.export.to_onnx:main"
+skin-quantize   = "skin_training.export.quantize:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
