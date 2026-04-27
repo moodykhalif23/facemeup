@@ -1,32 +1,16 @@
-"""Load the Fitzpatrick17k dataset.
+"""Load Fitzpatrick17k from HuggingFace (streaming) or CSV fallback.
 
-Fitzpatrick17k (Groh et al. 2021):
-  - 16,577 clinical dermatology images
-  - 114 skin conditions, Fitzpatrick skin-type I–VI labels
-  - All images are photographs of skin ON ANY BODY PART
+HuggingFace repo: mattgroh/fitzpatrick17k
+  If that 404s, search HuggingFace for "fitzpatrick17k" and update HF_REPO.
 
-Two loading strategies (tried in order):
-  A. HuggingFace ``load_dataset``  (fast, no scraping)
-  B. CSV + URL download fallback  (slow but always works)
-
-Strategy A (HuggingFace):
-    The canonical repo at the time of writing is ``mattgroh/fitzpatrick17k``.
-    If that 404s, search HuggingFace for "fitzpatrick17k" and update HF_REPO below.
-
-Strategy B (CSV):
-    Downloads the raw CSV from GitHub then fetches each image URL.
-    Slow (~2 h for 16k images on Colab), but does not require HF access.
-
-Condition labels map to our 6-class taxonomy through the same SCIN_MACRO_MAP
-table — the condition name strings are similar enough to work directly.
+Same streaming approach as SCIN — no large download needed.
 """
 
 from __future__ import annotations
 
-import base64
 import csv
 import logging
-import time
+import os
 import urllib.request
 from io import BytesIO
 from pathlib import Path
@@ -36,21 +20,11 @@ from ..scin import SCINSample, _is_face_region
 
 log = logging.getLogger(__name__)
 
-# Verify this repo name on huggingface.co if you hit 404 or GatedRepo errors.
-HF_REPO = "mattgroh/fitzpatrick17k"
-
-CSV_URL = (
+HF_REPO  = "mattgroh/fitzpatrick17k"
+CSV_URL  = (
     "https://raw.githubusercontent.com/mattgroh/fitzpatrick17k"
     "/main/fitzpatrick17k.csv"
 )
-
-# Fitzpatrick17k body-part values (best-effort mapping; the dataset does not
-# always carry a body-part field — if absent we include all images and rely on
-# the face detector to filter at precompute time).
-FP17K_FACE_VALUES: frozenset[str] = frozenset({
-    "face", "head", "neck", "scalp", "cheek", "forehead",
-    "nose", "chin", "perioral", "periorbital",
-})
 
 
 def load_fitzpatrick17k(
@@ -62,46 +36,44 @@ def load_fitzpatrick17k(
     body_parts: frozenset[str] | None = FACE_BODY_PARTS,
     csv_url: str = CSV_URL,
     download_dir: Path | None = None,
-    max_images: int | None = None,
+    max_samples: int | None = None,
 ) -> list[SCINSample]:
-    """Return Fitzpatrick17k as a list of SCINSample (image_bytes populated).
+    """Return Fitzpatrick17k as list[SCINSample] (streaming, no full download).
 
     Args:
-        strategy: ``"hf"`` tries HuggingFace first, then falls back to CSV.
-                  ``"csv"`` goes straight to CSV+download (slower).
-        body_parts: Face-region filter. ``None`` = accept all regions.
-        max_images: Cap total samples (useful for quick smoke tests).
+        strategy:    ``"hf"`` tries HuggingFace first, falls back to CSV.
+                     ``"csv"`` goes straight to CSV+URL download (very slow).
+        max_samples: Cap total samples (useful for smoke tests).
     """
     if strategy == "hf":
         try:
             return _load_hf(hf_repo, hf_split, cache_dir, token,
-                            body_parts, max_images)
+                            body_parts, max_samples)
         except Exception as e:
-            log.warning("HuggingFace load failed (%s) — falling back to CSV", e)
+            log.warning("Fitzpatrick17k HF failed (%s) — falling back to CSV", e)
 
-    return _load_csv(csv_url, download_dir, body_parts, max_images)
+    return _load_csv(csv_url, download_dir, body_parts, max_samples)
 
 
-# ── Strategy A — HuggingFace ─────────────────────────────────────────────────
+# ── HuggingFace (streaming) ───────────────────────────────────────────────────
 
 def _load_hf(
-    repo: str,
-    split: str,
-    cache_dir: str | None,
-    token: str | None,
-    body_parts: frozenset[str] | None,
-    max_images: int | None,
+    repo: str, split: str, cache_dir: str | None,
+    token: str | None, body_parts, max_samples,
 ) -> list[SCINSample]:
     try:
         from datasets import load_dataset
     except ImportError as e:
         raise ImportError("pip install datasets") from e
 
-    log.info("loading %s/%s from HuggingFace …", repo, split)
-    ds = load_dataset(repo, split=split, cache_dir=cache_dir, token=token)
-    log.info("Fitzpatrick17k HF: %d rows, features: %s", len(ds), list(ds.features))
+    hf_token = token or os.environ.get("HF_TOKEN") or os.environ.get("HUGGINGFACE_TOKEN")
 
-    cols = set(ds.features.keys())
+    log.info("streaming %s/%s…", repo, split)
+    ds = load_dataset(repo, split=split, streaming=True,
+                      cache_dir=cache_dir, token=hf_token)
+
+    features = ds.features or {}
+    cols  = set(features.keys())
     img_col   = _pick(cols, ("image", "img", "pixel_values"))
     url_col   = _pick(cols, ("url",))
     label_col = _pick(cols, ("label", "condition", "nine_partition_label",
@@ -110,12 +82,17 @@ def _load_hf(
                              "high_fitzpatrick_scale", "low_fitzpatrick_scale"))
     body_col  = _pick(cols, ("body_part", "anatom_site", "location"))
 
+    log.info("fp17k column map → img=%s url=%s label=%s fp=%s body=%s",
+             img_col, url_col, label_col, fp_col, body_col)
+
     samples: list[SCINSample] = []
     for i, row in enumerate(ds):
-        if max_images and len(samples) >= max_images:
+        if max_samples and len(samples) >= max_samples:
             break
+        if i % 500 == 0:
+            log.info("fp17k: row %d, collected %d", i, len(samples))
 
-        raw_body = str(row[body_col]).lower().strip() if body_col else ""
+        raw_body = str(row.get(body_col, "")).lower().strip() if body_col else ""
         if body_parts and body_col and not _is_face_region(raw_body, body_parts):
             continue
 
@@ -123,7 +100,7 @@ def _load_hf(
         if img_bytes is None:
             continue
 
-        raw_label = _extract_label(row, label_col)
+        raw_label = str(row.get(label_col, "") or "") if label_col else ""
         samples.append(SCINSample(
             case_id=f"fp17k_{i}",
             image_path=None,
@@ -138,15 +115,9 @@ def _load_hf(
     return samples
 
 
-# ── Strategy B — CSV + download ───────────────────────────────────────────────
+# ── CSV fallback ─────────────────────────────────────────────────────────────
 
-def _load_csv(
-    csv_url: str,
-    download_dir: Path | None,
-    body_parts: frozenset[str] | None,
-    max_images: int | None,
-) -> list[SCINSample]:
-    """Download CSV, then fetch each image URL. Very slow; use only if HF is unavailable."""
+def _load_csv(csv_url, download_dir, body_parts, max_samples) -> list[SCINSample]:
     if download_dir is None:
         download_dir = Path("/content/fp17k_images")
     download_dir.mkdir(parents=True, exist_ok=True)
@@ -159,28 +130,20 @@ def _load_csv(
     samples: list[SCINSample] = []
     failed = 0
     for i, row in enumerate(rows):
-        if max_images and len(samples) >= max_images:
+        if max_samples and len(samples) >= max_samples:
             break
-
+        url   = row.get("url", "").strip()
         label = row.get("label") or row.get("three_partition_label") or ""
         fp_raw = row.get("fitzpatrick") or row.get("fitzpatrick_scale")
-        url = row.get("url", "").strip()
-        case_id = f"fp17k_csv_{i}"
-
         if not url:
             continue
-
-        # No body_part column in the raw CSV — rely on face detector at precompute.
-        img_path = download_dir / f"{i}.jpg"
+        img_path  = download_dir / f"{i}.jpg"
         img_bytes = _fetch_url(url, img_path)
         if img_bytes is None:
             failed += 1
-            if failed % 100 == 0:
-                log.warning("Fitzpatrick17k CSV: %d download failures so far", failed)
             continue
-
         samples.append(SCINSample(
-            case_id=case_id,
+            case_id=f"fp17k_csv_{i}",
             image_path=None,
             image_bytes=img_bytes,
             label_vector=tuple(scin_labels_to_vector([label] if label else [])),
@@ -188,8 +151,7 @@ def _load_csv(
             fitzpatrick=fitzpatrick_from_str(fp_raw),
             body_part=None,
         ))
-
-    log.info("Fitzpatrick17k CSV: %d samples loaded, %d download failures", len(samples), failed)
+    log.info("Fitzpatrick17k CSV: %d samples, %d failures", len(samples), failed)
     return samples
 
 
@@ -202,9 +164,8 @@ def _pick(cols: set[str], options: tuple[str, ...]) -> str | None:
     return None
 
 
-def _row_to_bytes(row: dict, img_col: str | None, url_col: str | None) -> bytes | None:
-    if img_col:
-        raw = row[img_col]
+def _row_to_bytes(row, img_col, url_col) -> bytes | None:
+    if img_col and (raw := row.get(img_col)) is not None:
         if isinstance(raw, bytes):
             return raw
         if isinstance(raw, dict) and raw.get("bytes"):
@@ -213,8 +174,8 @@ def _row_to_bytes(row: dict, img_col: str | None, url_col: str | None) -> bytes 
             buf = BytesIO()
             raw.save(buf, format="JPEG", quality=95)
             return buf.getvalue()
-    if url_col:
-        return _fetch_url(row[url_col])
+    if url_col and (url := row.get(url_col)):
+        return _fetch_url(str(url))
     return None
 
 
@@ -230,12 +191,3 @@ def _fetch_url(url: str, cache_path: Path | None = None) -> bytes | None:
     except Exception as e:
         log.debug("fetch failed %s: %s", url, e)
         return None
-
-
-def _extract_label(row: dict, col: str | None) -> str:
-    if col is None:
-        return ""
-    val = row.get(col)
-    if isinstance(val, list):
-        return val[0] if val else ""
-    return str(val) if val else ""
