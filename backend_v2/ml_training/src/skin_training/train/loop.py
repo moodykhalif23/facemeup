@@ -10,6 +10,7 @@ from __future__ import annotations
 import argparse
 import logging
 import math
+import os
 import sys
 import time
 from dataclasses import asdict
@@ -68,14 +69,24 @@ def train_model(cfg: Config, resume_from: Path | None = None) -> dict:
     train_ds = AlignedFaceDataset(aligned_dir, train_s, cfg.data.image_size, train=True)
     val_ds   = AlignedFaceDataset(aligned_dir, val_s,   cfg.data.image_size, train=False)
 
+    train_batch_size = min(cfg.train.batch_size, max(1, len(train_ds)))
+    val_batch_size = min(cfg.train.batch_size, max(1, len(val_ds)))
+    num_workers = min(cfg.data.num_workers, os.cpu_count() or cfg.data.num_workers)
+    drop_last = len(train_ds) > train_batch_size
+    if train_batch_size != cfg.train.batch_size or num_workers != cfg.data.num_workers:
+        log.warning(
+            "adjusting loader settings for dataset size: batch_size %d→%d, num_workers %d→%d, drop_last=%s",
+            cfg.train.batch_size, train_batch_size, cfg.data.num_workers, num_workers, drop_last,
+        )
+
     sampler = class_balanced_sampler(train_s)
     train_loader = DataLoader(
-        train_ds, batch_size=cfg.train.batch_size, sampler=sampler,
-        num_workers=cfg.data.num_workers, pin_memory=cfg.data.pin_memory, drop_last=True,
+        train_ds, batch_size=train_batch_size, sampler=sampler,
+        num_workers=num_workers, pin_memory=cfg.data.pin_memory, drop_last=drop_last,
     )
     val_loader = DataLoader(
-        val_ds, batch_size=cfg.train.batch_size, shuffle=False,
-        num_workers=cfg.data.num_workers, pin_memory=cfg.data.pin_memory,
+        val_ds, batch_size=val_batch_size, shuffle=False,
+        num_workers=num_workers, pin_memory=cfg.data.pin_memory,
     )
 
     # --- model / loss / optim ----------------------------------------------
@@ -147,11 +158,12 @@ def train_model(cfg: Config, resume_from: Path | None = None) -> dict:
             if m.auc is not None:
                 writer.add_scalar(f"val/auc/{m.label}", m.auc, epoch)
 
-        is_best = val_f1_macro > best_f1
+        best_path = ckpt_dir / "best.pt"
+        is_best = (not best_path.is_file()) or (val_f1_macro > best_f1)
         if is_best:
             best_f1 = val_f1_macro
             patience = 0
-            _save_checkpoint(ckpt_dir / "best.pt", epoch, model, optimizer, scheduler, scaler, best_f1, cfg)
+            _save_checkpoint(best_path, epoch, model, optimizer, scheduler, scaler, best_f1, cfg)
         else:
             patience += 1
         if epoch % cfg.train.save_every_epochs == 0:
