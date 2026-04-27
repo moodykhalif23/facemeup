@@ -18,6 +18,7 @@ from __future__ import annotations
 import logging
 import os
 import urllib.request
+from io import BytesIO
 
 from ..labels import fitzpatrick_from_str, scin_labels_to_vector
 from ..scin import SCINSample
@@ -55,7 +56,7 @@ def load_scin_hf(
     token: str | None = None,
     max_samples: int | None = None,
 ) -> list[SCINSample]:
-    """Stream SCIN metadata, fetch face images on demand via HF HTTP."""
+    """Stream SCIN metadata and normalize image payloads into raw bytes."""
     try:
         from datasets import load_dataset
     except ImportError as e:
@@ -98,24 +99,24 @@ def load_scin_hf(
         if max_samples and len(samples) >= max_samples:
             break
 
-        # Body-part filter
-        if face_bp_cols:
-            if not any(_truthy(row.get(c)) for c in face_bp_cols):
-                skipped_body += 1
-                continue
-        elif all_bp_cols:
-            face_like = [c for c in all_bp_cols
-                         if any(t in c for t in ("face","head","neck","scalp"))]
-            if face_like and not any(_truthy(row.get(c)) for c in face_like):
-                skipped_body += 1
-                continue
+        # Respect `body_parts=None` from --all-body-parts and only filter when requested.
+        if body_parts is not None:
+            if face_bp_cols:
+                if not any(_truthy(row.get(c)) for c in face_bp_cols):
+                    skipped_body += 1
+                    continue
+            elif all_bp_cols:
+                face_like = [c for c in all_bp_cols
+                             if any(t in c for t in ("face", "head", "neck", "scalp"))]
+                if face_like and not any(_truthy(row.get(c)) for c in face_like):
+                    skipped_body += 1
+                    continue
 
-        # Fetch image bytes via HF HTTP
-        img_path = row.get(img_path_col)
-        if not img_path:
+        img_value = row.get(img_path_col)
+        if img_value is None:
             skipped_img += 1
             continue
-        img_bytes = _fetch_hf_image(str(img_path), hf_repo, hf_token)
+        img_bytes = _row_to_bytes(img_value, hf_repo, hf_token)
         if img_bytes is None:
             skipped_img += 1
             continue
@@ -139,7 +140,7 @@ def load_scin_hf(
             label_vector=tuple(scin_labels_to_vector(raw_labels)),
             raw_conditions=tuple(raw_labels),
             fitzpatrick=fitzpatrick_from_str(fp_raw),
-            body_part="head_or_neck" if face_bp_cols else None,
+            body_part=_active_body_parts(row, all_bp_cols),
         ))
 
     log.info(
@@ -164,6 +165,40 @@ def _truthy(val) -> bool:
     return str(val).lower().strip() in ("true", "1", "yes", "y")
 
 
+def _row_to_bytes(raw, repo_id: str, token: str | None) -> bytes | None:
+    if raw is None:
+        return None
+    if isinstance(raw, (bytes, bytearray)):
+        return bytes(raw)
+    if isinstance(raw, str):
+        path = raw.strip()
+        if not path:
+            return None
+        if path.startswith(("http://", "https://")):
+            return _fetch_url(path, token)
+        return _fetch_hf_image(path, repo_id, token)
+    if isinstance(raw, dict):
+        if raw.get("bytes"):
+            return bytes(raw["bytes"])
+        if raw.get("path"):
+            return _row_to_bytes(raw["path"], repo_id, token)
+        return None
+    if hasattr(raw, "save"):
+        buf = BytesIO()
+        fmt = getattr(raw, "format", None) or "PNG"
+        raw.save(buf, format=fmt)
+        return buf.getvalue()
+    if hasattr(raw, "filename") and getattr(raw, "filename"):
+        return _row_to_bytes(raw.filename, repo_id, token)
+    log.debug("unsupported SCIN image payload type: %s", type(raw).__name__)
+    return None
+
+
+def _active_body_parts(row: dict, body_cols: list[str]) -> str | None:
+    active = [c.removeprefix("body_parts_") for c in body_cols if _truthy(row.get(c))]
+    return "|".join(active) if active else None
+
+
 def _fetch_hf_image(path: str, repo_id: str, token: str | None) -> bytes | None:
     """Download one image from a HuggingFace dataset repo (no local caching).
 
@@ -171,6 +206,10 @@ def _fetch_hf_image(path: str, repo_id: str, token: str | None) -> bytes | None:
         https://huggingface.co/datasets/{repo}/resolve/main/{path}
     """
     url = f"https://huggingface.co/datasets/{repo_id}/resolve/main/{path.lstrip('/')}"
+    return _fetch_url(url, token)
+
+
+def _fetch_url(url: str, token: str | None = None) -> bytes | None:
     headers: dict[str, str] = {}
     if token:
         headers["Authorization"] = f"Bearer {token}"
