@@ -2,16 +2,6 @@
 
 Modern, cross-platform frontend built with React, Ant Design, and Capacitor.
 
-## Tech Stack
-
-- **React 18** - UI library
-- **Ant Design** - UI component library
-- **Vite** - Build tool and dev server
-- **React Router** - Routing
-- **Redux Toolkit** - State management
-- **Capacitor** - Native mobile(IOS && Android)
-- **Axios** - HTTP client
-
 ## Features
 
 - ✅ Cross-platform (Web, iOS, Android)

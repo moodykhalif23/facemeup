@@ -29,6 +29,14 @@ export default defineConfig({
           join(root, 'public/mediapipe/face_mesh'),
         );
       },
+      configureServer(server) {
+        // Also copy during dev so the files are available immediately
+        const root = resolve(__dirname);
+        copyDir(
+          join(root, 'node_modules/@mediapipe/face_mesh'),
+          join(root, 'public/mediapipe/face_mesh'),
+        );
+      },
     },
   ],
   server: {
