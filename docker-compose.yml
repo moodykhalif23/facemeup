@@ -1,23 +1,40 @@
+name: skincare
+
 services:
   api:
     build:
-      context: ./backend
+      context: ./backend_v2
       dockerfile: Dockerfile
-    container_name: skincare-api
+    container_name: skincare-v2-api
     env_file:
-      - ./backend/.env
+      - ./backend_v2/.env
     ports:
-      - "8011:8000"
-    volumes:
-      - ./backend:/app
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+      - "8012:8000"
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@skincare-db:5432/skincare?sslmode=disable
+      REDIS_URL: redis://skincare-redis:6379/0
+      ML_SERVICE_URL: http://ml-service:8000
     depends_on:
       db:
         condition: service_healthy
       redis:
         condition: service_healthy
-    command: sh -c "alembic upgrade head && uvicorn app.main:app --reload --host 0.0.0.0 --port 8000"
+      ml-service:
+        condition: service_started
+    networks:
+      - skincare
+
+  ml-service:
+    build:
+      context: ./backend_v2/ml_service
+      dockerfile: Dockerfile
+    container_name: skincare-v2-ml
+    ports:
+      - "8013:8000"
+    env_file:
+      - ./backend_v2/.env
+    volumes:
+      - ./backend_v2/ml_service/models:/app/models:ro
     networks:
       - skincare
 
