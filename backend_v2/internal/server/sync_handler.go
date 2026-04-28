@@ -172,9 +172,9 @@ func fallbackSKU(p woocommerce.Product) string {
 
 func wcToUpsertInput(p woocommerce.Product) *db.UpsertInput {
 	sku := fallbackSKU(p)
-	price, _ := strconv.ParseFloat(p.Price, 64)
+	price := woocommerce.ParsePrice(p.Price)
 	if price == 0 {
-		price, _ = strconv.ParseFloat(p.RegularPrice, 64)
+		price = woocommerce.ParsePrice(p.RegularPrice)
 	}
 	var priceP *float64
 	if price > 0 {

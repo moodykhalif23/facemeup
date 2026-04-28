@@ -20,16 +20,16 @@ import (
 // Product is a minimal subset of WC's product schema — just what we map
 // into product_catalog.
 type Product struct {
-	ID               int    `json:"id"`
-	Name             string `json:"name"`
-	Slug             string `json:"slug"`
-	SKU              string `json:"sku"`
-	Price            string `json:"price"`             // WC serialises as string
-	RegularPrice     string `json:"regular_price"`
-	StockQuantity    *int   `json:"stock_quantity"`
-	StockStatus      string `json:"stock_status"`
-	Description      string `json:"description"`
-	ShortDescription string `json:"short_description"`
+	ID               int             `json:"id"`
+	Name             string          `json:"name"`
+	Slug             string          `json:"slug"`
+	SKU              string          `json:"sku"`
+	Price            json.RawMessage `json:"price"`
+	RegularPrice     json.RawMessage `json:"regular_price"`
+	StockQuantity    *int            `json:"stock_quantity"`
+	StockStatus      string          `json:"stock_status"`
+	Description      string          `json:"description"`
+	ShortDescription string          `json:"short_description"`
 	Categories       []struct {
 		Name string `json:"name"`
 	} `json:"categories"`
@@ -172,9 +172,9 @@ func MapToUpsert(p Product) map[string]any {
 	if sku == "" {
 		sku = fmt.Sprintf("wc-%d", p.ID)
 	}
-	price, _ := strconv.ParseFloat(p.Price, 64)
+	price := ParsePrice(p.Price)
 	if price == 0 {
-		price, _ = strconv.ParseFloat(p.RegularPrice, 64)
+		price = ParsePrice(p.RegularPrice)
 	}
 	img := ""
 	if len(p.Images) > 0 {
@@ -216,4 +216,23 @@ func stripTags(s string) string {
 		}
 	}
 	return strings.TrimSpace(sb.String())
+}
+
+// ParsePrice handles WC price fields that can be string or number.
+func ParsePrice(raw json.RawMessage) float64 {
+	if len(raw) == 0 {
+		return 0
+	}
+	// Try as string first
+	var s string
+	if err := json.Unmarshal(raw, &s); err == nil {
+		v, _ := strconv.ParseFloat(s, 64)
+		return v
+	}
+	// Try as number
+	var f float64
+	if err := json.Unmarshal(raw, &f); err == nil {
+		return f
+	}
+	return 0
 }
