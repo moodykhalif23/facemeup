@@ -1,0 +1,15 @@
+ml_service/
+ml_training/
+.venv/
+.env
+*.env.local
+.git/
+.pytest_cache/
+__pycache__/
+*.py[cod]
+*.egg-info/
+bin/
+dist/
+tmp/
+*.test
+*.out
