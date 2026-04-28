@@ -93,7 +93,7 @@ def placeholder_classify(
     """Returns uniform-prior output. Call site matches ONNXClassifier.classify."""
     _ = patch_tensor
     skin_type_scores, skin_type = _skin_type_from_questionnaire(skin_types, questionnaire)
-    condition_scores = {label: 0.5 for label in conditions}
+    condition_scores = {label: 0.1 for label in conditions}
     return ClassifierResult(
         skin_type=skin_type,
         skin_type_scores=skin_type_scores,
