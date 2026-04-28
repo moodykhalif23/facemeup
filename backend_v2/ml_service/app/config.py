@@ -29,6 +29,13 @@ class Settings(BaseSettings):
 
     onnx_providers: tuple[str, ...] = ("CPUExecutionProvider",)
 
+    # Groq vision provider — set GROQ_API_KEY to enable.
+    # When set, Groq Llama-3.2-Vision is used as the primary inference provider
+    # (no face detection required, handles close-up skin photos).
+    # Falls back to ONNX → placeholder when unset.
+    groq_api_key: str = ""
+    groq_model: str = "llama-3.2-11b-vision-preview"  # or llama-3.2-90b-vision-preview
+
 
 @lru_cache
 def get_settings() -> Settings:

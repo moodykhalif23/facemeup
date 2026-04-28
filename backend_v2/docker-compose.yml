@@ -36,10 +36,12 @@ services:
       dockerfile: Dockerfile
     container_name: skincare-v2-ml
     ports:
-      - "8013:8000"   
+      - "8013:8000"
     environment:
       ML_ENV: development
       ML_PORT: "8000"
+      ML_GROQ_API_KEY: "${GROQ_API_KEY:-}"
+      ML_GROQ_MODEL: "${GROQ_MODEL:-llama-3.2-11b-vision-preview}"
     volumes:
       - ./ml_service/models:/app/models:ro
     networks:
