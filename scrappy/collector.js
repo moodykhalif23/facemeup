@@ -34,6 +34,9 @@ function getArg(name, fallback) {
 }
 const LIMIT = parseInt(getArg('--limit', '100'));
 const START_PAGE = parseInt(getArg('--page', '1'));
+const SKIP_EXPORT = args.includes('--skip-export');
+const CHROME_PATH = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH
+  || '/usr/bin/google-chrome';
 
 if (!fs.existsSync(CONFIG.rawDir)) fs.mkdirSync(CONFIG.rawDir, { recursive: true });
 if (!fs.existsSync(CONFIG.imagesDir)) fs.mkdirSync(CONFIG.imagesDir, { recursive: true });
@@ -291,7 +294,7 @@ async function dismissAnyDialog(page) {
 
 async function browseReportsAndExport() {
   log('Launching browser for Reports page...');
-  const browser = await chromium.launch({ headless: false, slowMo: 40, args: ['--no-sandbox'] });
+  const browser = await chromium.launch({ headless: false, slowMo: 40, args: ['--no-sandbox'], executablePath: CHROME_PATH });
   const ctx = await browser.newContext({
     viewport: { width: 1440, height: 900 },
     ignoreHTTPSErrors: true,
@@ -431,7 +434,7 @@ async function browseReportsAndExport() {
 /** Headless Playwright login — returns a fresh access_token */
 async function getFreshToken() {
   log('Getting fresh token via headless login...');
-  const browser = await chromium.launch({ headless: true, args: ['--no-sandbox'] });
+  const browser = await chromium.launch({ headless: true, args: ['--no-sandbox'], executablePath: CHROME_PATH });
   const ctx = await browser.newContext({ ignoreHTTPSErrors: true });
   const page = await ctx.newPage();
   let token = null;
@@ -624,8 +627,12 @@ async function getFreshToken() {
     await new Promise(r => setTimeout(r, 300)); // polite delay
   }
 
-  log('\n=== STEP 5: Browse Reports → View Details + Export Pictures ===');
-  await browseReportsAndExport();
+  if (SKIP_EXPORT) {
+    log('\n=== STEP 5: Skipping Reports → Export Pictures (--skip-export) ===');
+  } else {
+    log('\n=== STEP 5: Browse Reports → View Details + Export Pictures ===');
+    await browseReportsAndExport();
+  }
 
   log('\n=== STEP 6: Downloading face images ===');
   let dlOk = 0, dlSkipped = 0, dlFailed = 0;

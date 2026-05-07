@@ -1,0 +1,16 @@
+{
+  "name": "scrappy",
+  "version": "1.0.0",
+  "description": "Scrapes and normalizes data from the Bitmoji AI skin analysis device portal (zm.yiyuan.ai) so that the mobile app ML model can be aligned with the device's output schema.",
+  "main": "collector.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "playwright": "^1.59.1"
+  }
+}
