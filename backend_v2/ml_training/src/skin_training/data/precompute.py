@@ -42,6 +42,7 @@ def load_samples(
     source: str,
     scin_root: Path | None = None,
     glowmix_root: Path | None = None,
+    bitmoji_root: Path | None = None,
     hf_cache_dir: str | None = None,
     hf_token: str | None = None,
     face_only: bool = True,
@@ -54,7 +55,8 @@ def load_samples(
     for src in sources_to_load:
         log.info("loading source: %s", src)
         try:
-            batch = _load_single(src, scin_root, glowmix_root, hf_cache_dir, hf_token, body_filter)
+            batch = _load_single(src, scin_root, glowmix_root, bitmoji_root,
+                                 hf_cache_dir, hf_token, body_filter)
             log.info("  → %d samples from %s", len(batch), src)
             all_samples.extend(batch)
         except Exception as e:
@@ -79,6 +81,7 @@ def precompute(
     output_dir: Path,
     scin_root: Path | None = None,
     glowmix_root: Path | None = None,
+    bitmoji_root: Path | None = None,
     aligned_size: int = 256,
     skip_existing: bool = True,
     hf_cache_dir: str | None = None,
@@ -101,7 +104,8 @@ def precompute(
     labels_path = output_dir / "labels.csv"
     index_path = output_dir / "index.json"
 
-    samples = load_samples(source, scin_root, glowmix_root, hf_cache_dir, hf_token, face_only)
+    samples = load_samples(source, scin_root, glowmix_root, bitmoji_root,
+                           hf_cache_dir, hf_token, face_only)
     if not samples:
         log.error("0 samples loaded — check source, auth, and body-part filter settings")
         sys.exit(3)
@@ -202,6 +206,7 @@ def _load_single(
     source: str,
     scin_root: Path | None,
     glowmix_root: Path | None,
+    bitmoji_root: Path | None,
     hf_cache_dir: str | None,
     hf_token: str | None,
     body_filter,
@@ -225,8 +230,17 @@ def _load_single(
             raise ValueError("--scin-root is required for source=scin_csv")
         return parse_scin_manifest(scin_root, body_parts=body_filter)
 
+    if source == "bitmoji":
+        # Bitmoji device captures from scrappy/raw/images/. The default root
+        # walks up from this file to facemeup/scrappy/raw/images. Override with
+        # --bitmoji-root for a non-standard layout.
+        from .bitmoji import parse_bitmoji_dataset
+        from pathlib import Path as _P
+        root = bitmoji_root or (_P(__file__).resolve().parents[5] / "scrappy" / "raw" / "images")
+        return list(parse_bitmoji_dataset(root))
+
     raise ValueError(
-        f"unknown source: {source!r} — use scin_hf | fitzpatrick17k | glowmix | scin_csv | all | all_face_cosmetic"
+        f"unknown source: {source!r} — use scin_hf | fitzpatrick17k | glowmix | scin_csv | bitmoji | all | all_face_cosmetic"
     )
 
 
@@ -336,13 +350,17 @@ def main() -> None:
         description="Preprocess face-skin images → aligned tensors for training"
     )
     parser.add_argument("--source", default="scin_hf",
-                        choices=["scin_hf", "fitzpatrick17k", "glowmix", "scin_csv", "all", "all_face_cosmetic"],
+                        choices=["scin_hf", "fitzpatrick17k", "glowmix", "scin_csv",
+                                 "bitmoji", "all", "all_face_cosmetic"],
                         help="Data source (default: scin_hf)")
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--scin-root", type=Path, default=None,
                         help="Path to local SCIN folder (only for source=scin_csv)")
     parser.add_argument("--glowmix-root", type=Path, default=None,
                         help="Path to extracted GlowMix Kaggle folder (for source=glowmix/all_face_cosmetic)")
+    parser.add_argument("--bitmoji-root", type=Path, default=None,
+                        help="Path to scrappy/raw/images (for source=bitmoji). "
+                             "Defaults to facemeup/scrappy/raw/images.")
     parser.add_argument("--aligned-size", type=int, default=256)
     parser.add_argument("--force", action="store_true",
                         help="Reprocess even if .npy already exists")
@@ -364,6 +382,7 @@ def main() -> None:
         output_dir=args.output,
         scin_root=args.scin_root,
         glowmix_root=args.glowmix_root,
+        bitmoji_root=args.bitmoji_root,
         aligned_size=args.aligned_size,
         skip_existing=not args.force,
         hf_cache_dir=args.hf_cache_dir,
