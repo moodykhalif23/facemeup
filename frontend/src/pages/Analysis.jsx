@@ -81,6 +81,13 @@ export default function Analysis() {
         capture_images: captureBase64List,
       });
 
+      // Soft quality warnings: result is still valid, but tell the user we
+      // could have done better with a sharper / better-lit shot.
+      const warnings = response.data?.quality_warnings || [];
+      for (const w of warnings) {
+        if (w.severity === 'warn') message.warning(w.message, 5);
+      }
+
       const analysisPayload = { ...response.data, questionnaire };
       dispatch(setCurrentAnalysis(analysisPayload));
       dispatch(addToHistory(analysisPayload));
@@ -107,7 +114,18 @@ export default function Analysis() {
       navigate('/results');
     } catch (error) {
       console.error('Analysis failed:', error);
-      message.error(error.response?.data?.error?.message || 'Analysis failed. Please try again.');
+      const errPayload = error.response?.data?.error;
+      if (errPayload?.code === 'image_quality_too_low' && Array.isArray(errPayload.warnings)) {
+        for (const w of errPayload.warnings) {
+          if (w.severity === 'block') message.error(w.message, 8);
+          else message.warning(w.message, 6);
+        }
+        setCapturedImage(null);
+        setAllCaptures([]);
+        setLandmarks(null);
+      } else {
+        message.error(errPayload?.message || 'Analysis failed. Please try again.');
+      }
     } finally {
       setLoading(false);
     }

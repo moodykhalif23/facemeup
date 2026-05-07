@@ -30,16 +30,17 @@ type analyzeProfile struct {
 }
 
 type analyzeResponse struct {
-	ID              int                `json:"id"`
-	CreatedAt       time.Time          `json:"created_at"`
-	Profile         analyzeProfile     `json:"profile"`
-	Questionnaire   map[string]any     `json:"questionnaire"`
-	InferenceMode   string             `json:"inference_mode,omitempty"`
-	Confidence      float64            `json:"confidence"`
-	SkinTypeScores  map[string]float64 `json:"skin_type_scores,omitempty"`
-	ConditionScores map[string]float64 `json:"condition_scores,omitempty"`
-	Heatmaps        []mlclient.Heatmap `json:"heatmaps,omitempty"`
-	Disclaimer      string             `json:"disclaimer,omitempty"`
+	ID              int                       `json:"id"`
+	CreatedAt       time.Time                 `json:"created_at"`
+	Profile         analyzeProfile            `json:"profile"`
+	Questionnaire   map[string]any            `json:"questionnaire"`
+	InferenceMode   string                    `json:"inference_mode,omitempty"`
+	Confidence      float64                   `json:"confidence"`
+	SkinTypeScores  map[string]float64        `json:"skin_type_scores,omitempty"`
+	ConditionScores map[string]float64        `json:"condition_scores,omitempty"`
+	Heatmaps        []mlclient.Heatmap        `json:"heatmaps,omitempty"`
+	QualityWarnings []mlclient.QualityWarning `json:"quality_warnings,omitempty"`
+	Disclaimer      string                    `json:"disclaimer,omitempty"`
 }
 
 type feedbackRequest struct {
@@ -111,7 +112,19 @@ func (s *Server) handleAnalyze(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		var badReq *mlclient.ErrBadRequest
 		if errors.As(err, &badReq) {
-			writeError(w, http.StatusUnprocessableEntity, "analysis_failed", badReq.Msg)
+			code := badReq.Code
+			if code == "" {
+				code = "analysis_failed"
+			}
+			var warnings []map[string]any
+			for _, w := range badReq.Warnings {
+				warnings = append(warnings, map[string]any{
+					"code":     w.Code,
+					"severity": w.Severity,
+					"message":  w.Message,
+				})
+			}
+			writeErrorWithWarnings(w, http.StatusUnprocessableEntity, code, badReq.Msg, warnings)
 			return
 		}
 		s.log.Error("ml-service analyze", "err", err)
@@ -149,6 +162,7 @@ func (s *Server) handleAnalyze(w http.ResponseWriter, r *http.Request) {
 		SkinTypeScores:  mlResp.SkinTypeScores,
 		ConditionScores: mlResp.ConditionScores,
 		Heatmaps:        mlResp.Heatmaps,
+		QualityWarnings: mlResp.QualityWarnings,
 		Disclaimer:      mlResp.Disclaimer,
 	})
 }

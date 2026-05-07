@@ -36,6 +36,15 @@ type Heatmap struct {
 	ImageBase64 string `json:"image_base64"`
 }
 
+// QualityWarning mirrors ml_service QualityWarning. Severity is "warn" or
+// "block"; "block" responses come back as 422 with the warnings on the error
+// detail and are surfaced to the user as a retake prompt.
+type QualityWarning struct {
+	Code     string `json:"code"`
+	Severity string `json:"severity"`
+	Message  string `json:"message"`
+}
+
 // AnalyzeResponse mirrors AnalyzeResponse.
 type AnalyzeResponse struct {
 	SkinType        string             `json:"skin_type"`
@@ -45,6 +54,7 @@ type AnalyzeResponse struct {
 	Confidence      float64            `json:"confidence"`
 	InferenceMode   string             `json:"inference_mode"`
 	Heatmaps        []Heatmap          `json:"heatmaps"`
+	QualityWarnings []QualityWarning   `json:"quality_warnings"`
 	Disclaimer      string             `json:"disclaimer"`
 }
 
@@ -57,8 +67,14 @@ type Client struct {
 // ErrSidecarUnavailable means the ML service didn't respond / 5xx'd.
 var ErrSidecarUnavailable = errors.New("ml-service unavailable")
 
-// ErrBadRequest = 4xx client-side problem (the sidecar tells us the image is bad, no face, etc).
-type ErrBadRequest struct{ Msg string }
+// ErrBadRequest = 4xx client-side problem (the sidecar tells us the image is
+// bad, no face, etc). When `Code == "image_quality_too_low"`, `Warnings`
+// carries the structured retake guidance the frontend should display.
+type ErrBadRequest struct {
+	Code     string
+	Msg      string
+	Warnings []QualityWarning
+}
 
 func (e *ErrBadRequest) Error() string { return "ml-service 4xx: " + e.Msg }
 
@@ -101,10 +117,29 @@ func (c *Client) Analyze(ctx context.Context, req *AnalyzeRequest) (*AnalyzeResp
 		return nil, fmt.Errorf("%w: status=%d body=%s", ErrSidecarUnavailable, resp.StatusCode, string(raw))
 	}
 	if resp.StatusCode >= 400 {
+		// FastAPI's `HTTPException(detail=...)` puts whatever was passed in
+		// under `detail`. We expect either a plain string or a structured
+		// object `{code, message, warnings: [...]}` for quality blocks.
+		var asString struct {
+			Detail string `json:"detail"`
+		}
+		var asObject struct {
+			Detail struct {
+				Code     string           `json:"code"`
+				Message  string           `json:"message"`
+				Warnings []QualityWarning `json:"warnings"`
+			} `json:"detail"`
+		}
+		if jErr := json.Unmarshal(raw, &asObject); jErr == nil && asObject.Detail.Code != "" {
+			return nil, &ErrBadRequest{
+				Code:     asObject.Detail.Code,
+				Msg:      asObject.Detail.Message,
+				Warnings: asObject.Detail.Warnings,
+			}
+		}
 		msg := string(raw)
-		var parsed struct{ Detail string `json:"detail"` }
-		if jErr := json.Unmarshal(raw, &parsed); jErr == nil && parsed.Detail != "" {
-			msg = parsed.Detail
+		if jErr := json.Unmarshal(raw, &asString); jErr == nil && asString.Detail != "" {
+			msg = asString.Detail
 		}
 		return nil, &ErrBadRequest{Msg: msg}
 	}

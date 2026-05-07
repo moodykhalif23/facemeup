@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
@@ -25,6 +25,12 @@ class HeatmapPayload(BaseModel):
     image_base64: str
 
 
+class QualityWarning(BaseModel):
+    code: str
+    severity: Literal["warn", "block"]
+    message: str
+
+
 class AnalyzeResponse(BaseModel):
     skin_type: str
     skin_type_scores: dict[str, float]
@@ -33,6 +39,7 @@ class AnalyzeResponse(BaseModel):
     confidence: float
     inference_mode: str
     heatmaps: list[HeatmapPayload] = Field(default_factory=list)
+    quality_warnings: list[QualityWarning] = Field(default_factory=list)
     disclaimer: str = (
         "This analysis is informational and does not replace professional dermatology advice."
     )
